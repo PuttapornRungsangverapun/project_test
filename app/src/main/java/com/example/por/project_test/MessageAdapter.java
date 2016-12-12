@@ -176,8 +176,5 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
         }
     }
 
-    class ViewHolder {
-        public TextView urlTextView;
-        public ImageView imageView;
-    }
+
 }
