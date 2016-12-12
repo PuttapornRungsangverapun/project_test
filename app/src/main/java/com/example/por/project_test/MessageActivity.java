@@ -21,6 +21,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,6 +41,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -203,6 +205,9 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             String filename = getFileName(uri);
             byte[] filedata = getData(uri);
 
+            if (filedata == null) {
+                return;
+            }
 
             String encryptFile = encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
@@ -266,6 +271,12 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         byte[] result = null;
         try {
             InputStream inputStream = getContentResolver().openInputStream(uri);
+
+            if (inputStream.available() > 10e6) {
+                Toast.makeText(this, "File size must be 10mb", Toast.LENGTH_SHORT).show();
+                inputStream.close();
+                return null;
+            }
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             int nRead;
             byte[] data = new byte[16384];//อ่านทั้ฝหมด16kb ในเgoogleบอกเร็วสุด
@@ -276,6 +287,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
 
             result = buffer.toByteArray();
             inputStream.close();//ถ้าไม่ปิดแสดงว่ามีคนใช้อยู่จะลบไม่ได้
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -343,9 +355,14 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
 
             if (value != null) {
 
-                encrypted = cipher.doFinal(value.getBytes());
+                encrypted = cipher.doFinal(value.getBytes("UTF-8"));
 //                System.out.println("encrypted string: " + Base64.encodeToString(encrypted, Base64.DEFAULT));
             } else {
+                //ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                //CipherOutputStream cios = new CipherOutputStream(bos, cipher);
+                //cios.write(data);
+                //encrypted = bos.toByteArray();
+
                 encrypted = cipher.doFinal(data);
 //                System.out.println("encrypted string: " + Base64.encodeToString(encrypted, Base64.DEFAULT));
             }

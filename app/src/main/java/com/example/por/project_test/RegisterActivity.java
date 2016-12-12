@@ -110,10 +110,10 @@ public class RegisterActivity extends AppCompatActivity implements HttpRequestCa
         RSAPrivateKey pvKey = (RSAPrivateKey) myPair.getPrivate();
 
         publicKey = Base64.encodeToString(pbKey.getEncoded(), Base64.DEFAULT);
-        Log.d("xxx", publicKey);
+//        Log.d("xxx", publicKey);
 
         privateKey = Base64.encodeToString(pvKey.getEncoded(), Base64.DEFAULT);
-        Log.d("xxx", privateKey);
+//        Log.d("xxx", privateKey);
 
         SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
         editor.putString("publickey", publicKey);

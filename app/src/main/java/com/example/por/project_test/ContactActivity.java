@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import java.util.ArrayList;
 
 public class ContactActivity extends AppCompatActivity implements HttpRequestCallback {
@@ -69,6 +71,12 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
         String type = "listfriend";
         BackgoundWorker backgoundWorker = new BackgoundWorker(this);
         backgoundWorker.execute(type, id + "", token);
+
+        String token_noti = FirebaseInstanceId.getInstance().getToken();
+        String type2 = "notification";
+        backgoundWorker = new BackgoundWorker(this);
+        backgoundWorker.execute(type2, id + "", token_noti, token);
+
     }
 
 

@@ -87,6 +87,12 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             param.put("lastmessageid", params[3]);
             param.put("token", params[4]);
             httpRequest(url_server + "messagestatus.php", param);
+        }else if(type.equals("notification")){
+            HashMap<String, String> param = new HashMap<>();
+            param.put("userid", params[1]);
+            param.put("token_noti", params[2]);
+            param.put("token", params[3]);
+            httpRequest(url_server + "tokennotification.php", param);
         }
         return status;
     }
@@ -251,7 +257,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
         }
 
 
-        super.onPostExecute(result);
+        //super.onPostExecute(result);
 
     }
 }
