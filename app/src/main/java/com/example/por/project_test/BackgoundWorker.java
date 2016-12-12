@@ -240,7 +240,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 for (int i = 0; i < jsonmessage.length(); i++) {//ทำparsingแปลงjsonarray
                     MessageInfo messageInfo = new MessageInfo(jsonmessage.getJSONObject(i).getInt("message_id"),
                             jsonmessage.getJSONObject(i).getString("text_body"),
-                            jsonmessage.getJSONObject(i).getString("message_status"),
+                            jsonmessage.getJSONObject(i).getInt("message_status"),
                             jsonmessage.getJSONObject(i).getInt("message_sender_id"),
                             jsonmessage.getJSONObject(i).getString("file_filename"),
                             jsonmessage.getJSONObject(i).getString("map_latitude"),

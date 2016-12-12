@@ -58,7 +58,6 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
         String filename;
         LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.message, parent, false);
-
         LinearLayout linearLayout = (LinearLayout) rowView.findViewById(R.id.ln_user_reciever);
         LinearLayout linearLayout2 = (LinearLayout) rowView.findViewById(R.id.ln_user_sender);
 
@@ -70,7 +69,6 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
         if (user_id_current.equals(value.get(position).message_sender_id + "")) {
             linearLayout2.setVisibility(View.VISIBLE);
             textView = (TextView) rowView.findViewById(R.id.tv_message_adapter);
-
             img_file = (ImageView) rowView.findViewById(R.id.img_upload);
 
         } else {
@@ -82,21 +80,30 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
             tv_user_from.setText(intent.getStringExtra("frienduser"));
             img_file = (ImageView) rowView.findViewById(R.id.img_download);
         }
-        if (value.get(position).message_status.equals("4")) {
+        if (value.get(position).message_status == 4) {
             TextView tv_read = (TextView) rowView.findViewById(R.id.tv_read);
             tv_read.setVisibility(View.VISIBLE);
         }
-
 
         if (value.get(position).type.equals("file")) {
             filename = value.get(position).filename;
 
 
-            if (filename.endsWith(".png") || filename.endsWith(".jpg")) {
+            if (filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
                 String url = BackgoundWorker.url_server + "downloadfile.php?messageid=" + value.get(position).message_id + "&token=" + token + "&userid=" + id;
                 img_file.setVisibility(View.VISIBLE);
                 textView.setVisibility(View.GONE);
-                new ImgTask(img_file).execute(url);
+
+                String msgId = value.get(position).message_id + "";
+
+                if (ImageCacheUtils.hasCache(ctx, msgId)) {
+                    Bitmap bm = ImageCacheUtils.load(ctx, msgId);
+                    if (bm != null) {
+                        img_file.setImageBitmap(bm);
+                    }
+                } else {
+                    new ImgTask(msgId, img_file).execute(url);
+                }
             } else {
                 textView.setText(value.get(position).filename);
                 img = rowView.getResources().getDrawable(R.drawable.file);
@@ -105,7 +112,6 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
             }
         } else if (value.get(position).type.equals("text")) {
             textView.setText(value.get(position).message);
-
         } else if (value.get(position).type.equals("map")) {
             textView.setText("Location");
             img = rowView.getResources().getDrawable(R.drawable.makermap);
@@ -114,6 +120,7 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
 
         }
 
+
         return rowView;
     }
 
@@ -121,8 +128,10 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
 
         Bitmap bitmap;
         ImageView iv;
+        String msgId;
 
-        ImgTask(ImageView iv) {
+        ImgTask(String msgId, ImageView iv) {
+            this.msgId = msgId;
             this.iv = iv;
         }
 
@@ -163,7 +172,12 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
         @Override
         protected void onPostExecute(Integer integer) {
             iv.setImageBitmap(bitmap);
+            ImageCacheUtils.save(ctx, msgId, bitmap);
         }
     }
 
+    class ViewHolder {
+        public TextView urlTextView;
+        public ImageView imageView;
+    }
 }
