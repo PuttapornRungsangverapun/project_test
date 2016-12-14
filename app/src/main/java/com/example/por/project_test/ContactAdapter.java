@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by Por on 9/18/2016.
  */
-public class ContactAdapter extends ArrayAdapter<UserInfo>{
+public class ContactAdapter extends ArrayAdapter<UserInfo> {
 
     private final Context ctx;
     List<UserInfo> value;
@@ -35,7 +35,7 @@ public class ContactAdapter extends ArrayAdapter<UserInfo>{
         ImageView imageView = (ImageView) rowView.findViewById(R.id.img_profile);
 
         textView.setText(value.get(position).username);
-        imageView.setImageResource(R.mipmap.ic_launcher);
+        imageView.setImageResource(R.drawable.person);
         //textView.setText([position]);
         // Change icon based on name
         //String s = values[position];

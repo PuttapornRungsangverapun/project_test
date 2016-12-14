@@ -2,6 +2,7 @@ package com.example.por.project_test;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -224,9 +225,9 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
 
             try {
                 if (resource.getString("status").equals("success")) {
-                    callback.onResult(new String[]{resource.getString("message")}, null);
+                    callback.onResult(new String[]{resource.getString("message"),TRUE}, null);
                 } else {
-                    callback.onResult(new String[]{resource.getString("message")}, null);
+                    callback.onResult(new String[]{resource.getString("message"),FALSE}, null);
                 }
 
             } catch (JSONException e) {

@@ -41,7 +41,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.crypto.Cipher;
-import javax.crypto.CipherOutputStream;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -56,6 +55,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
     ArrayList<MessageInfo> messageInfos;
     MessageAdapter messageAdapter;
     boolean isRequesting;
+    Timer t;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,7 +167,23 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             }
         });
 
-        Timer t = new Timer();
+
+    }
+
+    @Override
+    protected void onResume() {
+        startFetch();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        t.cancel();
+        super.onPause();
+    }
+
+    private void startFetch() {
+        t = new Timer();
         t.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -227,11 +243,17 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         if (mesObjects == null && result == null) {
             isRequesting = false;
             return;
+        } else if ((result != null) && (result[1].equals(BackgoundWorker.FALSE))) {
+
+            Toast.makeText(this, result[0], Toast.LENGTH_SHORT).show();
+            return;
+
         } else if (mesObjects == null) {
             return;
         }
         ArrayList<MessageInfo> messageInfos = new ArrayList<>();
         for (Object o : mesObjects) {
+
             if (o instanceof MessageInfo) {//เข็คoใช่objectของclassหรือไม่
                 MessageInfo mo = (MessageInfo) o;
                 //secure
@@ -242,12 +264,19 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                         shareedkey = RSADecrypt(mo.message);
                     }
                 } else if (mo.type.equals("map")) {
-                    mo.latitude = Double.parseDouble(decrypt(mo.tmpLat));
-                    mo.longtitude = Double.parseDouble(decrypt(mo.tmpLon));
-                    messageInfos.add(mo);
+                    try {
+                        mo.latitude = Double.parseDouble(decrypt(mo.tmpLat));
+                        mo.longtitude = Double.parseDouble(decrypt(mo.tmpLon));
+                        messageInfos.add(mo);
+                    } catch (Exception e) {
+                    }
                 } else if (mo.type.equals("text")) {
-                    mo.message = decrypt(mo.message);
-                    messageInfos.add(mo);
+                    try {
+                        mo.message = decrypt(mo.message);
+                        messageInfos.add(mo);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     messageInfos.add(mo);
                 }
@@ -408,7 +437,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
     private static byte[] decrypt(String key, String initVector, String encrypted, byte[] data) {
         byte[] original;
         try {
-
+Log.e("secret",shareedkey);
 
             IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
             SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");

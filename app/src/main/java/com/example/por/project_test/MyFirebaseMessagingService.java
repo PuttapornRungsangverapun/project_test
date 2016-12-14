@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -88,6 +89,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void sendNotification(String username, String messageBody, String friendid) {
         Intent intent = new Intent(this, MessageActivity.class);
 
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK,"");
+        wl.acquire(3000);//ติด3วิ
+        wl.release();
+
         intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
         intent.putExtra("frienduser", username);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -96,12 +102,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.cast_ic_notification_small_icon)
+                .setSmallIcon(R.drawable.chat)
                 .setContentTitle(username)
                 .setContentText(messageBody)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+                .setVibrate(new long[]{ 100, 100, 100, 100, 100, 100, 100, 100, 100});
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

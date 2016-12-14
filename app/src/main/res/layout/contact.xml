@@ -6,14 +6,21 @@
 
     <ImageView
         android:id="@+id/img_profile"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:src="@drawable/person" />
+
     <TextView
+        android:id="@+id/tv_friend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/tv_friend"
         android:layout_gravity="center_vertical"
-        android:text="user"/>
+        android:layout_marginLeft="5dp"
+        android:textSize="15sp"
+        android:text="user" />
 
 </LinearLayout>

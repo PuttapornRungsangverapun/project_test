@@ -47,7 +47,7 @@ public class AddfriendActivity extends AppCompatActivity implements TextWatcher,
                 } else {
                     BackgoundWorker backgoundWorker = new BackgoundWorker(AddfriendActivity.this);
                     backgoundWorker.execute(type, str_username, id + "", token);
-                    Log.i("Addfriend", "Click");
+//                    Log.i("Addfriend", "Click");
                 }
             }
         });
