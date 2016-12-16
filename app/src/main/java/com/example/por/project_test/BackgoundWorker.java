@@ -153,7 +153,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
         } catch (Exception e) {
             Log.e("JSON error", "Cann't convert to json object");
             e.printStackTrace();
-            Toast.makeText((Context) callback,"",Toast.LENGTH_SHORT).show();
+            Toast.makeText((Context) callback,"read message failed",Toast.LENGTH_SHORT).show();
             return;
         }
 

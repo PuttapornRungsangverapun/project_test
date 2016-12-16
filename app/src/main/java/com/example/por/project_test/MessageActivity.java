@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -226,6 +228,22 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                 return;
             }
 
+            if(filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+                Bitmap bm = BitmapFactory.decodeByteArray(filedata,0,filedata.length);
+                Bitmap resized = null;
+
+                if(bm.getWidth() > bm.getHeight()){
+                    resized = Bitmap.createScaledBitmap(bm, 1000, (int)(1000*((float)bm.getHeight()/bm.getWidth())), true);
+                }
+                else{
+                    resized = Bitmap.createScaledBitmap(bm, (int)(1000*((float)bm.getWidth()/bm.getHeight())), 1000, true);
+                }
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                resized.compress(Bitmap.CompressFormat.JPEG,90,baos);
+                filedata = baos.toByteArray();
+            }
+
             String encryptFile = encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
 
@@ -296,6 +314,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         }
 
         isRequesting = false;
+        bt_send.setEnabled(true);
     }
 
     //Read file fromuri

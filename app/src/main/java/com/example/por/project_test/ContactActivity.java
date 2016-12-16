@@ -31,6 +31,12 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
 
+        if(this.getIntent().getBooleanExtra("skip_contact",false)){
+            Intent intent = new Intent(this,MessageActivity.class);
+            intent.putExtra("friendid", getIntent().getStringExtra("friendid"));//มันส่งobjectธรรมดามาเลยcast
+            intent.putExtra("frienduser", getIntent().getStringExtra("frienduser"));
+            startActivity(intent);
+        }
 
         lv_contact = (ListView) findViewById(R.id.lv_contact);
         add_friend = (FloatingActionButton) findViewById(R.id.add_friend);

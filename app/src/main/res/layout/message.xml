@@ -74,6 +74,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="right"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
             android:orientation="vertical">
 
 
@@ -102,6 +104,7 @@
             android:id="@+id/tv_message_adapter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="0"
 
             android:layout_marginLeft="2dp"
             android:background="@drawable/bg_msg_you"
@@ -115,6 +118,7 @@
             android:id="@+id/img_upload"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:layout_marginLeft="2dp"
             android:background="@drawable/bg_msg_you"
             android:visibility="gone" />
 
