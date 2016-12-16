@@ -1,5 +1,6 @@
 package com.example.por.project_test;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -113,11 +114,10 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             }
             bufferedWriter.write(post_data);//เขียนใส่ท่อ
             bufferedWriter.flush();//flushไม่ต้องรอส่งเลย
-            bufferedWriter.close();//ปิดท่อ
-            outputStream.close();
+
 
             httpURLConnection.connect();
-            int resPonseStatus = httpURLConnection.getResponseCode();
+            //int resPonseStatus = httpURLConnection.getResponseCode();
 
             InputStream inputStream = httpURLConnection.getInputStream();//ท่อเราดูดมา
 
@@ -125,6 +125,8 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             status = br.readLine();//ดูดข้อมูลมา1บรรทัด
 
             inputStream.close();
+            bufferedWriter.close();//ปิดท่อ
+            outputStream.close();
             httpURLConnection.disconnect();
 
 //            if (resPonseStatus == 403) {
@@ -148,9 +150,10 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
         JSONObject resource = null;
         try {
             resource = new JSONObject(result);
-        } catch (JSONException e) {
+        } catch (Exception e) {
             Log.e("JSON error", "Cann't convert to json object");
             e.printStackTrace();
+            Toast.makeText((Context) callback,"",Toast.LENGTH_SHORT).show();
             return;
         }
 

@@ -16,6 +16,7 @@
 
 package com.example.por.project_test;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -108,7 +109,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
-                .setVibrate(new long[]{ 100, 100, 100, 100, 100, 100, 100, 100, 100});
+                .setVibrate(new long[]{ 100, 100, 100, 100, 100, 100, 100, 100, 100})
+                .setPriority(Notification.PRIORITY_MAX)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setVisibility(Notification.VISIBILITY_PUBLIC);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

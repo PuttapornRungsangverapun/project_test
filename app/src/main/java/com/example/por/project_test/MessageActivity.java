@@ -1,6 +1,7 @@
 package com.example.por.project_test;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -150,7 +151,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                             if (checkFilePermission() == false) {
                                 return;
                             }
-                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                             intent.addCategory(Intent.CATEGORY_OPENABLE);//แสดงไฟล์เฉพาะactivityเปิดได้
                             intent.setType("*/*");//(image/jpg)
                             startActivityForResult(intent, REQUEST_FILE);
@@ -276,6 +277,8 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                         messageInfos.add(mo);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        mo.message = "failed to decrypt...";
+                        messageInfos.add(mo);
                     }
                 } else {
                     messageInfos.add(mo);
@@ -299,7 +302,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
     private byte[] getData(Uri uri) {//อ่านไฟล์โดยให้pathไปreturnเป็นbyte binaryกลับมา
         byte[] result = null;
         try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
+            InputStream inputStream = this.getContentResolver().openInputStream(uri);
 
             if (inputStream.available() > 10e6) {
                 Toast.makeText(this, "File size must be 10mb", Toast.LENGTH_SHORT).show();
@@ -319,7 +322,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
 
 
         } catch (IOException e) {
-            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
         return result;
     }
@@ -460,9 +463,9 @@ Log.e("secret",shareedkey);
     }
 
     public String checkhashkey() {
-        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
-//        return sp.getString("SHARED_KEY:" + friendid, "1234567890asdfgh1234567890asdfgh");
-        return sp.getString("SHARED_KEY:" + friendid, null);
+        return null;
+//        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
+//        return sp.getString("SHARED_KEY:" + friendid, null);
     }
 
     //    public String gensharesecretkey(){
