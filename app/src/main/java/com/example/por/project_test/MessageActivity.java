@@ -482,9 +482,8 @@ Log.e("secret",shareedkey);
     }
 
     public String checkhashkey() {
-        return null;
-//        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
-//        return sp.getString("SHARED_KEY:" + friendid, null);
+        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
+        return sp.getString("SHARED_KEY:" + friendid, null);
     }
 
     //    public String gensharesecretkey(){
