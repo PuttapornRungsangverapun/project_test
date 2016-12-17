@@ -27,7 +27,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
+            android:layout_gravity="bottom"
             android:orientation="horizontal">
 
             <TextView
@@ -73,6 +73,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:gravity="right"
             android:orientation="vertical">
 
@@ -102,7 +103,6 @@
             android:id="@+id/tv_message_adapter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:layout_marginLeft="2dp"
             android:background="@drawable/bg_msg_you"
             android:paddingBottom="5dp"
@@ -115,6 +115,7 @@
             android:id="@+id/img_upload"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:layout_marginLeft="2dp"
             android:background="@drawable/bg_msg_you"
             android:visibility="gone" />
 

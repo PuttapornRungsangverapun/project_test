@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -150,7 +152,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                             if (checkFilePermission() == false) {
                                 return;
                             }
-                            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                             intent.addCategory(Intent.CATEGORY_OPENABLE);//แสดงไฟล์เฉพาะactivityเปิดได้
                             intent.setType("*/*");//(image/jpg)
                             startActivityForResult(intent, REQUEST_FILE);
@@ -224,6 +226,21 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             if (filedata == null) {
                 return;
             }
+            if(filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+                Bitmap bm = BitmapFactory.decodeByteArray(filedata,0,filedata.length);
+                Bitmap resized = null;
+
+                if(bm.getWidth() > bm.getHeight()){
+                    resized = Bitmap.createScaledBitmap(bm, 800, (int)(800*((float)bm.getHeight()/bm.getWidth())), true);
+                }
+                else{
+                    resized = Bitmap.createScaledBitmap(bm, (int)(800*((float)bm.getWidth()/bm.getHeight())), 800, true);
+                }
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                resized.compress(Bitmap.CompressFormat.JPEG,90,baos);
+                filedata = baos.toByteArray();
+            }
 
             String encryptFile = encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
@@ -276,6 +293,8 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                         messageInfos.add(mo);
                     } catch (Exception e) {
                         e.printStackTrace();
+                        mo.message = "failed to decrypt...";
+                        messageInfos.add(mo);
                     }
                 } else {
                     messageInfos.add(mo);
@@ -293,6 +312,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         }
 
         isRequesting = false;
+        bt_send.setEnabled(true);
     }
 
     //Read file fromuri
@@ -437,7 +457,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
     private static byte[] decrypt(String key, String initVector, String encrypted, byte[] data) {
         byte[] original;
         try {
-Log.e("secret",shareedkey);
+            Log.e("secret", shareedkey);
 
             IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
             SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");

@@ -31,6 +31,9 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
 
+        if(this.getIntent().getBooleanExtra("skipcontact",false)){
+
+        }
 
         lv_contact = (ListView) findViewById(R.id.lv_contact);
         add_friend = (FloatingActionButton) findViewById(R.id.add_friend);
@@ -52,6 +55,7 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
                 ii.putExtra("friendid", userInfos.get(i).userid + "");//มันส่งobjectธรรมดามาเลยcast
                 ii.putExtra("frienduser", userInfos.get(i).username + "");
                 ii.putExtra("publickey", userInfos.get(i).publickey + "");
+                ii.putExtra("skipcontact", true);
                 startActivity(ii);
                 //Toast.makeText(ContactActivity.this, adapterView.getAdapter().getItem(i).toString(), Toast.LENGTH_SHORT).show();
 

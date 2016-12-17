@@ -16,10 +16,12 @@
 
 package com.example.por.project_test;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.PowerManager;
@@ -89,30 +91,35 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void sendNotification(String username, String messageBody, String friendid) {
         Intent intent = new Intent(this, MessageActivity.class);
 
-        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK,"");
-        wl.acquire(3000);//ติด3วิ
-        wl.release();
+//        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "");
+//        wl.acquire(3000);//ติด3วิ
+//        wl.release();
 
         intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
         intent.putExtra("frienduser", username);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 1234 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.chat)
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.chat))
                 .setContentTitle(username)
                 .setContentText(messageBody)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
-                .setVibrate(new long[]{ 100, 100, 100, 100, 100, 100, 100, 100, 100});
+                .setVibrate(new long[]{100, 100, 100, 100, 100, 100, 100, 100, 100})
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setPriority(Notification.PRIORITY_MAX)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setOngoing(true);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        notificationManager.notify(1234 /* ID of notification */, notificationBuilder.build());
     }
 }

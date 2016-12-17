@@ -44,6 +44,7 @@
             android:id="@+id/bt_send_message"
             android:layout_width="30dp"
             android:layout_height="30dp"
+            android:enabled="false"
             android:layout_weight="0"
             android:background="@drawable/sendmessage"
             android:paddingBottom="10dp"

@@ -29,7 +29,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
     public static final String TRUE = "true", FALSE = "false";
     HttpRequestCallback callback;
     String status, type;
-    public static final String url_server = "http://122.155.16.121/";
+    public static final String url_server = "http://122.155.16.121/por/";
 
     public BackgoundWorker(HttpRequestCallback callback) {
         this.callback = callback;
