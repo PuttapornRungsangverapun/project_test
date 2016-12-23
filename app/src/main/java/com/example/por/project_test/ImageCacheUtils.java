@@ -21,7 +21,7 @@ public class ImageCacheUtils {
         File target = new File(context.getCacheDir(),"image_cache_" + id);
         try {
             FileOutputStream fos = new FileOutputStream(target);
-            image.compress(Bitmap.CompressFormat.JPEG,10,fos);
+            image.compress(Bitmap.CompressFormat.JPEG,90,fos);
             fos.close();
         } catch (Exception e) {
             e.printStackTrace();

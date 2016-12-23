@@ -64,14 +64,14 @@ public class DownloadFileService extends Service {
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);
 
-                int size = Integer.parseInt(connection.getHeaderField("Content-length"));//ขนาดข้อมูลเท่าไหร่ หน่วยbyte
-                target = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filename);//วางไฟล์ไว้ที่download
+                int size = Integer.parseInt(connection.getHeaderField("Content-length"));//byte
+                target = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filename);
                 FileOutputStream fos = new FileOutputStream(target);
                 InputStream is = connection.getInputStream();
                 BufferedInputStream bis = new BufferedInputStream(is);
 
                 byte[] bytes = new byte[512];//โหลดทีละ512
-                byte[] bytesdecrypt = new byte[size];//โหลดทีละ512
+                byte[] bytesdecrypt = new byte[size];
                 int read, count = 0;
 
                 float update = 0f;

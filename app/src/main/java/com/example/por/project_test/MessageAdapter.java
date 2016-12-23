@@ -148,7 +148,7 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
                 BufferedInputStream bis = new BufferedInputStream(is);
 
                 byte[] bytes = new byte[512];//โหลดทีละ512
-                byte[] bytesdecrypt = new byte[size];//โหลดทีละ512
+                byte[] bytesdecrypt = new byte[size];
                 int read, count = 0;
 
                 float update = 0f;
@@ -159,7 +159,7 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
                 }
 
                 byte[] original = MessageActivity.decrypt(bytesdecrypt);
-                bitmap = BitmapFactory.decodeByteArray(original, 0, original.length);
+
                 is.close();
 
             } catch (Exception e) {

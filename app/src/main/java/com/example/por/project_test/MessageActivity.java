@@ -379,7 +379,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
     }
 
     public String encrypt(String msg, byte[] data) {
-        String key = shareedkey; // 128 bit key
+        String key = shareedkey; // 256 bit key
         String initVector = new BigInteger(80, new SecureRandom()).toString(32); // 80/5=16 bytes IV   80bitแบบrandom tostringเป็นbase32 ตัวหนังสือ1ตัวเท่ากับ32bit ได้ 16 ตัว
         return initVector + encrypt(key, initVector, msg, data);
     }
@@ -399,7 +399,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
             SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
 
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7PADDING");
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
             if (value != null) {
