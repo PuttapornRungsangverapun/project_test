@@ -6,11 +6,14 @@ package com.example.por.project_test;
 
 public class UserInfo {
 
-   String username,publickey;
-   int userid;
-    UserInfo(int userid,String username,String publickey){
-        this.userid=userid;
-        this.username=username;
-        this.publickey=publickey;
+    String username, publickey, groupname;
+    int userid, groupid;
+
+    UserInfo(int userid, String username, String publickey,  int groupid,String groupname) {
+        this.userid = userid;
+        this.username = username;
+        this.publickey = publickey;
+        this.groupname = groupname;
+        this.groupid = groupid;
     }
 }

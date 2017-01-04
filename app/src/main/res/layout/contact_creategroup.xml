@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_weight="0"
     android:orientation="horizontal">
 
     <ImageView
@@ -15,13 +16,22 @@
         android:src="@drawable/person" />
 
     <TextView
-        android:id="@+id/tv_friend"
+        android:id="@+id/tv_creategroup_friend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="5dp"
-        android:textSize="15sp"
-        android:text="user" />
+        android:paddingLeft="55dp"
+        android:paddingTop="15dp"
+        android:text="user"
+        android:textSize="15sp" />
 
 
-</LinearLayout>
+    <CheckBox
+        android:id="@+id/chk_addgroup"
+      android:layout_marginLeft="250dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" />
+
+</RelativeLayout>

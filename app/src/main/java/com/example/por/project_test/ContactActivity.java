@@ -21,8 +21,7 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
 
     ListView lv_contact;
     FloatingActionButton add_friend;
-    String id;
-    String token;
+    String id,token;
     ContactAdapter contactAdapter;
     ArrayList<UserInfo> userInfos;
 
@@ -31,9 +30,6 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
 
-        if(this.getIntent().getBooleanExtra("skipcontact",false)){
-
-        }
 
         lv_contact = (ListView) findViewById(R.id.lv_contact);
         add_friend = (FloatingActionButton) findViewById(R.id.add_friend);
@@ -55,7 +51,6 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
                 ii.putExtra("friendid", userInfos.get(i).userid + "");//มันส่งobjectธรรมดามาเลยcast
                 ii.putExtra("frienduser", userInfos.get(i).username + "");
                 ii.putExtra("publickey", userInfos.get(i).publickey + "");
-                ii.putExtra("skipcontact", true);
                 startActivity(ii);
                 //Toast.makeText(ContactActivity.this, adapterView.getAdapter().getItem(i).toString(), Toast.LENGTH_SHORT).show();
 
@@ -133,6 +128,10 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
                 editor.commit();
                 Intent i = new Intent(ContactActivity.this, MainActivity.class);
                 startActivity(i);
+                return true;
+            case R.id.create_group:
+                Intent i2 = new Intent(ContactActivity.this, CreateGroupActivity.class);
+                startActivity(i2);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

@@ -33,9 +33,13 @@ public class ContactAdapter extends ArrayAdapter<UserInfo> {
         View rowView = inflater.inflate(R.layout.contact, parent, false);
         TextView textView = (TextView) rowView.findViewById(R.id.tv_friend);
         ImageView imageView = (ImageView) rowView.findViewById(R.id.img_profile);
-
-        textView.setText(value.get(position).username);
-        imageView.setImageResource(R.drawable.person);
+        if (value.get(position).groupid == -1) {
+            textView.setText(value.get(position).username);
+            imageView.setImageResource(R.drawable.person);
+        } else {
+            textView.setText(value.get(position).groupname);
+            imageView.setImageResource(R.drawable.person);
+        }
         //textView.setText([position]);
         // Change icon based on name
         //String s = values[position];

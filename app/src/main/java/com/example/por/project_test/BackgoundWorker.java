@@ -2,7 +2,6 @@ package com.example.por.project_test;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +28,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
     public static final String TRUE = "true", FALSE = "false";
     HttpRequestCallback callback;
     String status, type;
-    public static final String url_server = "http://122.155.16.121/por/";
+    public static final String url_server = "http://u3.punyapat.org/por/";
 
     public BackgoundWorker(HttpRequestCallback callback) {
         this.callback = callback;
@@ -88,12 +87,17 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             param.put("lastmessageid", params[3]);
             param.put("token", params[4]);
             httpRequest(url_server + "messagestatus.php", param);
-        }else if(type.equals("notification")){
+        } else if (type.equals("notification")) {
             HashMap<String, String> param = new HashMap<>();
             param.put("userid", params[1]);
             param.put("token_noti", params[2]);
             param.put("token", params[3]);
             httpRequest(url_server + "tokennotification.php", param);
+        } else if (type.equals("listaddgroup")) {
+            HashMap<String, String> param = new HashMap<>();
+            param.put("userid", params[1]);
+            param.put("token", params[2]);
+            httpRequest(url_server + "listaddgroupcreate.php", param);
         }
         return status;
     }
@@ -214,7 +218,9 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
                     UserInfo userInfo = new UserInfo(jsonfriendlist.getJSONObject(i).getInt("user_id"),
                             jsonfriendlist.getJSONObject(i).getString("user_username"),
-                            jsonfriendlist.getJSONObject(i).getString("publickey"));
+                            jsonfriendlist.getJSONObject(i).getString("publickey"),
+                            jsonfriendlist.getJSONObject(i).getInt("group_id"),
+                            jsonfriendlist.getJSONObject(i).getString("group_name"));
                     temp.add(userInfo);
                 }
             } catch (JSONException e) {
@@ -225,9 +231,9 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
 
             try {
                 if (resource.getString("status").equals("success")) {
-                    callback.onResult(new String[]{resource.getString("message"),TRUE}, null);
+                    callback.onResult(new String[]{resource.getString("message"), TRUE}, null);
                 } else {
-                    callback.onResult(new String[]{resource.getString("message"),FALSE}, null);
+                    callback.onResult(new String[]{resource.getString("message"), FALSE}, null);
                 }
 
             } catch (JSONException e) {
@@ -255,6 +261,21 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        } else if (type.equals("listaddgroup")) {
+            ArrayList<Object> temp = new ArrayList<>();
+            try {
+                JSONArray jsonfriendlist = resource.getJSONArray("message");
+                for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
+                    AddUserGroupInfo addUserGroupInfo = new AddUserGroupInfo(
+                            jsonfriendlist.getJSONObject(i).getInt("friend_id"),
+                            jsonfriendlist.getJSONObject(i).getString("user_username"));
+
+                    temp.add(addUserGroupInfo);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            callback.onResult(null, temp);
         }
 
 
