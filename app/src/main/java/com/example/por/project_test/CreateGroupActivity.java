@@ -1,6 +1,5 @@
 package com.example.por.project_test;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,7 +8,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -57,7 +55,7 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
                             type = "crategroup";
                             String friendid = addUserGroupInfos.get(i).userid + "";
                             BackgoundWorker backgoundWorker = new BackgoundWorker(CreateGroupActivity.this);
-                            backgoundWorker.execute(type, token, friendid, groupName, id);
+                            backgoundWorker.execute(type, friendid, groupName);
                         }
                     }
                 }
@@ -67,26 +65,13 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
 
     @Override
     public void onResult(String[] result, ArrayList<Object> userList) {
-        if ((result == null) && (userList == null)) {
-            return;
-        } if (userList == null) {
-            return;
-        } if ((result != null) && (result[0].equals(BackgoundWorker.TRUE))) {
-            Toast.makeText(this, result[1], Toast.LENGTH_SHORT).show();
-            finish();
-        } if ((userList != null) && (result == null)) {
-            addUserGroupInfos = new ArrayList<>();
-            for (Object o : userList) {
-                if (o instanceof AddUserGroupInfo)//เข็คoใช่objectของclassหรือไม่
-                    addUserGroupInfos.add((AddUserGroupInfo) o);
-
-            }
-            createGrouptAdapter = new CreateGrouptAdapter(this, R.layout.contact, addUserGroupInfos);
-            lv_addgroup.setAdapter(createGrouptAdapter);
-
+        addUserGroupInfos = new ArrayList<>();
+        for (Object o : userList) {
+            if (o instanceof AddUserGroupInfo)//เข็คoใช่objectของclassหรือไม่
+                addUserGroupInfos.add((AddUserGroupInfo) o);
 
         }
+        createGrouptAdapter = new CreateGrouptAdapter(this, R.layout.contact, addUserGroupInfos);
+        lv_addgroup.setAdapter(createGrouptAdapter);
     }
-
-
 }
