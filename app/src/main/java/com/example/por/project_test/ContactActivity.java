@@ -21,7 +21,7 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
 
     ListView lv_contact;
     FloatingActionButton add_friend;
-    String id,token;
+    String id, token;
     ContactAdapter contactAdapter;
     ArrayList<UserInfo> userInfos;
 
@@ -47,11 +47,19 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
         lv_contact.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent ii = new Intent(ContactActivity.this, MessageActivity.class);
-                ii.putExtra("friendid", userInfos.get(i).userid + "");//มันส่งobjectธรรมดามาเลยcast
-                ii.putExtra("frienduser", userInfos.get(i).username + "");
-                ii.putExtra("publickey", userInfos.get(i).publickey + "");
-                startActivity(ii);
+                if (userInfos.get(i).userid > 0) {
+                    Intent ii = new Intent(ContactActivity.this, MessageActivity.class);
+                    ii.putExtra("friendid", userInfos.get(i).userid + "");//มันส่งobjectธรรมดามาเลยcast
+                    ii.putExtra("frienduser", userInfos.get(i).username + "");
+                    ii.putExtra("publickey", userInfos.get(i).publickey + "");
+                    startActivity(ii);
+                } else {
+                    Intent ii = new Intent(ContactActivity.this, GroupMessageActivity.class);
+                    ii.putExtra("groupid", userInfos.get(i).groupid+"");
+                    ii.putExtra("groupname", userInfos.get(i).groupname+"");
+                    ii.putExtra("userid", id+"");
+                    startActivity(ii);
+                }
                 //Toast.makeText(ContactActivity.this, adapterView.getAdapter().getItem(i).toString(), Toast.LENGTH_SHORT).show();
 
 

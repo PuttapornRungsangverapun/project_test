@@ -105,6 +105,12 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             param.put("frienid", params[3]);
             param.put("groupname", params[4]);
             httpRequest(url_server + "creategroup.php", param);
+        } else if (type.equals("membergroup")) {
+            HashMap<String, String> param = new HashMap<>();
+            param.put("userid", params[1]);
+            param.put("token", params[2]);
+            param.put("groupid", params[3]);
+            httpRequest(url_server + "membergroup.php", param);
         }
         return status;
     }
@@ -296,8 +302,21 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 e.printStackTrace();
             }
 
+        } else if (type.equals("membergroup")) {
+            ArrayList<Object> temp = new ArrayList<>();
+            try {
+                JSONArray jsonfriendlist = resource.getJSONArray("message");
+                for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
+                    MemberGroupInfo memberGroupInfo = new MemberGroupInfo(
+                            jsonfriendlist.getJSONObject(i).getString("user_username"));
+                    temp.add(memberGroupInfo);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            callback.onResult(null, temp);
         }
-        //super.onPostExecute(result);
+            //super.onPostExecute(result);
 
     }
 }

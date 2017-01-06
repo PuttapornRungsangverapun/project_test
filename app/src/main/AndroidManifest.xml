@@ -86,8 +86,16 @@
         <activity
             android:name=".CreateGroupActivity"
             android:label="Create group"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".GroupMessageActivity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".MemberGroupActivity"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".InviteGroupActivity"
             android:theme="@style/AppTheme"></activity>
-        <activity android:name=".GroupMessageActivity"></activity>
     </application>
 
 </manifest>
