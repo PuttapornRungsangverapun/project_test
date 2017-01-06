@@ -131,7 +131,7 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
                 return true;
             case R.id.create_group:
                 Intent i2 = new Intent(ContactActivity.this, CreateGroupActivity.class);
-                startActivity(i2);
+                startActivityForResult(i2, 1);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
