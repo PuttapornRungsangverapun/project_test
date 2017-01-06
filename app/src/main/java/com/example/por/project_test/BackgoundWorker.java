@@ -28,7 +28,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
     public static final String TRUE = "true", FALSE = "false";
     HttpRequestCallback callback;
     String status, type;
-    public static final String url_server = "http://u3.punyapat.org/por/";
+    public static final String url_server = "https://u3.punyapat.org/por/";
 
     public BackgoundWorker(HttpRequestCallback callback) {
         this.callback = callback;
@@ -98,6 +98,13 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             param.put("userid", params[1]);
             param.put("token", params[2]);
             httpRequest(url_server + "listaddgroupcreate.php", param);
+        } else if (type.equals("crategroup")) {
+            HashMap<String, String> param = new HashMap<>();
+            param.put("token", params[1]);
+            param.put("frienid", params[2]);
+            param.put("groupname", params[3]);
+            param.put("userid", params[4]);
+            httpRequest(url_server + "creategroup.php", param);
         }
         return status;
     }
@@ -276,9 +283,20 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 e.printStackTrace();
             }
             callback.onResult(null, temp);
+        } else if (type.equals("crategroup")) {
+            try {
+
+                if (resource.getString("status").equals("success")) {
+                    callback.onResult(new String[]{TRUE, resource.getString("message")}, null);
+                } else {
+                    callback.onResult(new String[]{FALSE, resource.getString("message")}, null);
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         }
-
-
         //super.onPostExecute(result);
 
     }
