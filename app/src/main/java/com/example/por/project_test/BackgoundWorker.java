@@ -111,6 +111,18 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             param.put("token", params[2]);
             param.put("groupid", params[3]);
             httpRequest(url_server + "membergroup.php", param);
+        } else if (type.equals("listinvitefriend")) {
+            HashMap<String, String> param = new HashMap<>();
+            param.put("userid", params[1]);
+            param.put("token", params[2]);
+            param.put("groupid", params[3]);
+            httpRequest(url_server + "listinvitegroup.php", param);
+        } else if (type.equals("invitefriend")) {
+            HashMap<String, String> param = new HashMap<>();
+            param.put("userid", params[1]);
+            param.put("token", params[2]);
+            param.put("friendid", params[3]);
+            httpRequest(url_server + "inviteaddgroup.php", param);
         }
         return status;
     }
@@ -315,8 +327,34 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 e.printStackTrace();
             }
             callback.onResult(null, temp);
+        } else if (type.equals("listinvitefriend")) {
+            ArrayList<Object> temp = new ArrayList<>();
+            try {
+                JSONArray jsonfriendlist = resource.getJSONArray("message");
+                for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
+                    InviteGroupInfo inviteGroupInfo = new InviteGroupInfo(
+                            jsonfriendlist.getJSONObject(i).getInt("fid"),
+                            jsonfriendlist.getJSONObject(i).getString("user_username"));
+                    temp.add(inviteGroupInfo);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            callback.onResult(null, temp);
+        } else if (type.equals("invitefriend")) {
+
+            try {
+                if (resource.getString("status").equals("success")) {
+                    callback.onResult(new String[]{TRUE, resource.getString("message")}, null);
+                } else {
+                    callback.onResult(new String[]{FALSE, resource.getString("message")}, null);
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
-            //super.onPostExecute(result);
+        //super.onPostExecute(result);
 
     }
 }

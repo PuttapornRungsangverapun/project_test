@@ -33,6 +33,8 @@ public class GroupMessageActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.invite_friend:
                 Intent i = new Intent(GroupMessageActivity.this, InviteGroupActivity.class);
+                i.putExtra("groupid", groupId);
+                i.putExtra("groupname", groupName);
                 startActivityForResult(i, 1);
                 return true;
             case R.id.member:

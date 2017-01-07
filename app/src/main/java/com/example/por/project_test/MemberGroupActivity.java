@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -13,13 +15,14 @@ public class MemberGroupActivity extends AppCompatActivity implements HttpReques
     MemberGroupAdapter memberGroupAdapter;
     ListView lv_membergroup;
     String type, id, token, groupId, groupName;
+    Button bt_invite_friend;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_member_group);
         lv_membergroup = (ListView) findViewById(R.id.lv_membergroup);
-
+        bt_invite_friend = (Button) findViewById(R.id.bt_invite_friend);
         Intent i = getIntent();
         groupId = i.getStringExtra("groupid");
         groupName = i.getStringExtra("groupname");
@@ -34,9 +37,16 @@ public class MemberGroupActivity extends AppCompatActivity implements HttpReques
 
 
         memberGroupInfos = new ArrayList<>();
-
         memberGroupAdapter = new MemberGroupAdapter(this, R.layout.membergroup, memberGroupInfos);
         lv_membergroup.setAdapter(memberGroupAdapter);
+
+        bt_invite_friend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MemberGroupActivity.this, InviteGroupActivity.class);
+                startActivity(i);
+            }
+        });
     }
 
     @Override
