@@ -35,7 +35,7 @@ public class GroupMessageActivity extends AppCompatActivity {
                 Intent i = new Intent(GroupMessageActivity.this, InviteGroupActivity.class);
                 i.putExtra("groupid", groupId);
                 i.putExtra("groupname", groupName);
-                startActivityForResult(i, 1);
+                startActivity(i);
                 return true;
             case R.id.member:
                 Intent i2 = new Intent(GroupMessageActivity.this, MemberGroupActivity.class);

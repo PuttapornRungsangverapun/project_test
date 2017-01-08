@@ -17,7 +17,7 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
     ArrayList<InviteGroupInfo> inviteGroupInfos;
     InviteGroupAdapter inviteGroupAdapter;
     ListView lv_invitegroup;
-    String id, token, type, groupId,groupName;
+    String id, token, type, groupId, groupName;
     Button bt_invite;
 
     @Override
@@ -52,7 +52,7 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
                         type = "invitefriend";
                         String friendid = inviteGroupInfos.get(i).userid + "";
                         BackgoundWorker backgoundWorker = new BackgoundWorker(InviteGroupActivity.this);
-                        backgoundWorker.execute(type, id, token, friendid);
+                        backgoundWorker.execute(type, id, token, friendid, groupId);
                     }
                 }
 

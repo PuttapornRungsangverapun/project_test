@@ -51,11 +51,11 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
                     et_namegroup.setError("Group name must be filled");
                     return;
                 } else {
+                    BackgoundWorker backgoundWorker = new BackgoundWorker(CreateGroupActivity.this);
                     for (int i = 0; i < createGrouptAdapter.mCheckStates.size(); i++) {
                         if (createGrouptAdapter.mCheckStates.get(i) == true) {
                             type = "crategroup";
                             String friendid = addUserGroupInfos.get(i).userid + "";
-                            BackgoundWorker backgoundWorker = new BackgoundWorker(CreateGroupActivity.this);
                             backgoundWorker.execute(type, id, token, friendid, groupName);
                         }
                     }

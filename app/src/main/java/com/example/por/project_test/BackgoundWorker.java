@@ -122,6 +122,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             param.put("userid", params[1]);
             param.put("token", params[2]);
             param.put("friendid", params[3]);
+            param.put("groupid", params[4]);
             httpRequest(url_server + "inviteaddgroup.php", param);
         }
         return status;
