@@ -16,7 +16,8 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
     EditText et_namegroup;
     Button bt_creategroup_submit;
     ListView lv_addgroup;
-    String id, token, type;
+    static String id, token;
+    String type;
     CreateGrouptAdapter createGrouptAdapter;
     ArrayList<AddUserGroupInfo> addUserGroupInfos;
     CheckBox chk_addgroup;
@@ -52,7 +53,7 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
                     return;
                 } else {
                     BackgoundWorker backgoundWorker = new BackgoundWorker(CreateGroupActivity.this);
-                    for (int i = 0; i < createGrouptAdapter.mCheckStates.size(); i++) {
+                    for (int i = 0; i < createGrouptAdapter.value.size(); i++) {
                         if (createGrouptAdapter.mCheckStates.get(i) == true) {
                             type = "crategroup";
                             String friendid = addUserGroupInfos.get(i).userid + "";

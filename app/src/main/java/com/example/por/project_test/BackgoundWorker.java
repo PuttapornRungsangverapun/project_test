@@ -125,6 +125,15 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             param.put("groupid", params[4]);
             httpRequest(url_server + "inviteaddgroup.php", param);
         }
+//
+// }else if (type.equals("sendmessagegroup")) {
+//            HashMap<String, String> param = new HashMap<>();
+//            param.put("userid", params[1]);
+//            param.put("token", params[2]);
+//            param.put("friendid", params[3]);
+//            param.put("groupid", params[4]);
+//            httpRequest(url_server + "sendmessagegroup.php", param);
+//        }
         return status;
     }
 
