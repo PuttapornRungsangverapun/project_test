@@ -37,7 +37,7 @@ public class ContactAdapter extends ArrayAdapter<UserInfo> {
             textView.setText(value.get(position).username);
             imageView.setImageResource(R.drawable.person);
         } else {
-            textView.setText(value.get(position).groupname);
+            textView.setText(value.get(position).groupname + " (" + value.get(position).count + ")");
             imageView.setImageResource(R.drawable.person);
         }
         //textView.setText([position]);

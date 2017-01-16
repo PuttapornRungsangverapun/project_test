@@ -89,15 +89,28 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * @param messageBody FCM message body received.
      */
     private void sendNotification(String username, String messageBody, String friendid) {
-        Intent intent = new Intent(this, MessageActivity.class);
+        Intent intent;
+        String sender;
+        if (friendid.startsWith("U")) {
+            friendid = friendid.replace("U", "");
+            intent = new Intent(this, MessageActivity.class);
+            intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
+            intent.putExtra("frienduser", username);
+            sender = username;
+        } else {
+            friendid = friendid.replace("G", "");
+            intent = new Intent(this, GroupMessageActivity.class);
+            intent.putExtra("groupid", friendid);
+            intent.putExtra("groupname", username.split(";")[1]);
+            sender= username.split(";")[0];
+        }
 
 //        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 //        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "");
 //        wl.acquire(3000);//ติด3วิ
 //        wl.release();
 
-        intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
-        intent.putExtra("frienduser", username);
+
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 1234 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
@@ -106,7 +119,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.chat)
                 .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.chat))
-                .setContentTitle(username)
+                .setContentTitle(sender)
                 .setContentText(messageBody)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)

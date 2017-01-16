@@ -26,14 +26,14 @@ import java.util.List;
  * Created by Por on 10/9/2016.
  */
 
-public class GroupMessageAdapter extends ArrayAdapter<MessageInfo> {
+public class GroupMessageAdapter extends ArrayAdapter<GroupMessageInfo> {
     private final Context ctx;
-    List<MessageInfo> value;
+    List<GroupMessageInfo> value;
     String user_id_current;
     ImageView img_file;
     String token, id;
 
-    public GroupMessageAdapter(Context ctx, int resource, int textViewResourceId, ArrayList<MessageInfo> value, String token, String id) {
+    public GroupMessageAdapter(Context ctx, int resource, int textViewResourceId, ArrayList<GroupMessageInfo> value, String token, String id) {
         super(ctx, resource, textViewResourceId, value);
         this.ctx = ctx;
         this.value = value;
@@ -52,27 +52,27 @@ public class GroupMessageAdapter extends ArrayAdapter<MessageInfo> {
 
         String filename;
         LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView = inflater.inflate(R.layout.message, parent, false);
-        LinearLayout linearLayout = (LinearLayout) rowView.findViewById(R.id.ln_user_reciever);
-        LinearLayout linearLayout2 = (LinearLayout) rowView.findViewById(R.id.ln_user_sender);
+        View rowView = inflater.inflate(R.layout.groupmessage, parent, false);
+        LinearLayout linearLayout = (LinearLayout) rowView.findViewById(R.id.ln_group_reciever);
+        LinearLayout linearLayout2 = (LinearLayout) rowView.findViewById(R.id.ln_group_sender);
 
-        tv_time_sender = (TextView) rowView.findViewById(R.id.tv_user_sender_time);
+        tv_time_sender = (TextView) rowView.findViewById(R.id.tv_group_sender_time);
         tv_time_sender.setText(value.get(position).time);
-        tv_time_receiver = (TextView) rowView.findViewById(R.id.tv_user_reciver_time);
+        tv_time_receiver = (TextView) rowView.findViewById(R.id.tv_group_reciver_time);
         tv_time_receiver.setText(value.get(position).time);
 
         if (user_id_current.equals(value.get(position).message_sender_id + "")) {
             linearLayout2.setVisibility(View.VISIBLE);
-            textView = (TextView) rowView.findViewById(R.id.tv_message_adapter);
-            img_file = (ImageView) rowView.findViewById(R.id.img_upload);
+            textView = (TextView) rowView.findViewById(R.id.tv_group_message_adapter);
+            img_file = (ImageView) rowView.findViewById(R.id.img_group_upload);
 
         } else {
             linearLayout.setVisibility(View.VISIBLE);
-            textView = (TextView) rowView.findViewById(R.id.tv_message_left);
+            textView = (TextView) rowView.findViewById(R.id.tv_groupmessage_left);
 
-            TextView tv_user_from = (TextView) rowView.findViewById(R.id.tv_user_from);
-            Intent intent = ((MessageActivity) ctx).getIntent();
-            tv_user_from.setText(intent.getStringExtra("frienduser"));
+            TextView tv_user_from = (TextView) rowView.findViewById(R.id.tv_group_from);
+
+            tv_user_from.setText(value.get(position).username);
             img_file = (ImageView) rowView.findViewById(R.id.img_download);
         }
         if (value.get(position).message_status == 4) {
@@ -85,11 +85,11 @@ public class GroupMessageAdapter extends ArrayAdapter<MessageInfo> {
 
 
             if (filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
-                String url = BackgoundWorker.url_server + "downloadfile.php?messageid=" + value.get(position).message_id + "&token=" + token + "&userid=" + id;
+                String url = BackgoundWorker.url_server + "downloadfile.php?messageid=" + value.get(position).group_message_id + "&token=" + token + "&userid=" + id;
                 img_file.setVisibility(View.VISIBLE);
                 textView.setVisibility(View.GONE);
 
-                String msgId = value.get(position).message_id + "";
+                String msgId = value.get(position).group_message_id + "";
 
                 if (ImageCacheUtils.hasCache(ctx, msgId)) {
                     Bitmap bm = ImageCacheUtils.load(ctx, msgId);

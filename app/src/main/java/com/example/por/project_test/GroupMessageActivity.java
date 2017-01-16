@@ -16,6 +16,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,14 +31,29 @@ import android.widget.Toast;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 public class GroupMessageActivity extends AppCompatActivity implements HttpRequestCallback {
 
-    static String id, token;
-    String groupId, groupName, type;
+    static String id, token, shareedkey;
+    String groupId, groupName, type, publickey, privatekey;
+    ;
     boolean isRequesting;
     ArrayList<GroupMessageInfo> groupMessageInfos;
     GroupMessageAdapter groupMessageAdapter;
@@ -64,6 +81,12 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         id = sp.getString("user_id_current", "-1");
         token = sp.getString("token", "-1");
+
+        shareedkey = checkhashkey();
+
+        groupMessageInfos = new ArrayList<>();
+        groupMessageAdapter = new GroupMessageAdapter(this, R.layout.message, R.id.tv_message_adapter, groupMessageInfos, token, id);
+        listView_group_message.setAdapter(groupMessageAdapter);
 
         listView_group_message.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -93,8 +116,9 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                     return;
                 } else {
                     type = "sendmessagegroup";
+                    str_message = encrypt(str_message);
                     BackgoundWorker backgoundWorker = new BackgoundWorker(GroupMessageActivity.this);
-                    backgoundWorker.execute(type, id, token, groupId, str_message, "text");
+                    backgoundWorker.execute(type, id, groupId, str_message, "text", "", "", "", token);
                     et_group_message.setText("");
                 }
             }
@@ -153,7 +177,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                     return;
                 } else {
                     isRequesting = true;
-                    String type1 = "readmessage";
+                    String type1 = "readmessagegroup";
                     BackgoundWorker backgoundWorker = new BackgoundWorker(GroupMessageActivity.this);
                     backgoundWorker.execute(type1, id, groupId, lastMessageId + "", token);
                 }
@@ -174,23 +198,27 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
         } else if (mesObjects == null) {
             return;
         }
-        ArrayList<GroupMessageInfo> messageInfos = new ArrayList<>();
+        ArrayList<GroupMessageInfo> groupMessageInfos = new ArrayList<>();
         for (Object o : mesObjects) {
 
             if (o instanceof GroupMessageInfo) {//เข็คoใช่objectของclassหรือไม่
                 GroupMessageInfo mo = (GroupMessageInfo) o;
                 if (mo.type.equals("authen")) {
-
+                    if( (mo.target_id + "").equals(id)) {
+                        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
+                        privatekey = sp.getString("privatekey", "-1");
+                        shareedkey = RSADecrypt(mo.message);
+                    }
                 } else if (mo.type.equals("map")) {
                     try {
                         mo.latitude = Double.parseDouble((mo.tmpLat));
                         mo.longtitude = Double.parseDouble((mo.tmpLon));
-                        messageInfos.add(mo);
+                        groupMessageInfos.add(mo);
                     } catch (Exception e) {
                     }
                 } else if (mo.type.equals("text")) {
                     try {
-//                        mo.message = (mo.message);
+                        mo.message = decrypt(mo.message);
                         groupMessageInfos.add(mo);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -203,8 +231,8 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             }
         }
         if (groupMessageInfos.size() > 0) {
-            this.groupMessageInfos.addAll(messageInfos);
-            lastMessageId = messageInfos.get(messageInfos.size() - 1).group_message_id;//ขนาดของตัวมัน-1 ถ้ามี20 ได้19
+            this.groupMessageInfos.addAll(groupMessageInfos);
+            lastMessageId = groupMessageInfos.get(groupMessageInfos.size() - 1).group_message_id;//ขนาดของตัวมัน-1 ถ้ามี20 ได้19
             groupMessageAdapter.notifyDataSetChanged();
         }
 
@@ -309,6 +337,195 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             }
         }
         return result;
+    }
+
+    public String encrypt(String msg, byte[] data) {
+        String key = shareedkey; // 256 bit key
+        String initVector = new BigInteger(80, new SecureRandom()).toString(32); // 80/5=16 bytes IV   80bitแบบrandom tostringเป็นbase32 ตัวหนังสือ1ตัวเท่ากับ32bit ได้ 16 ตัว
+        return initVector + encrypt(key, initVector, msg, data);
+    }
+
+    public String encrypt(String msg) {
+        return encrypt(msg, null);
+    }
+
+    public String encrypt(byte[] data) {
+        return encrypt(null, data);
+    }
+
+
+    public String encrypt(String key, String initVector, String value, byte[] data) {
+        byte[] encrypted;
+        try {
+            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7PADDING");
+            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
+
+            if (value != null) {
+
+                encrypted = cipher.doFinal(value.getBytes("UTF-8"));
+//                System.out.println("encrypted string: " + Base64.encodeToString(encrypted, Base64.DEFAULT));
+            } else {
+                //ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                //CipherOutputStream cios = new CipherOutputStream(bos, cipher);
+                //cios.write(data);
+                //encrypted = bos.toByteArray();
+
+                encrypted = cipher.doFinal(data);
+//                System.out.println("encrypted string: " + Base64.encodeToString(encrypted, Base64.DEFAULT));
+            }
+            return Base64.encodeToString(encrypted, Base64.DEFAULT);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private static byte[] decrypt(String encrypted, byte[] data) {
+        String iv = null;
+        String cyphertext = null;
+        String key = shareedkey;
+
+        if (encrypted == null) {
+            byte[] iv2 = new byte[16];
+            byte[] data2 = new byte[data.length - 16];
+            System.arraycopy(data, 0, iv2, 0, 16);
+            System.arraycopy(data, 16, data2, 0, data2.length);
+            return decrypt(key, new String(iv2), null, data2);
+
+        } else {
+            iv = encrypted.substring(0, 16);
+            cyphertext = encrypted.substring(16);//begin index 16
+            return decrypt(key, iv, cyphertext, data);
+        }
+    }
+
+    public static String decrypt(String encrypted) {
+
+        return new String(decrypt(encrypted, null));
+
+    }
+
+    public static byte[] decrypt(byte[] data) {
+
+        return decrypt(null, data);
+
+    }
+
+    private static byte[] decrypt(String key, String initVector, String encrypted, byte[] data) {
+        byte[] original;
+        try {
+//            Log.e("secret", shareedkey);
+
+            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
+
+
+            if (encrypted != null) {
+                original = cipher.doFinal(Base64.decode(encrypted, Base64.DEFAULT));
+            } else {
+                original = cipher.doFinal(data);
+            }
+            return original;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private String RSAEncrypt(String myMessage) {
+        RSAPublicKey pbKey = null;
+
+        byte[] keyBytes = null;
+        try {
+            keyBytes = Base64.decode(publickey.getBytes("utf-8"), Base64.DEFAULT);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+        KeyFactory keyFactory = null;
+        try {
+            keyFactory = KeyFactory.getInstance("RSA");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        try {
+            pbKey = (RSAPublicKey) keyFactory.generatePublic(spec);
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+
+///
+
+        // Get an instance of the Cipher for RSA encryption/decryption
+        Cipher c = null;
+        try {
+            c = Cipher.getInstance("RSA");
+            // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
+            c.init(Cipher.ENCRYPT_MODE, pbKey);
+
+            // Encrypt that message using a new SealedObject and the Cipher we created before
+            String msg = Base64.encodeToString(c.doFinal(myMessage.getBytes("UTF-8")), Base64.DEFAULT);
+
+            return msg;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String RSADecrypt(String myMessage) {
+        RSAPrivateKey pvKey = null;
+
+        byte[] keyBytes = null;
+        try {
+            keyBytes = Base64.decode(privatekey.getBytes("utf-8"), Base64.DEFAULT);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory keyFactory = null;
+        try {
+            keyFactory = KeyFactory.getInstance("RSA");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        try {
+            pvKey = (RSAPrivateKey) keyFactory.generatePrivate(spec);
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+
+///
+
+        // Get an instance of the Cipher for RSA encryption/decryption
+        Cipher c = null;
+        try {
+            c = Cipher.getInstance("RSA");
+            // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
+            c.init(Cipher.DECRYPT_MODE, pvKey);
+
+            // Encrypt that message using a new SealedObject and the Cipher we created before
+            String msg = new String(c.doFinal(Base64.decode(myMessage, Base64.DEFAULT)));
+
+            return msg;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String checkhashkey() {
+        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
+//        return sp.getString("SHARED_KEY:" + friendid, "1234567890asdfgh1234567890asdfgh");
+        return sp.getString("SHARED_KEY_GROUP:" + groupId, null);
     }
 
     @Override

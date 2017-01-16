@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
@@ -226,22 +227,21 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             if (filedata == null) {
                 return;
             }
-            if(filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
-                Bitmap bm = BitmapFactory.decodeByteArray(filedata,0,filedata.length);
+            if (filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+                Bitmap bm = BitmapFactory.decodeByteArray(filedata, 0, filedata.length);
                 Bitmap resized = null;
 
-                if(bm.getWidth() > bm.getHeight()){
-                    resized = Bitmap.createScaledBitmap(bm, 800, (int)(800*((float)bm.getHeight()/bm.getWidth())), true);
-                }
-                else{
-                    resized = Bitmap.createScaledBitmap(bm, (int)(800*((float)bm.getWidth()/bm.getHeight())), 800, true);
+                if (bm.getWidth() > bm.getHeight()) {
+                    resized = Bitmap.createScaledBitmap(bm, 800, (int) (800 * ((float) bm.getHeight() / bm.getWidth())), true);
+                } else {
+                    resized = Bitmap.createScaledBitmap(bm, (int) (800 * ((float) bm.getWidth() / bm.getHeight())), 800, true);
                 }
 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                resized.compress(Bitmap.CompressFormat.JPEG,90,baos);
+                resized.compress(Bitmap.CompressFormat.JPEG, 90, baos);
                 filedata = baos.toByteArray();
             }
-
+            String md5 = getMD5EncryptedString(Base64.encodeToString(filedata, Base64.DEFAULT));
             String encryptFile = encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
 
@@ -568,6 +568,22 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static String getMD5EncryptedString(String encTarget) {
+        MessageDigest mdEnc = null;
+        try {
+            mdEnc = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("Exception while encrypting to md5");
+            e.printStackTrace();
+        } // Encryption algorithm
+        mdEnc.update(encTarget.getBytes(), 0, encTarget.length());
+        String md5 = new BigInteger(1, mdEnc.digest()).toString(16);
+        while (md5.length() < 32) {
+            md5 = "0" + md5;
+        }
+        return md5;
     }
 }
 

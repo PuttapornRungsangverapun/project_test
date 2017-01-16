@@ -7,13 +7,14 @@ package com.example.por.project_test;
 public class UserInfo {
 
     String username, publickey, groupname;
-    int userid, groupid;
+    int userid, groupid, count;
 
-    UserInfo(int userid, String username, String publickey,  int groupid,String groupname) {
+    UserInfo(int userid, String username, String publickey, int groupid, String groupname, int count) {
         this.userid = userid;
         this.username = username;
         this.publickey = publickey;
         this.groupname = groupname;
         this.groupid = groupid;
+        this.count = count;
     }
 }

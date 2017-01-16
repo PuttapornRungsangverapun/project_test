@@ -124,16 +124,35 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             param.put("friendid", params[3]);
             param.put("groupid", params[4]);
             httpRequest(url_server + "inviteaddgroup.php", param);
+        } else if (type.equals("readmessagegroup")) {
+            HashMap<String, String> param = new HashMap<>();
+            param.put("userid", params[1]);
+            param.put("groupid", params[2]);
+            param.put("lastmessageid", params[3]);
+            param.put("token", params[4]);
+            httpRequest(url_server + "readmessagegroup.php", param);
+        } else if (type.equals("sendmessagegroup")) {
+            HashMap<String, String> param = new HashMap<>();
+            param.put("userid", params[1]);
+            param.put("groupid", params[2]);
+            param.put("message", params[3]);
+            param.put("type", params[4]);
+            param.put("filename", params[5]);
+            param.put("latitude", params[6]);
+            param.put("longitude", params[7]);
+            param.put("token", params[8]);
+            if (params.length >= 10) {
+                param.put("targetid", params[9]);
+            }
+            httpRequest(url_server + "sendmessagegroup.php", param);
+        } else if (type.equals("getpublickey")) {
+            HashMap<String, String> param = new HashMap<>();
+            param.put("userid", params[1]);
+            param.put("friendid", params[2]);
+            param.put("token", params[3]);
+            httpRequest(url_server + "getpublickey.php", param);
         }
-//
-// }else if (type.equals("sendmessagegroup")) {
-//            HashMap<String, String> param = new HashMap<>();
-//            param.put("userid", params[1]);
-//            param.put("token", params[2]);
-//            param.put("friendid", params[3]);
-//            param.put("groupid", params[4]);
-//            httpRequest(url_server + "sendmessagegroup.php", param);
-//        }
+
         return status;
     }
 
@@ -187,7 +206,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
         JSONObject resource = null;
         try {
             resource = new JSONObject(result);
-        } catch (JSONException e) {
+        } catch (Exception e) {
             Log.e("JSON error", "Cann't convert to json object");
             e.printStackTrace();
             return;
@@ -255,7 +274,8 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                             jsonfriendlist.getJSONObject(i).getString("user_username"),
                             jsonfriendlist.getJSONObject(i).getString("publickey"),
                             jsonfriendlist.getJSONObject(i).getInt("group_id"),
-                            jsonfriendlist.getJSONObject(i).getString("group_name"));
+                            jsonfriendlist.getJSONObject(i).getString("group_name"),
+                            jsonfriendlist.getJSONObject(i).getInt("n"));
                     temp.add(userInfo);
                 }
             } catch (JSONException e) {
@@ -315,7 +335,9 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
 
             try {
                 if (resource.getString("status").equals("success")) {
-                    callback.onResult(new String[]{TRUE, resource.getString("message")}, null);
+                    if (resource.has("message")) {
+                        callback.onResult(new String[]{TRUE, resource.getString("message"), resource.getString("groupid")}, null);
+                    }
                 } else {
                     callback.onResult(new String[]{FALSE, resource.getString("message")}, null);
                 }
@@ -360,6 +382,52 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                     callback.onResult(new String[]{FALSE, resource.getString("message")}, null);
                 }
 
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else if (type.equals("readmessagegroup")) {
+
+            try {
+                ArrayList<Object> temp = new ArrayList<>();
+                JSONArray jsonmessage = resource.getJSONArray("message");
+                for (int i = 0; i < jsonmessage.length(); i++) {//ทำparsingแปลงjsonarray
+                    GroupMessageInfo groupMessageInfo = new GroupMessageInfo(jsonmessage.getJSONObject(i).getInt("group_message_id"),
+                            jsonmessage.getJSONObject(i).getString("text_body"),
+                            jsonmessage.getJSONObject(i).getInt("group_message_status"),
+                            jsonmessage.getJSONObject(i).getInt("group_message_sender_id"),
+                            jsonmessage.getJSONObject(i).getString("user_username"),
+                            jsonmessage.getJSONObject(i).getString("file_filename"),
+                            jsonmessage.getJSONObject(i).getString("map_latitude"),
+                            jsonmessage.getJSONObject(i).getString("map_longitude"),
+                            jsonmessage.getJSONObject(i).getString("time"),
+                            jsonmessage.getJSONObject(i).getString("group_message_type"),
+                            jsonmessage.getJSONObject(i).getInt("target_userid"));
+
+                    temp.add(groupMessageInfo);
+                }
+                callback.onResult(null, temp);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else if (type.equals("sendmessagegroup")) {
+
+            try {
+                if (resource.getString("status").equals("success")) {
+                    callback.onResult(new String[]{resource.getString("message"), TRUE}, null);
+                } else {
+                    callback.onResult(new String[]{resource.getString("message"), FALSE}, null);
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else if (type.equals("getpublickey")) {
+
+            try {
+                if (resource.getString("status").equals("success")) {
+                    callback.onResult(new String[]{type, resource.getJSONObject("message").getString("user_id"),
+                            resource.getJSONObject("message").getString("publickey"), TRUE}, null);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
