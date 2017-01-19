@@ -92,7 +92,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 GroupMessageInfo groupMessageInfo = groupMessageInfos.get(position);
-                String url = BackgoundWorker.url_server + "downloadfile.php?messageid=" + groupMessageInfo.group_message_id + "&token=" + token + "&userid=" + id;
+                String url = BackgoundWorker.url_server + "downloadfilegroup.php?messageid=" + groupMessageInfo.group_message_id + "&token=" + token + "&userid=" + id;
                 String filename = groupMessageInfo.filename;
                 if (groupMessageInfo.type.equals("file")) {
                     Intent intent = new Intent(GroupMessageActivity.this, DownloadFileService.class);
@@ -265,13 +265,13 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                 filedata = baos.toByteArray();
             }
 
-//            String encryptFile = encrypt(filedata);
+            String encryptFile = encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
 
-            String type2 = "sendmessage";
+            String type2 = "sendmessagegroup";
 
             BackgoundWorker backgoundWorker = new BackgoundWorker(GroupMessageActivity.this);
-//            backgoundWorker.execute(type2, id, groupId, encryptFile, "file", filename, "", "", token);
+            backgoundWorker.execute(type2, id, groupId, encryptFile, "file", filename, "", "", token);
 
 
         }
