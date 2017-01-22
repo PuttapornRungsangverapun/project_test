@@ -151,6 +151,12 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             param.put("friendid", params[2]);
             param.put("token", params[3]);
             httpRequest(url_server + "getpublickey.php", param);
+        } else if (type.equals("scanvirus")) {
+            HashMap<String, String> param = new HashMap<>();
+            param.put("userid", params[1]);
+            param.put("md5", params[2]);
+            param.put("token", params[3]);
+            httpRequest(url_server + "scanvirus.php", param);
         }
 
         return status;
@@ -428,6 +434,18 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                     callback.onResult(new String[]{type, resource.getJSONObject("message").getString("user_id"),
                             resource.getJSONObject("message").getString("publickey"), TRUE}, null);
                 }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }else if (type.equals("scanvirus")) {
+
+            try {
+                if (resource.getString("status").equals("success")) {
+                    callback.onResult(new String[]{resource.getString("message"), TRUE}, null);
+                } else {
+                    callback.onResult(new String[]{resource.getString("message"), FALSE}, null);
+                }
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }

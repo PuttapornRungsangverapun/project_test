@@ -73,7 +73,7 @@ public class GroupMessageAdapter extends ArrayAdapter<GroupMessageInfo> {
             TextView tv_user_from = (TextView) rowView.findViewById(R.id.tv_group_from);
 
             tv_user_from.setText(value.get(position).username);
-            img_file = (ImageView) rowView.findViewById(R.id.img_download);
+            img_file = (ImageView) rowView.findViewById(R.id.img_group_download);
         }
         if (value.get(position).message_status == 4) {
             TextView tv_read = (TextView) rowView.findViewById(R.id.tv_read);
@@ -85,7 +85,7 @@ public class GroupMessageAdapter extends ArrayAdapter<GroupMessageInfo> {
 
 
             if (filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
-                String url = BackgoundWorker.url_server + "downloadfile.php?messageid=" + value.get(position).group_message_id + "&token=" + token + "&userid=" + id;
+                String url = BackgoundWorker.url_server + "downloadfilegroup.php?messageid=" + value.get(position).group_message_id + "&token=" + token + "&userid=" + id;
                 img_file.setVisibility(View.VISIBLE);
                 textView.setVisibility(View.GONE);
 

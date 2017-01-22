@@ -124,11 +124,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             } else {
                 Toast.makeText(this, "Cann't find location", Toast.LENGTH_SHORT).show();
             }
+        } else if ((getIntent().hasExtra("groupid")) && (status)) {
+            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);//ขอตำแนหน่ง่าสุด
+            if (mLastLocation != null) {//มีค่า
+                lat = mLastLocation.getLatitude();
+                lon = mLastLocation.getLongitude();
+                longmark = lon;
+                latmark = lat;
+                LatLng bangkok = new LatLng(lat, lon);
+                MarkerOptions marker = new MarkerOptions().position(bangkok).title("Your location").draggable(true);
+                mMap.addMarker(marker);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bangkok, 18));
+                status = false;
+            } else {
+                Toast.makeText(this, "Cann't find location", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         requestLocation();//กดallowสำหรับครั้งแรก
     }
 

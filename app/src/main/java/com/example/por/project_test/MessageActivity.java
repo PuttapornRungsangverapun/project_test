@@ -242,13 +242,15 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                 filedata = baos.toByteArray();
             }
             String md5 = getMD5EncryptedString(Base64.encodeToString(filedata, Base64.DEFAULT));
+            String type = "scanvirus";
+            BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
+            backgoundWorker.execute(type, id, md5, token);
             String encryptFile = encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
 
-            String type2 = "sendmessage";
-
-            BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-            backgoundWorker.execute(type2, id, friendid, encryptFile, "file", filename, "", "", token);
+//            String type2 = "sendmessage";
+//            BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
+//            backgoundWorker.execute(type2, id, friendid, encryptFile, "file", filename, "", "", token);
 
 
         }
