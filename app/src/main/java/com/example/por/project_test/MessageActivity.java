@@ -125,7 +125,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                     Log.d("str message", str_message);
 
                     BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-                    backgoundWorker.execute(type2, id, friendid, str_message, "text", "", "", "", token);
+                    backgoundWorker.execute("sendmessage", id, friendid, str_message, "text", "", "", "", token, "");
                     et_message.setText("");
                 }
 
@@ -214,7 +214,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         String sharedKeyMessage = RSAEncrypt(shareedkey);
 
         BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-        backgoundWorker.execute(type2, id, friendid, sharedKeyMessage, "authen", "", "", "", token);
+        backgoundWorker.execute(type2, id, friendid, sharedKeyMessage, "authen", "", "", "", token, "");
     }
 
     @Override
@@ -242,15 +242,12 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                 filedata = baos.toByteArray();
             }
             String md5 = getMD5EncryptedString(Base64.encodeToString(filedata, Base64.DEFAULT));
-            String type = "scanvirus";
-            BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-            backgoundWorker.execute(type, id, md5, token);
             String encryptFile = encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
 
-//            String type2 = "sendmessage";
-//            BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-//            backgoundWorker.execute(type2, id, friendid, encryptFile, "file", filename, "", "", token);
+
+            BackgoundWorker backgoundWorker2 = new BackgoundWorker(MessageActivity.this);
+            backgoundWorker2.execute("sendmessage", id, friendid, encryptFile, "file", filename, "", "", token, md5);
 
 
         }
@@ -574,18 +571,28 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
 
     public static String getMD5EncryptedString(String encTarget) {
         MessageDigest mdEnc = null;
+        byte[] data = Base64.decode(encTarget, Base64.DEFAULT);
         try {
             mdEnc = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
             System.out.println("Exception while encrypting to md5");
             e.printStackTrace();
         } // Encryption algorithm
-        mdEnc.update(encTarget.getBytes(), 0, encTarget.length());
-        String md5 = new BigInteger(1, mdEnc.digest()).toString(16);
-        while (md5.length() < 32) {
-            md5 = "0" + md5;
+        mdEnc.update(data);//encTarget.getBytes()
+//        String md5 = new BigInteger(1, mdEnc.digest()).toString(16);
+//        while (md5.length() < 32) {
+//            md5 = "0" + md5;
+//        }
+        byte messageDigest[] = mdEnc.digest();
+        StringBuilder hexString = new StringBuilder();
+        for (byte aMessageDigest : messageDigest) {
+            String h = Integer.toHexString(0xFF & aMessageDigest);
+            while (h.length() < 2)
+                h = "0" + h;
+            hexString.append(h);
         }
-        return md5;
+        return hexString.toString();
+//        return md5;
     }
 }
 

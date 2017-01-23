@@ -53,7 +53,6 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
 
     static String id, token, shareedkey;
     String groupId, groupName, type, publickey, privatekey;
-    ;
     boolean isRequesting;
     ArrayList<GroupMessageInfo> groupMessageInfos;
     GroupMessageAdapter groupMessageAdapter;
@@ -211,8 +210,8 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                     }
                 } else if (mo.type.equals("map")) {
                     try {
-                        mo.latitude = Double.parseDouble((mo.tmpLat));
-                        mo.longtitude = Double.parseDouble((mo.tmpLon));
+                        mo.latitude = Double.parseDouble(decrypt(mo.tmpLat));
+                        mo.longtitude = Double.parseDouble(decrypt(mo.tmpLon));
                         groupMessageInfos.add(mo);
                     } catch (Exception e) {
                     }

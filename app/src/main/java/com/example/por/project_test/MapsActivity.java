@@ -170,7 +170,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        String type = "sendmessage";
+
 
         if (getIntent().hasExtra("friendid")) {
 
@@ -185,7 +185,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String latEncrypt = messageActivity.encrypt(latmark + "");
 
             BackgoundWorker backgoundWorker = new BackgoundWorker(MapsActivity.this);
-            backgoundWorker.execute(type, id, friendid, "", "map", "", latEncrypt, lonEncrypt, token);
+            backgoundWorker.execute("sendmessage", id, friendid, "", "map", "", latEncrypt, lonEncrypt, token,"");
+            return true;//ไม่ต้องการให้bahivior defaultของแมพ
+        } else if (getIntent().hasExtra("groupid")) {
+
+            //SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
+            //String id = sp.getString("user_id_current", "-1");
+
+            Intent intent = getIntent();
+            String groupid = intent.getStringExtra("groupid");
+
+            GroupMessageActivity groupMessageActivity = new GroupMessageActivity();
+            String lonEncrypt = groupMessageActivity.encrypt(longmark + "");
+            String latEncrypt = groupMessageActivity.encrypt(latmark + "");
+
+            BackgoundWorker backgoundWorker = new BackgoundWorker(MapsActivity.this);
+            backgoundWorker.execute("sendmessagegroup", id, groupid, "", "map", "", latEncrypt, lonEncrypt, token);
             return true;//ไม่ต้องการให้bahivior defaultของแมพ
         }
         //Toast.makeText(this, marker.getPosition().toString(), Toast.LENGTH_SHORT).show();
