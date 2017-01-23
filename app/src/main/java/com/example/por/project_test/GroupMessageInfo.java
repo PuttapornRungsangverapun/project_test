@@ -5,11 +5,11 @@ package com.example.por.project_test;
  */
 
 public class GroupMessageInfo {
-    String message, filename, type, tmpLat, tmpLon, time, username;
-    int group_message_id, message_sender_id, message_status, target_id;
+    String message, filename, type, tmpLat, tmpLon, time, username, target_id;
+    int group_message_id, message_sender_id, message_status;
     double latitude, longtitude;
 
-    GroupMessageInfo(int group_message_id, String message, int message_status, int message_sender_id, String username, String filename, String latitude, String longtitude, String time, String type, int target_id) {
+    GroupMessageInfo(int group_message_id, String message, int message_status, int message_sender_id, String username, String filename, String latitude, String longtitude, String time, String type, String target_id) {
         this.group_message_id = group_message_id;
         this.message = message;
         this.message_status = message_status;

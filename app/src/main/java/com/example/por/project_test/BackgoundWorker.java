@@ -402,7 +402,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                             jsonmessage.getJSONObject(i).getString("map_longitude"),
                             jsonmessage.getJSONObject(i).getString("time"),
                             jsonmessage.getJSONObject(i).getString("group_message_type"),
-                            jsonmessage.getJSONObject(i).getInt("target_userid"));
+                            jsonmessage.getJSONObject(i).getString("target_userid"));
 
                     temp.add(groupMessageInfo);
                 }
