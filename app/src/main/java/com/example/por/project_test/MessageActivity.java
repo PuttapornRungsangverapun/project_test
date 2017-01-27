@@ -125,7 +125,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                     Log.d("str message", str_message);
 
                     BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-                    backgoundWorker.execute("sendmessage", id, friendid, str_message, "text", "", "", "", token, "");
+                    backgoundWorker.execute("sendmessage", id, friendid, str_message, "text", "", "", "", token);
                     et_message.setText("");
                 }
 
@@ -214,7 +214,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         String sharedKeyMessage = RSAEncrypt(shareedkey);
 
         BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-        backgoundWorker.execute(type2, id, friendid, sharedKeyMessage, "authen", "", "", "", token, "");
+        backgoundWorker.execute(type2, id, friendid, sharedKeyMessage, "authen", "", "", "", token);
     }
 
     @Override
@@ -579,10 +579,6 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             e.printStackTrace();
         } // Encryption algorithm
         mdEnc.update(data);//encTarget.getBytes()
-//        String md5 = new BigInteger(1, mdEnc.digest()).toString(16);
-//        while (md5.length() < 32) {
-//            md5 = "0" + md5;
-//        }
         byte messageDigest[] = mdEnc.digest();
         StringBuilder hexString = new StringBuilder();
         for (byte aMessageDigest : messageDigest) {
@@ -592,7 +588,6 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             hexString.append(h);
         }
         return hexString.toString();
-//        return md5;
     }
 }
 

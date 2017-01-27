@@ -28,10 +28,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
-    double lat, lon;
-    String id, token;
-    boolean status = true;
-    double longmark, latmark;
+    private double lat, lon;
+    private String id, token;
+    private boolean status = true;
+    private double longmark, latmark;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,8 +174,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (getIntent().hasExtra("friendid")) {
 
-            //SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
-            //String id = sp.getString("user_id_current", "-1");
 
             Intent intent = getIntent();
             String friendid = intent.getStringExtra("friendid");
@@ -185,12 +183,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String latEncrypt = messageActivity.encrypt(latmark + "");
 
             BackgoundWorker backgoundWorker = new BackgoundWorker(MapsActivity.this);
-            backgoundWorker.execute("sendmessage", id, friendid, "", "map", "", latEncrypt, lonEncrypt, token,"");
+            backgoundWorker.execute("sendmessage", id, friendid, "", "map", "", latEncrypt, lonEncrypt, token, "");
             return true;//ไม่ต้องการให้bahivior defaultของแมพ
         } else if (getIntent().hasExtra("groupid")) {
 
-            //SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
-            //String id = sp.getString("user_id_current", "-1");
 
             Intent intent = getIntent();
             String groupid = intent.getStringExtra("groupid");

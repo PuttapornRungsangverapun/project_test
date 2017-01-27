@@ -26,8 +26,8 @@ import java.util.HashMap;
  */
 public class BackgoundWorker extends AsyncTask<String, String, String> {
     public static final String TRUE = "true", FALSE = "false";
-    HttpRequestCallback callback;
-    String status, type;
+    private HttpRequestCallback callback;
+    private String status, type;
     public static final String url_server = "https://u3.punyapat.org/por/";
 
     public BackgoundWorker(HttpRequestCallback callback) {
@@ -79,7 +79,9 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             param.put("latitude", params[6]);
             param.put("longitude", params[7]);
             param.put("token", params[8]);
-            param.put("md5", params[9]);
+            if (params[4].equals("file")) {
+                param.put("md5", params[9]);
+            }
             httpRequest(url_server + "message.php", param);
         } else if (type.equals("readmessage")) {
             HashMap<String, String> param = new HashMap<>();
@@ -142,9 +144,12 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             param.put("latitude", params[6]);
             param.put("longitude", params[7]);
             param.put("token", params[8]);
-            if (params.length >= 10) {
+            if (params[4].equals("file")) {
+                param.put("md5", params[9]);
+            } else if (params.length >= 10) {
                 param.put("targetid", params[9]);
             }
+
             httpRequest(url_server + "sendmessagegroup.php", param);
         } else if (type.equals("getpublickey")) {
             HashMap<String, String> param = new HashMap<>();

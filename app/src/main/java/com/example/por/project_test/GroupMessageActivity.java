@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
@@ -51,17 +52,17 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class GroupMessageActivity extends AppCompatActivity implements HttpRequestCallback {
 
-    static String id, token, shareedkey;
-    String groupId, groupName, type, publickey, privatekey;
-    boolean isRequesting;
-    ArrayList<GroupMessageInfo> groupMessageInfos;
-    GroupMessageAdapter groupMessageAdapter;
-    int lastMessageId;
-    static int REQUEST_FILE = 1;
-    Button bt_group_file, bt_group_send_message;
-    EditText et_group_message;
-    ListView listView_group_message;
-    Timer t;
+    private static String id, token, shareedkey;
+    private String groupId, groupName, privatekey;
+    private boolean isRequesting;
+    private ArrayList<GroupMessageInfo> groupMessageInfos;
+    private GroupMessageAdapter groupMessageAdapter;
+    private int lastMessageId;
+    private static int REQUEST_FILE = 1;
+    private Button bt_group_file, bt_group_send_message;
+    private EditText et_group_message;
+    private ListView listView_group_message;
+    private Timer t;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,10 +115,9 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                 if (str_message.isEmpty() || str_message.length() == 0 || str_message.equals("") || str_message == null) {
                     return;
                 } else {
-                    type = "sendmessagegroup";
                     str_message = encrypt(str_message);
                     BackgoundWorker backgoundWorker = new BackgoundWorker(GroupMessageActivity.this);
-                    backgoundWorker.execute(type, id, groupId, str_message, "text", "", "", "", token);
+                    backgoundWorker.execute("sendmessagegroup", id, groupId, str_message, "text", "", "", "", token);
                     et_group_message.setText("");
                 }
             }
@@ -176,9 +176,8 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                     return;
                 } else {
                     isRequesting = true;
-                    String type1 = "readmessagegroup";
                     BackgoundWorker backgoundWorker = new BackgoundWorker(GroupMessageActivity.this);
-                    backgoundWorker.execute(type1, id, groupId, lastMessageId + "", token);
+                    backgoundWorker.execute("readmessagegroup", id, groupId, lastMessageId + "", token);
                 }
             }
         }, 500, 500);
@@ -203,7 +202,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             if (o instanceof GroupMessageInfo) {//เข็คoใช่objectของclassหรือไม่
                 GroupMessageInfo mo = (GroupMessageInfo) o;
                 if (mo.type.equals("authen")) {
-                    if( (mo.target_id + "").equals(id)) {
+                    if ((mo.target_id + "").equals(id)) {
                         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
                         privatekey = sp.getString("privatekey", "-1");
                         shareedkey = RSADecrypt(mo.message);
@@ -264,13 +263,12 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                 filedata = baos.toByteArray();
             }
 
+            String md5 = getMD5EncryptedString(Base64.encodeToString(filedata, Base64.DEFAULT));
             String encryptFile = encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
 
-            String type2 = "sendmessagegroup";
-
             BackgoundWorker backgoundWorker = new BackgoundWorker(GroupMessageActivity.this);
-            backgoundWorker.execute(type2, id, groupId, encryptFile, "file", filename, "", "", token);
+            backgoundWorker.execute("sendmessagegroup", id, groupId, encryptFile, "file", filename, "", "", token, md5);
 
 
         }
@@ -363,17 +361,9 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
             if (value != null) {
-
                 encrypted = cipher.doFinal(value.getBytes("UTF-8"));
-//                System.out.println("encrypted string: " + Base64.encodeToString(encrypted, Base64.DEFAULT));
             } else {
-                //ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                //CipherOutputStream cios = new CipherOutputStream(bos, cipher);
-                //cios.write(data);
-                //encrypted = bos.toByteArray();
-
                 encrypted = cipher.doFinal(data);
-//                System.out.println("encrypted string: " + Base64.encodeToString(encrypted, Base64.DEFAULT));
             }
             return Base64.encodeToString(encrypted, Base64.DEFAULT);
         } catch (Exception ex) {
@@ -439,46 +429,6 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
         return null;
     }
 
-    private String RSAEncrypt(String myMessage) {
-        RSAPublicKey pbKey = null;
-
-        byte[] keyBytes = null;
-        try {
-            keyBytes = Base64.decode(publickey.getBytes("utf-8"), Base64.DEFAULT);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = null;
-        try {
-            keyFactory = KeyFactory.getInstance("RSA");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        try {
-            pbKey = (RSAPublicKey) keyFactory.generatePublic(spec);
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-
-///
-
-        // Get an instance of the Cipher for RSA encryption/decryption
-        Cipher c = null;
-        try {
-            c = Cipher.getInstance("RSA");
-            // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
-            c.init(Cipher.ENCRYPT_MODE, pbKey);
-
-            // Encrypt that message using a new SealedObject and the Cipher we created before
-            String msg = Base64.encodeToString(c.doFinal(myMessage.getBytes("UTF-8")), Base64.DEFAULT);
-
-            return msg;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     private String RSADecrypt(String myMessage) {
         RSAPrivateKey pvKey = null;
@@ -552,5 +502,26 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public static String getMD5EncryptedString(String encTarget) {
+        MessageDigest mdEnc = null;
+        byte[] data = Base64.decode(encTarget, Base64.DEFAULT);
+        try {
+            mdEnc = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("Exception while encrypting to md5");
+            e.printStackTrace();
+        } // Encryption algorithm
+        mdEnc.update(data);//encTarget.getBytes()
+        byte messageDigest[] = mdEnc.digest();
+        StringBuilder hexString = new StringBuilder();
+        for (byte aMessageDigest : messageDigest) {
+            String h = Integer.toHexString(0xFF & aMessageDigest);
+            while (h.length() < 2)
+                h = "0" + h;
+            hexString.append(h);
+        }
+        return hexString.toString();
     }
 }
