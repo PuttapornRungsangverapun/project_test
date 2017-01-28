@@ -8,10 +8,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.util.Hashtable;
 
 public class App {
-	Hashtable<String, Socket> socketTable;
+	Hashtable<String, Handler> socketTable;
 	Connection connection;
 
 	public App() throws Exception {
@@ -43,14 +44,21 @@ public class App {
 
 		private Socket socket;
 		private int step;
+		int senderId, recieverId, callId;
+		Object sleep;
+		boolean ready;
+		String waitResult;
 
 		public Handler(Socket socket) {
 			this.socket = socket;
-			socketTable.put(socketTable.size() + "", socket);
+			callId = socketTable.size();
+			socketTable.put(callId + "", this);
+			sleep = new Object();
 		}
 
 		@Override
 		public void run() {
+
 			try {
 				// if(socketTable.size()!=2){return;}
 
@@ -66,20 +74,67 @@ public class App {
 
 					if (step == 0) {
 						String[] temp = request.split(":");
-						if (!temp[0].equals("request_call")) {
+						if ((!temp[0].equals("request_call")) && (!temp[0].equals("reject"))) {
 							send(bos, "Need request_call");
 							break;
 						}
 
-						if (!temp[1].matches("\\d+")) {
-							send(bos, "Id is not number");
-							break;
+						String cmd = temp[0];
+						if (cmd.equals("request_call")) {
+							if (!temp[1].matches("\\d+")) {
+								send(bos, "Id is not number");
+								break;
+							}
+							if (!temp[2].matches("\\d+")) {
+								send(bos, "Id is not number");
+								break;
+							}
+							senderId = Integer.parseInt(temp[1]);
+							recieverId = Integer.parseInt(temp[2]);
+							PreparedStatement preparedStatement = connection.prepareStatement(
+									"insert into call_history(call_sender_id,call_receiver_id,call_status) values(?,?,?)");
+							preparedStatement.setInt(1, senderId);
+							preparedStatement.setInt(2, recieverId);
+							preparedStatement.setString(3, "waiting");
+							preparedStatement.executeUpdate();
+							send(bos, "waiting:" + recieverId);
+							while (!ready) {
+								synchronized (sleep) {
+									sleep.wait();
+								}
+							}
+
+							if (waitResult.equals("reject")) {
+								send(bos, "reject:" + recieverId);
+								break;
+							}
+
+						} else if (cmd.equals("reject")) {
+							if (!temp[1].matches("\\d+")) {
+								send(bos, "Id is not number");
+								break;
+							}
+							if (!temp[2].matches("\\d+")) {
+								send(bos, "Id is not number");
+								break;
+							}
+							senderId = Integer.parseInt(temp[1]);
+							int callId = Integer.parseInt(temp[2]);
+							PreparedStatement preparedStatement = connection
+									.prepareStatement("update call_history set call_status=? where call_id=?");
+							preparedStatement.setString(1, "reject");
+							preparedStatement.setInt(2, callId);
+							preparedStatement.executeUpdate();
+							send(bos, "cancel:" + callId);
+
+							// for waiting caller
+							socketTable.get(callId+"").waitResult = "reject";
+							socketTable.get(callId+"").ready = true;
+							synchronized (socketTable.get(callId+"").sleep) {
+								socketTable.get(callId+"").sleep.notify();
+							}
+							
 						}
-						if (!temp[3].matches("\\d+")) {
-							send(bos, "Id is not number");
-							break;
-						}
-						send(bos, "calling:" + temp[1]);
 					}
 
 					bos.flush();
@@ -90,7 +145,7 @@ public class App {
 				bos.flush();
 				bos.close();
 			} catch (Exception e) {
-				System.err.println(e.getMessage());
+				e.printStackTrace();
 			}
 
 			System.out.println("END");
