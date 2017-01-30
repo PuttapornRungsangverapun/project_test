@@ -48,6 +48,10 @@ public class App {
 		Object sleep;
 		boolean ready;
 		String waitResult;
+		BufferedInputStream fbis;
+		BufferedOutputStream fbos;
+		BufferedInputStream bis;
+		BufferedOutputStream bos;
 
 		public Handler(Socket socket) {
 			this.socket = socket;
@@ -63,8 +67,8 @@ public class App {
 				// if(socketTable.size()!=2){return;}
 
 				System.out.println("Incoming connection...");
-				BufferedInputStream bis = new BufferedInputStream(socket.getInputStream());
-				BufferedOutputStream bos = new BufferedOutputStream(socket.getOutputStream());
+				bis = new BufferedInputStream(socket.getInputStream());
+				bos = new BufferedOutputStream(socket.getOutputStream());
 
 				byte[] data = new byte[10240];
 				int n;
@@ -74,7 +78,8 @@ public class App {
 
 					if (step == 0) {
 						String[] temp = request.split(":");
-						if ((!temp[0].equals("request_call")) && (!temp[0].equals("reject"))) {
+						if ((!temp[0].equals("request_call")) && (!temp[0].equals("reject"))
+								&& (!temp[0].equals("accept"))) {
 							send(bos, "Need request_call");
 							break;
 						}
@@ -107,6 +112,13 @@ public class App {
 							if (waitResult.equals("reject")) {
 								send(bos, "reject:" + recieverId);
 								break;
+							} else if (waitResult.startsWith("start")) {
+								String[] tempResult = waitResult.split(":");
+								send(bos, tempResult[0] + ":" + tempResult[2]);
+								String callId = tempResult[1];
+								fbis = socketTable.get(callId + "").bis;
+								fbos = socketTable.get(callId + "").bos;
+								step = 1;
 							}
 
 						} else if (cmd.equals("reject")) {
@@ -128,17 +140,50 @@ public class App {
 							send(bos, "cancel:" + callId);
 
 							// for waiting caller
-							socketTable.get(callId+"").waitResult = "reject";
-							socketTable.get(callId+"").ready = true;
-							synchronized (socketTable.get(callId+"").sleep) {
-								socketTable.get(callId+"").sleep.notify();
+							socketTable.get(callId + "").waitResult = "reject";
+							socketTable.get(callId + "").ready = true;
+							synchronized (socketTable.get(callId + "").sleep) {
+								socketTable.get(callId + "").sleep.notify();
 							}
-							
+
+						} else if (cmd.equals("accept")) {
+							if (!temp[1].matches("\\d+")) {
+								send(bos, "Id is not number");
+								break;
+							}
+							if (!temp[2].matches("\\d+")) {
+								send(bos, "Id is not number");
+								break;
+							}
+							senderId = Integer.parseInt(temp[1]);
+							int callId = Integer.parseInt(temp[2]);
+							Long time = System.currentTimeMillis();
+							PreparedStatement preparedStatement = connection
+									.prepareStatement("update call_history set call_status=? where call_id=?");
+							preparedStatement.setString(1, "accpet");
+							preparedStatement.setInt(2, callId);
+							preparedStatement.executeUpdate();
+							send(bos, "start:" + time);
+							fbis = socketTable.get(callId + "").bis;
+							fbos = socketTable.get(callId + "").bos;
+							step = 1;
+
+							// for waiting caller
+							socketTable.get(callId + "").waitResult = "start:" + this.callId + ":" + time;
+							socketTable.get(callId + "").ready = true;
+							synchronized (socketTable.get(callId + "").sleep) {
+								socketTable.get(callId + "").sleep.notify();
+							}
+
 						}
+						bos.flush();
+					} else if (step == 1) {
+
+						fbos.write(data, 0, n);
+						fbos.flush();
 					}
 
-					bos.flush();
-					System.out.println(n + ":" + data[0]);
+					System.out.println(this.callId + ":" + n);
 				}
 
 				bis.close();
@@ -149,6 +194,7 @@ public class App {
 			}
 
 			System.out.println("END");
+			socketTable.clear();
 		}
 
 		private void send(BufferedOutputStream os, String message, int n) throws IOException {
