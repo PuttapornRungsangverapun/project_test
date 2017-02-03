@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
@@ -153,8 +154,8 @@ public class GroupMessageAdapter extends ArrayAdapter<GroupMessageInfo> {
                     count += read;//countอ่านมาแล้วกี่ไบ
                 }
 
-                byte[] original = MessageActivity.decrypt(bytesdecrypt);
-
+                byte[] original = GroupMessageActivity.decrypt(bytesdecrypt);
+                bitmap = BitmapFactory.decodeByteArray(original, 0, original.length);
                 is.close();
 
             } catch (Exception e) {

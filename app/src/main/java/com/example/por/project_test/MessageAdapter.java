@@ -159,7 +159,7 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
                 }
 
                 byte[] original = MessageActivity.decrypt(bytesdecrypt);
-
+                bitmap = BitmapFactory.decodeByteArray(original, 0, original.length);
                 is.close();
 
             } catch (Exception e) {
