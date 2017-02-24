@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -70,13 +71,13 @@ public class App {
 				bis = new BufferedInputStream(socket.getInputStream());
 				bos = new BufferedOutputStream(socket.getOutputStream());
 
-				byte[] data = new byte[10240];
+				byte[] data = new byte[1024 * 128];
 				int n;
 
 				while ((n = bis.read(data)) != -1) {
-					String request = new String(data, 0, n);
 
 					if (step == 0) {
+						String request = new String(data, 0, n);
 						String[] temp = request.split(":");
 						if ((!temp[0].equals("request_call")) && (!temp[0].equals("reject"))
 								&& (!temp[0].equals("accept"))) {
@@ -102,7 +103,8 @@ public class App {
 							preparedStatement.setInt(2, recieverId);
 							preparedStatement.setString(3, "waiting");
 							preparedStatement.executeUpdate();
-							send(bos, "waiting:" + recieverId);
+							send(bos, "waiting:" + recieverId + ":" + this.callId);// send
+																					// noti
 							while (!ready) {
 								synchronized (sleep) {
 									sleep.wait();
@@ -178,9 +180,32 @@ public class App {
 						}
 						bos.flush();
 					} else if (step == 1) {
+						if (n >= 20) {
 
-						fbos.write(data, 0, n);
-						fbos.flush();
+							byte[] temp = new byte[4];
+							int count = 0;
+							System.arraycopy(data, count, temp, 0, temp.length);
+							count += temp.length;
+							int callId = ByteBuffer.wrap(temp).getInt();
+							System.arraycopy(data, count, temp, 0, temp.length);
+							count += temp.length;
+							int type = ByteBuffer.wrap(temp).getInt();
+							temp = new byte[8];
+							System.arraycopy(data, count, temp, 0, temp.length);
+							count += temp.length;
+							long timeStamp = ByteBuffer.wrap(temp).getLong();
+							temp = new byte[4];
+							System.arraycopy(data, count, temp, 0, temp.length);
+							int length = ByteBuffer.wrap(temp).getInt();
+							count += temp.length;
+
+							System.out.println(callId + ":" + type + ":" + timeStamp + ":" + length);
+							byte[] payLoad = new byte[length];
+							System.arraycopy(data, count, payLoad, 0, length);
+
+							fbos.write(payLoad);
+							fbos.flush();
+						}
 					}
 
 					System.out.println(this.callId + ":" + n);
