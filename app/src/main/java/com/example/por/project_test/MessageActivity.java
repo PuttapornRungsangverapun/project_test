@@ -96,6 +96,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                     Intent intent = new Intent(MessageActivity.this, DownloadFileService.class);
                     intent.putExtra("url", url);
                     intent.putExtra("filename", filename);
+                    intent.putExtra("type", "single");
                     startService(intent);
                 } else if (message.type.equals("map")) {
                     Intent intent = new Intent(MessageActivity.this, MapsActivity.class);

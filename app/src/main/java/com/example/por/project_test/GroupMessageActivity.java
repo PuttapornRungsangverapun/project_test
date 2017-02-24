@@ -90,14 +90,16 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
 
         listView_group_message.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id2) {
                 GroupMessageInfo groupMessageInfo = groupMessageInfos.get(position);
+
                 String url = BackgoundWorker.url_server + "downloadfilegroup.php?messageid=" + groupMessageInfo.group_message_id + "&token=" + token + "&userid=" + id;
                 String filename = groupMessageInfo.filename;
                 if (groupMessageInfo.type.equals("file")) {
                     Intent intent = new Intent(GroupMessageActivity.this, DownloadFileService.class);
                     intent.putExtra("url", url);
                     intent.putExtra("filename", filename);
+                    intent.putExtra("type", "group");
                     startService(intent);
                 } else if (groupMessageInfo.type.equals("map")) {
                     Intent intent = new Intent(GroupMessageActivity.this, MapsActivity.class);

@@ -38,7 +38,7 @@ public class ContactAdapter extends ArrayAdapter<UserInfo> {
             imageView.setImageResource(R.drawable.person);
         } else {
             textView.setText(value.get(position).groupname + " (" + value.get(position).count + ")");
-            imageView.setImageResource(R.drawable.person);
+            imageView.setImageResource(R.drawable.persongroup);
         }
         //textView.setText([position]);
         // Change icon based on name

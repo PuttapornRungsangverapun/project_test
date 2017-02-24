@@ -44,6 +44,8 @@ public class MemberGroupActivity extends AppCompatActivity implements HttpReques
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(MemberGroupActivity.this, InviteGroupActivity.class);
+                i.putExtra("groupid", groupId);
+                i.putExtra("groupname", groupName);
                 startActivity(i);
             }
         });
