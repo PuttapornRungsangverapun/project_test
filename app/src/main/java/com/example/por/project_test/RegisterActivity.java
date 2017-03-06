@@ -43,7 +43,6 @@ public class RegisterActivity extends AppCompatActivity implements HttpRequestCa
         bt_submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String type = "register";
                 String str_username = et_username.getText().toString().trim();
                 String str_password = et_password.getText().toString().trim();
                 String str_email = et_email.getText().toString().trim();
@@ -70,7 +69,7 @@ public class RegisterActivity extends AppCompatActivity implements HttpRequestCa
                     return;
                 } else {
                     getRSAKey();
-                    backgoundWorker.execute(type, str_username, str_password, str_email, publicKey);
+                    backgoundWorker.execute("register", str_username, str_password, str_email, publicKey);
 
                 }
             }

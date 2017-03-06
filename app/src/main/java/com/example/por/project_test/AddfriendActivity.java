@@ -33,7 +33,7 @@ public class AddfriendActivity extends AppCompatActivity implements TextWatcher,
         bt_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String type = "addfriend";
+
                 String str_username = et_searchfriend.getText().toString().trim();
 
 //                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(AddfriendActivity.this);
@@ -46,7 +46,7 @@ public class AddfriendActivity extends AppCompatActivity implements TextWatcher,
 
                 } else {
                     BackgoundWorker backgoundWorker = new BackgoundWorker(AddfriendActivity.this);
-                    backgoundWorker.execute(type, str_username, id + "", token);
+                    backgoundWorker.execute("addfriend", str_username, id + "", token);
 //                    Log.i("Addfriend", "Click");
                 }
             }
@@ -66,14 +66,14 @@ public class AddfriendActivity extends AppCompatActivity implements TextWatcher,
 
     @Override
     public void afterTextChanged(Editable editable) {
-        String type = "searchfriend";
+
 
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         String id = sp.getString("user_id_current", "");
         String token = sp.getString("token", "");
 
         BackgoundWorker backgoundWorker = new BackgoundWorker(this);
-        backgoundWorker.execute(type, id, editable.toString(), token);
+        backgoundWorker.execute("searchfriend", id, editable.toString(), token);
         //Log.i("Searchfriend", id,editable.toString(),token);
 
 

@@ -31,7 +31,7 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
     private InviteGroupAdapter inviteGroupAdapter;
     private ListView lv_invitegroup;
     private static String id, token, shareedkey;
-    private String type, groupId;
+    private String groupId;
     Button bt_invite;
     private List<Integer> groupMember;
 
@@ -56,9 +56,9 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
         groupId = i.getStringExtra("groupid");
         setTitle("Group : " + i.getStringExtra("groupname"));
 
-        type = "listinvitefriend";
+
         BackgoundWorker backgoundWorker = new BackgoundWorker(InviteGroupActivity.this);
-        backgoundWorker.execute(type, id, token, groupId);
+        backgoundWorker.execute("listinvitefriend", id, token, groupId);
 
         bt_invite.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,10 +66,9 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
 
                 for (int i = 0; i < inviteGroupAdapter.value.size(); i++) {
                     if (inviteGroupAdapter.mCheckStates.get(i) == true) {
-                        type = "invitefriend";
                         String friendid = inviteGroupInfos.get(i).userid + "";
                         BackgoundWorker backgoundWorker = new BackgoundWorker(InviteGroupActivity.this);
-                        backgoundWorker.execute(type, id, token, friendid, groupId);
+                        backgoundWorker.execute("invitefriend", id, token, friendid, groupId);
                         groupMember.add(inviteGroupInfos.get(i).userid);
                     }
                 }

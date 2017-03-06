@@ -29,7 +29,7 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
     Button bt_creategroup_submit;
     ListView lv_addgroup;
     static String id, token, shareedkey;
-    String type, groupId;
+    String groupId;
     CreateGrouptAdapter createGrouptAdapter;
     ArrayList<AddUserGroupInfo> addUserGroupInfos;
     CheckBox chk_addgroup;
@@ -52,9 +52,9 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
         id = sp.getString("user_id_current", "-1");
         token = sp.getString("token", "-1");
 
-        type = "listaddgroup";
+
         BackgoundWorker backgoundWorker = new BackgoundWorker(this);
-        backgoundWorker.execute(type, id + "", token);
+        backgoundWorker.execute("listaddgroup", id + "", token);
         groupMember = new ArrayList<>();
 
         bt_creategroup_submit.setOnClickListener(new View.OnClickListener() {
@@ -68,10 +68,9 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
 
                     for (int i = 0; i < createGrouptAdapter.value.size(); i++) {
                         if (createGrouptAdapter.mCheckStates.get(i) == true) {
-                            type = "crategroup";
                             String friendid = addUserGroupInfos.get(i).userid + "";
                             BackgoundWorker backgoundWorker = new BackgoundWorker(CreateGroupActivity.this);
-                            backgoundWorker.execute(type, id, token, friendid, groupName);
+                            backgoundWorker.execute("crategroup", id, token, friendid, groupName);
                             groupMember.add(addUserGroupInfos.get(i).userid);
                         }
                     }
@@ -88,12 +87,12 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
             genSharedKey(result[2]);
             finish();
         }
-        if ((result!=null)&&(result[0].equals("getpublickey"))) {
+        if ((result != null) && (result[0].equals("getpublickey"))) {
             String friendid = result[1];
             String publickey = result[2];
             String sharedKeyMessage = RSAEncrypt(publickey, shareedkey);
             BackgoundWorker backgoundWorker = new BackgoundWorker(CreateGroupActivity.this);
-            backgoundWorker.execute("sendmessagegroup", id, groupId, sharedKeyMessage, "authen", "", "", "", token,friendid);
+            backgoundWorker.execute("sendmessagegroup", id, groupId, sharedKeyMessage, "authen", "", "", "", token, friendid);
         }
         if ((userList == null) && (result == null)) {
             return;

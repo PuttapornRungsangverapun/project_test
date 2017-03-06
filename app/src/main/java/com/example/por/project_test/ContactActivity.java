@@ -19,11 +19,11 @@ import java.util.ArrayList;
 
 public class ContactActivity extends AppCompatActivity implements HttpRequestCallback {
 
-    ListView lv_contact;
+    private ListView lv_contact;
     FloatingActionButton add_friend;
-    String id, token;
-    ContactAdapter contactAdapter;
-    ArrayList<UserInfo> userInfos;
+    private String id, token;
+    private ContactAdapter contactAdapter;
+    private ArrayList<UserInfo> userInfos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +39,6 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
         contactAdapter = new ContactAdapter(this, R.layout.contact, userInfos);
         lv_contact.setAdapter(contactAdapter);
 
-        //SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         id = sp.getString("user_id_current", "-1");
         token = sp.getString("token", "-1");
@@ -55,9 +54,9 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
                     startActivity(ii);
                 } else {
                     Intent ii = new Intent(ContactActivity.this, GroupMessageActivity.class);
-                    ii.putExtra("groupid", userInfos.get(i).groupid+"");
-                    ii.putExtra("groupname", userInfos.get(i).groupname+"");
-                    ii.putExtra("userid", id+"");
+                    ii.putExtra("groupid", userInfos.get(i).groupid + "");
+                    ii.putExtra("groupname", userInfos.get(i).groupname + "");
+                    ii.putExtra("userid", id + "");
                     startActivity(ii);
                 }
                 //Toast.makeText(ContactActivity.this, adapterView.getAdapter().getItem(i).toString(), Toast.LENGTH_SHORT).show();
@@ -75,14 +74,13 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
         });
 
 
-        String type = "listfriend";
         BackgoundWorker backgoundWorker = new BackgoundWorker(this);
-        backgoundWorker.execute(type, id + "", token);
+        backgoundWorker.execute("listfriend", id + "", token);
 
         String token_noti = FirebaseInstanceId.getInstance().getToken();
-        String type2 = "notification";
+
         backgoundWorker = new BackgoundWorker(this);
-        backgoundWorker.execute(type2, id + "", token_noti, token);
+        backgoundWorker.execute("notification", id + "", token_noti, token);
 
     }
 
@@ -90,9 +88,8 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        String type = "listfriend";
         BackgoundWorker backgoundWorker = new BackgoundWorker(this);
-        backgoundWorker.execute(type, id + "", token);
+        backgoundWorker.execute("listfriend", id + "", token);
     }
 
     @Override

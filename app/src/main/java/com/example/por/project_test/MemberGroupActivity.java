@@ -14,7 +14,7 @@ public class MemberGroupActivity extends AppCompatActivity implements HttpReques
     ArrayList<MemberGroupInfo> memberGroupInfos;
     MemberGroupAdapter memberGroupAdapter;
     ListView lv_membergroup;
-    String type, id, token, groupId, groupName;
+    String  id, token, groupId, groupName;
     Button bt_invite_friend;
 
     @Override
@@ -31,10 +31,9 @@ public class MemberGroupActivity extends AppCompatActivity implements HttpReques
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         id = sp.getString("user_id_current", "-1");
         token = sp.getString("token", "-1");
-        type = "membergroup";
-        BackgoundWorker backgoundWorker = new BackgoundWorker(MemberGroupActivity.this);
-        backgoundWorker.execute(type, id, token, groupId);
 
+        BackgoundWorker backgoundWorker = new BackgoundWorker(MemberGroupActivity.this);
+        backgoundWorker.execute("membergroup", id, token, groupId);
 
         memberGroupInfos = new ArrayList<>();
         memberGroupAdapter = new MemberGroupAdapter(this, R.layout.membergroup, memberGroupInfos);

@@ -18,6 +18,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -71,7 +74,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         bt_file = (Button) findViewById(R.id.bt_file);
 
         Intent i = getIntent();
-        friendid = i.getStringExtra("friendid");//เพราะว่าเป็นinnerclassทำงานตอนกด
+        friendid = i.getStringExtra("friendid");
         publickey = i.getStringExtra("publickey");
         shareedkey = checkhashkey();
 
@@ -589,6 +592,26 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             hexString.append(h);
         }
         return hexString.toString();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_message, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.Call_Single:
+                Intent i = new Intent(MessageActivity.this, CallSingleActivity.class);
+                i.putExtra("friendid", friendid);
+                startActivity(i);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
 

@@ -91,7 +91,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void sendNotification(String username, String messageBody, String friendid) {
         Intent intent;
         String sender;
-        if (friendid.startsWith("U")) {
+        if (messageBody.startsWith("call")) {
+            friendid = friendid.replace("U", "");
+            intent = new Intent(this, CallSingleActivity.class);
+            intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
+
+
+            intent.putExtra("frienduser", messageBody.split(":")[1]);
+            sender = username;
+        } else if (friendid.startsWith("U")) {
             friendid = friendid.replace("U", "");
             intent = new Intent(this, MessageActivity.class);
             intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
@@ -102,7 +110,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent = new Intent(this, GroupMessageActivity.class);
             intent.putExtra("groupid", friendid);
             intent.putExtra("groupname", username.split(";")[1]);
-            sender= username.split(";")[0];
+            sender = username.split(";")[0];
         }
 
 //        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);

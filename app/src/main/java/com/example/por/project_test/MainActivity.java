@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity implements HttpRequestCallba
         bt_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String type = "login";
                 String str_username = et_login_username.getText().toString().trim();
                 String str_password = et_login_password.getText().toString().trim();
 
@@ -52,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements HttpRequestCallba
                     et_login_password.setError("Password must be filled");
                 } else {
                     BackgoundWorker backgoundWorker = new BackgoundWorker(MainActivity.this);
-                    backgoundWorker.execute(type, str_username, str_password);
+                    backgoundWorker.execute("login", str_username, str_password);
                 }
 
             }
