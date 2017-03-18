@@ -49,7 +49,7 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
     SocketTransmitter socketTransmitter;
     Button bt_call, bt_receive, bt_reject, bt_speaker;
     EditText et_call;
-    String id, token, frienid;
+    String id, token, frienid, usernameFriend;
     int callId;
 
     @Override
@@ -72,18 +72,18 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
         frienid = i.getStringExtra("friendid");
 
 
-        final String usernameFriend = getIntent().getStringExtra("frienduser");
+        usernameFriend = getIntent().getStringExtra("frienduser");
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
         bt_call.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                socketTransmitter.send(1234, "request_call:1:" + frienid, CallSingleActivity.this);
+                socketTransmitter.send(1234, "request_call:" + id + ":" + frienid, CallSingleActivity.this);
             }
         });
         bt_reject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                socketTransmitter.send(1234, "reject:" + id + "::" + usernameFriend + "", CallSingleActivity.this);
+                socketTransmitter.send(1234, "reject:" + id + ":" + usernameFriend + "", CallSingleActivity.this);
             }
         });
         bt_receive.setOnClickListener(new View.OnClickListener() {

@@ -109,7 +109,9 @@
             android:name=".InviteGroupActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-        <activity android:name=".CallSingleActivity"></activity>
+        <activity android:name=".CallSingleActivity"
+            android:screenOrientation="portrait"
+            ></activity>
     </application>
 
 </manifest>

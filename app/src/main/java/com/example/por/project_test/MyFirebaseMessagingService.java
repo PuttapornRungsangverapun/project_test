@@ -95,8 +95,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             friendid = friendid.replace("U", "");
             intent = new Intent(this, CallSingleActivity.class);
             intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
-
-
             intent.putExtra("frienduser", messageBody.split(":")[1]);
             sender = username;
         } else if (friendid.startsWith("U")) {
