@@ -489,6 +489,12 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.call_group:
+                Intent i3 = new Intent(GroupMessageActivity.this, CallGroupActivity.class);
+                i3.putExtra("groupid", groupId);
+                i3.putExtra("groupname", groupName);
+                startActivity(i3);
+                return true;
             case R.id.invite_friend:
                 Intent i = new Intent(GroupMessageActivity.this, InviteGroupActivity.class);
                 i.putExtra("groupid", groupId);
