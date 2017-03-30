@@ -1,4 +1,4 @@
-<?php 
+<?php
 include("db_con.php");
 include("token.php");
 header('Content-type:application/json');
@@ -20,51 +20,56 @@ groups_messages_maps.map_longitude,
 groups_messages_texts.target_userid,
 users.user_username
 FROM    groups_messages
-      left JOIN groups_messages_files 
-	  on groups_messages.group_message_id = groups_messages_files.group_message_id
-       left JOIN groups_messages_texts
-        on groups_messages.group_message_id =  groups_messages_texts.group_message_id
-		left JOIN groups_messages_maps
-        on groups_messages.group_message_id =  groups_messages_maps.group_message_id 
-        LEFT JOIN users 
-        ON users.user_id=groups_messages.group_message_sender_id
-		where  (groups_messages.group_id='$group_id') and (groups_messages.group_message_id > $last_message_id) 
-		and (groups_messages_files.group_message_id is not null
-		or groups_messages_texts.group_message_id is not null 
-		or groups_messages_maps.group_message_id is not null)
-		order by  groups_messages.group_message_id asc";
+left JOIN groups_messages_files
+on groups_messages.group_message_id = groups_messages_files.group_message_id
+left JOIN groups_messages_texts
+on groups_messages.group_message_id =  groups_messages_texts.group_message_id
+left JOIN groups_messages_maps
+on groups_messages.group_message_id =  groups_messages_maps.group_message_id
+LEFT JOIN users
+ON users.user_id=groups_messages.group_message_sender_id
+where  (groups_messages.group_id=?) and (groups_messages.group_message_id > ?)
+and (groups_messages_files.group_message_id is not null
+or groups_messages_texts.group_message_id is not null
+or groups_messages_maps.group_message_id is not null)
+order by   groups_messages_texts.target_userid=? DESC";
 //echo $mysql_qry;
-$result = mysqli_query($conn ,$mysql_qry);
+// $result = mysqli_query($conn ,$mysql_qry);
+$result = mysqli_prepare($conn ,$mysql_qry);
+mysqli_stmt_bind_param($result,'sss',$group_id,$last_message_id,$user_id);
+mysqli_stmt_execute($result);
+$result= mysqli_stmt_get_result($result);
+
 $message=array();
 $ret = array();
 while($row=mysqli_fetch_assoc($result)){
-if($row){
-	$message[]=$row;
+    if($row){
+        $message[]=$row;
+    }
+    
 }
-
-}
-$ret['status']="success";	
+$ret['status']="success";
 $ret['message']=$message;
-echo json_encode($ret);	
+echo json_encode($ret);
 
 
 /*for($i=0;$i<sizeof($message);$i++){
-	$row=$message[$i];
-	$message_status=$row['message_status'];
+$row=$message[$i];
+$message_status=$row['message_status'];
 if($user_id==$row['message_sender_id']){
-	if($row['message_status']==1){
-	$message_status=2;
-	}
-	else if($row['message_status']==3){
-	$message_status=4;
-	}
+if($row['message_status']==1){
+$message_status=2;
+}
+else if($row['message_status']==3){
+$message_status=4;
+}
 }
 else{if($row['message_status']==1){
-	$message_status=3;
-	}
-	else if($row['message_status']==2){
-	$message_status=4;
-	}}
+$message_status=3;
+}
+else if($row['message_status']==2){
+$message_status=4;
+}}
 $mysql_qry = "update messages set message_status ='$message_status' where message_id = '".$row['message_id']."'";
 $result = mysqli_query($conn ,$mysql_qry);
 }*/

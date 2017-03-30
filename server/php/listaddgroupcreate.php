@@ -1,4 +1,4 @@
-<?php 
+<?php
 include("db_con.php");
 header('Content-type:application/json');
 include('token.php');
@@ -7,16 +7,22 @@ include('token.php');
 from users inner join friends on users.user_id=friends.friend_id
 where friends.user_id = '$user_id'";*/
 
-$mysql_qry2="SELECT f1.friend_id, u.user_username FROM friends f1 join friends f2 on f1.user_id = f2.friend_id and f1.friend_id = f2.user_id left join users u on f1.friend_id = u.user_id where f1.user_id = '$user_id'";
-$result2 = mysqli_query($conn ,$mysql_qry2);
+$mysql_qry="SELECT f1.friend_id, u.user_username FROM friends f1 join friends f2 on f1.user_id = f2.friend_id and f1.friend_id = f2.user_id left join users u on f1.friend_id = u.user_id where f1.user_id = ?";
+// $result2 = mysqli_query($conn ,$mysql_qry2);
+
+$result = mysqli_prepare($conn ,$mysql_qry);
+mysqli_stmt_bind_param($result,'s',$user_id);
+mysqli_stmt_execute($result);
+$result= mysqli_stmt_get_result($result);
+
 //$row=mysqli_fetch_array($result);
 //$row=mysqli_fetch_all($result);
 $lvname=array();
-while($row=mysqli_fetch_assoc($result2)){
-	$lvname[]=$row;
-	
-	}
- $ret['status']="success";	
+while($row=mysqli_fetch_assoc($result)){
+    $lvname[]=$row;
+    
+}
+$ret['status']="success";
 $ret['message']=$lvname;
 
 echo json_encode($ret);
