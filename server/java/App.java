@@ -18,7 +18,7 @@ public class App {
 		ServerSocket server = new ServerSocket(1234);
 		System.out.println("waiting...");
 
-		AudioFormat af = new AudioFormat(16000, 8, 1, false, false);
+		AudioFormat af = new AudioFormat(5000, 16, 1, true, false);
 		DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
 		line = (SourceDataLine) AudioSystem.getLine(info);
 		line.open(af);
@@ -64,38 +64,45 @@ public class App {
 				int n, buffersize = 0;
 
 				while ((n = bis.read(data)) != -1) {
-					buffersize = 0;// reduce delay
-					System.arraycopy(data, 0, buffer, buffersize, n);
-					buffersize += n;
+					try{
+						buffersize = 0;// reduce delay
+						System.arraycopy(data, 0, buffer, buffersize, n);
+						buffersize += n;
 
-					byte[] temp = new byte[4];
-					int count = 0;
-					System.arraycopy(buffer, count, temp, 0, temp.length);
-					count += temp.length;
-					int callId = ByteBuffer.wrap(temp).getInt();
+						byte[] temp = new byte[4];
+						int count = 0;
+						System.arraycopy(buffer, count, temp, 0, temp.length);
+						count += temp.length;
+						int callId = ByteBuffer.wrap(temp).getInt();
 
-					System.arraycopy(buffer, count, temp, 0, temp.length);
-					count += temp.length;
-					int type = ByteBuffer.wrap(temp).getInt();
+						temp = new byte[1];
+						System.arraycopy(buffer, count, temp, 0, temp.length);
+						count += temp.length;
+						int type = ByteBuffer.wrap(temp).get();
 
-					temp = new byte[8];
-					System.arraycopy(buffer, count, temp, 0, temp.length);
-					count += temp.length;
-					long timeStamp = ByteBuffer.wrap(temp).getLong();
-					
-					System.out.println(System.currentTimeMillis() - timeStamp);
+						temp = new byte[8];
+						System.arraycopy(buffer, count, temp, 2, 6);//345678
+						count += 6;
+						long timeStamp = ByteBuffer.wrap(temp).getLong();
 
-					temp = new byte[4];
-					System.arraycopy(buffer, count, temp, 0, temp.length);
-					int length = ByteBuffer.wrap(temp).getInt();
-					count += temp.length;
+						temp = new byte[4];
+						System.arraycopy(buffer, count, temp, 2, 2);
+						int length = ByteBuffer.wrap(temp).getInt();
+						count += 2;
 
-					if (callId < 0 || callId > 99 || type < 0 || type > 99 || length < 0 || length > 3000) {
+				
+						 System.out.println(callId + ":" + type + ":" +
+						 timeStamp + ":" + length + ":" + (n - count)
+						 + ":" + buffersize);
+
+					if (callId < 0 || callId > 99 || type < 0 || type > 99 || length < 0 || length > 100000) {
 						System.out.println("broken pakage");
+						System.out.println(callId + ":" + type + ":" + timeStamp + ":" + length + ":" + (n - count) + ":"
+								+ buffersize);
 						continue;
 					}
-					System.out.println(callId + ":" + type + ":" + timeStamp + ":" + length + ":" + (n - count) + ":"
-							+ buffersize);
+//					System.out.println(callId + ":" + type + ":" + timeStamp + ":" + length + ":" + (n - count) + ":"
+//							+ buffersize);
 
 					byte[] payLoad = new byte[length];
 					System.arraycopy(buffer, count, payLoad, 0, length);
@@ -109,9 +116,13 @@ public class App {
 
 					if (buffersize < 1500) {
 						line.write(payLoad, 0, payLoad.length);
+						System.out.println(payLoad.length);
 					}
 					// fbos.write(payLoad);
 					// fbos.flush();
+					}catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 
 				bis.close();
@@ -124,4 +135,6 @@ public class App {
 			System.out.println("END");
 		}
 	}
+
+
 }
