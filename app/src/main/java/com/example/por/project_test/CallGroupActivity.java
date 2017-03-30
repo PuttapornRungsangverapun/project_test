@@ -47,7 +47,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
     private CallGroupActivity.RecordThread recordThread;
     SocketTransmitter socketTransmitter;
     Button bt_call, bt_receive, bt_reject, bt_speaker;
-    String id, token, frienid, usernameFriend;
+    String id, token, frienid;
     int callId;
 
     @Override
@@ -69,8 +69,10 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
         Intent i = getIntent();
         frienid = i.getStringExtra("groupid");
 
+        if (getIntent().getStringExtra("frienduser") != null) {
+            callId = Integer.parseInt(getIntent().getStringExtra("frienduser"));
+        }
 
-        usernameFriend = getIntent().getStringExtra("frienduser");
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
         bt_call.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,13 +83,13 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
         bt_reject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                socketTransmitter.send(1234, "reject:" + id + ":" + usernameFriend + "", CallGroupActivity.this);
+                socketTransmitter.send(1234, "reject:" + id + ":" + callId + "", CallGroupActivity.this);
             }
         });
         bt_receive.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                socketTransmitter.send(1234, "accept:" + id + ":" + usernameFriend + "", CallGroupActivity.this);
+                socketTransmitter.send(1234, "accept:" + id + ":" + callId + "", CallGroupActivity.this);
                 startStreaming();
             }
         });
@@ -137,6 +139,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
         }
         Log.i("123", requestId + "," + result);
     }
+
     private void startStreaming() {
         new Thread(new Runnable() {
             @Override
@@ -178,33 +181,34 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
 
         init();
     }
+
     class RecordThread extends Thread {
 
         @Override
         public void run() {
             BufferedOutputStream bos = new BufferedOutputStream(socketTransmitter.getOutputstream());
             int n;
-            byte[] data = new byte[minBufferSize * 2];
+            byte[] data = new byte[minBufferSize];
             while (doRecord) {
                 try {
                     n = audioRecorder.read(data, 0, data.length);
                     byte[] callId = ByteBuffer.allocate(4).putInt(CallGroupActivity.this.callId).array();
                     byte[] timeStamp = ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array();
-                    byte[] type = ByteBuffer.allocate(4).putInt(1).array();
+                    byte[] type = ByteBuffer.allocate(1).put((byte) 1).array();
                     byte[] length = ByteBuffer.allocate(4).putInt(n).array();
                     byte[] payLoad = new byte[n];
                     System.arraycopy(data, 0, payLoad, 0, n);
-                    byte[] packet = new byte[callId.length + timeStamp.length + type.length + length.length + n];
+                    byte[] packet = new byte[callId.length + 6 + 1 + 2 + n];
 
                     int count = 0;
                     System.arraycopy(callId, 0, packet, count, callId.length);
                     count += callId.length;
                     System.arraycopy(type, 0, packet, count, type.length);
-                    count += type.length;
-                    System.arraycopy(timeStamp, 0, packet, count, timeStamp.length);
-                    count += timeStamp.length;
-                    System.arraycopy(length, 0, packet, count, length.length);
-                    count += length.length;
+                    count += 1;
+                    System.arraycopy(timeStamp, 2, packet, count, 6);
+                    count += 6;
+                    System.arraycopy(length, 2, packet, count, 2);
+                    count += 2;
                     System.arraycopy(payLoad, 0, packet, count, payLoad.length);
                     bos.write(packet);
                     bos.flush();
@@ -244,6 +248,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
         }
 
     }
+
     @Override
     protected void onStop() {
         if (audioTrack != null) {

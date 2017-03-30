@@ -2,8 +2,8 @@ package com.example.por.project_test;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
@@ -23,8 +23,6 @@ import java.util.List;
 
 import javax.crypto.Cipher;
 
-import static com.example.por.project_test.R.id.lv_addgroup;
-
 public class InviteGroupActivity extends AppCompatActivity implements HttpRequestCallback {
 
     private ArrayList<InviteGroupInfo> inviteGroupInfos;
@@ -33,6 +31,7 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
     private static String id, token, shareedkey;
     private String groupId;
     Button bt_invite;
+    RSAEncryption rsaEncryption;
     private List<Integer> groupMember;
 
     @Override
@@ -42,6 +41,8 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
 
         lv_invitegroup = (ListView) findViewById(R.id.lv_invitegroup);
         bt_invite = (Button) findViewById(R.id.bt_invite);
+
+        rsaEncryption = new RSAEncryption(this);
 
         inviteGroupInfos = new ArrayList<>();
         groupMember = new ArrayList<>();
@@ -81,13 +82,22 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
     public void onResult(String[] result, ArrayList<Object> userList) {
         if ((result != null) && (result[0].equals(BackgoundWorker.TRUE))) {
             Toast.makeText(this, result[1], Toast.LENGTH_SHORT).show();
-            genSharedKey(groupId);
+//            genSharedKey(groupId);
+            SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
+            shareedkey = sp.getString("SHARED_KEY_GROUP:" + groupId, "-1");
+
+            for (int friendid : groupMember) {
+                BackgoundWorker backgoundWorker = new BackgoundWorker(InviteGroupActivity.this);
+                backgoundWorker.execute("getpublickey", id, friendid + "", token);
+
+            }
+
             finish();
         }
         if ((result != null) && (result[0].equals("getpublickey"))) {
             String friendid = result[1];
             String publickey = result[2];
-            String sharedKeyMessage = RSAEncrypt(publickey, shareedkey);
+            String sharedKeyMessage = rsaEncryption.RSAEncrypt(publickey, shareedkey);
             BackgoundWorker backgoundWorker = new BackgoundWorker(InviteGroupActivity.this);
             backgoundWorker.execute("sendmessagegroup", id, groupId, sharedKeyMessage, "authen", "", "", "", token, friendid);
         }

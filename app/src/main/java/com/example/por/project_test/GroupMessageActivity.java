@@ -10,14 +10,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -31,24 +30,11 @@ import android.widget.Toast;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 public class GroupMessageActivity extends AppCompatActivity implements HttpRequestCallback {
 
@@ -59,10 +45,12 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
     private GroupMessageAdapter groupMessageAdapter;
     private int lastMessageId;
     private static int REQUEST_FILE = 1;
-    private Button bt_group_file, bt_group_send_message;
+    Button bt_group_file, bt_group_send_message;
     private EditText et_group_message;
-    private ListView listView_group_message;
+    ListView listView_group_message;
     private Timer t;
+    RSAEncryption rsaEncryption;
+    AESEncryption aesEncryption;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +62,8 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
         bt_group_send_message = (Button) findViewById(R.id.bt_group_send_message);
         listView_group_message = (ListView) findViewById(R.id.listview_group_message);
 
+        rsaEncryption = new RSAEncryption(this);
+
         Intent i = getIntent();
         groupId = i.getStringExtra("groupid");
         setTitle(groupName = i.getStringExtra("groupname"));
@@ -83,6 +73,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
         token = sp.getString("token", "-1");
 
         shareedkey = checkhashkey();
+        aesEncryption = new AESEncryption(shareedkey);
 
         groupMessageInfos = new ArrayList<>();
         groupMessageAdapter = new GroupMessageAdapter(this, R.layout.message, R.id.tv_message_adapter, groupMessageInfos, token, id);
@@ -100,6 +91,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                     intent.putExtra("url", url);
                     intent.putExtra("filename", filename);
                     intent.putExtra("type", "group");
+                    intent.putExtra("sharedkey", shareedkey);
                     startService(intent);
                 } else if (groupMessageInfo.type.equals("map")) {
                     Intent intent = new Intent(GroupMessageActivity.this, MapsActivity.class);
@@ -117,7 +109,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                 if (str_message.isEmpty() || str_message.length() == 0 || str_message.equals("") || str_message == null) {
                     return;
                 } else {
-                    str_message = encrypt(str_message);
+                    str_message = aesEncryption.encrypt(str_message);
                     BackgoundWorker backgoundWorker = new BackgoundWorker(GroupMessageActivity.this);
                     backgoundWorker.execute("sendmessagegroup", id, groupId, str_message, "text", "", "", "", token);
                     et_group_message.setText("");
@@ -146,9 +138,8 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                         } else if (which == 1) {
                             Intent intent = new Intent(GroupMessageActivity.this, MapsActivity.class);
                             intent.putExtra("groupid", groupId);
+                            intent.putExtra("sharedkey", shareedkey);
                             startActivity(intent);
-
-
                         }
                     }
                 });
@@ -204,21 +195,23 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             if (o instanceof GroupMessageInfo) {//เข็คoใช่objectของclassหรือไม่
                 GroupMessageInfo mo = (GroupMessageInfo) o;
                 if (mo.type.equals("authen")) {
-                    if ((mo.target_id + "").equals(id)) {
-                        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
-                        privatekey = sp.getString("privatekey", "-1");
-                        shareedkey = RSADecrypt(mo.message);
+                    if (shareedkey == null) {
+//                        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
+//                        privatekey = sp.getString("privatekey", "-1");
+//                        shareedkey = RSADecrypt(mo.message);
+                        shareedkey = rsaEncryption.RSADecrypt(mo.message);
+                        aesEncryption = new AESEncryption(shareedkey);
                     }
                 } else if (mo.type.equals("map")) {
                     try {
-                        mo.latitude = Double.parseDouble(decrypt(mo.tmpLat));
-                        mo.longtitude = Double.parseDouble(decrypt(mo.tmpLon));
+                        mo.latitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLat));
+                        mo.longtitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLon));
                         groupMessageInfos.add(mo);
                     } catch (Exception e) {
                     }
                 } else if (mo.type.equals("text")) {
                     try {
-                        mo.message = decrypt(mo.message);
+                        mo.message = aesEncryption.decrypt(mo.message);
                         groupMessageInfos.add(mo);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -265,8 +258,8 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                 filedata = baos.toByteArray();
             }
 
-            String md5 = getMD5EncryptedString(Base64.encodeToString(filedata, Base64.DEFAULT));
-            String encryptFile = encrypt(filedata);
+            String md5 = GetMD5.getMD5EncryptedString(Base64.encodeToString(filedata, Base64.DEFAULT));
+            String encryptFile = aesEncryption.encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
 
             BackgoundWorker backgoundWorker = new BackgoundWorker(GroupMessageActivity.this);
@@ -336,141 +329,6 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             }
         }
         return result;
-    }
-
-    public String encrypt(String msg, byte[] data) {
-        String key = shareedkey; // 256 bit key
-        String initVector = new BigInteger(80, new SecureRandom()).toString(32); // 80/5=16 bytes IV   80bitแบบrandom tostringเป็นbase32 ตัวหนังสือ1ตัวเท่ากับ32bit ได้ 16 ตัว
-        return initVector + encrypt(key, initVector, msg, data);
-    }
-
-    public String encrypt(String msg) {
-        return encrypt(msg, null);
-    }
-
-    public String encrypt(byte[] data) {
-        return encrypt(null, data);
-    }
-
-
-    public String encrypt(String key, String initVector, String value, byte[] data) {
-        byte[] encrypted;
-        try {
-            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7PADDING");
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
-
-            if (value != null) {
-                encrypted = cipher.doFinal(value.getBytes("UTF-8"));
-            } else {
-                encrypted = cipher.doFinal(data);
-            }
-            return Base64.encodeToString(encrypted, Base64.DEFAULT);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private static byte[] decrypt(String encrypted, byte[] data) {
-        String iv = null;
-        String cyphertext = null;
-        String key = shareedkey;
-
-        if (encrypted == null) {
-            byte[] iv2 = new byte[16];
-            byte[] data2 = new byte[data.length - 16];
-            System.arraycopy(data, 0, iv2, 0, 16);
-            System.arraycopy(data, 16, data2, 0, data2.length);
-            return decrypt(key, new String(iv2), null, data2);
-
-        } else {
-            iv = encrypted.substring(0, 16);
-            cyphertext = encrypted.substring(16);//begin index 16
-            return decrypt(key, iv, cyphertext, data);
-        }
-    }
-
-    public static String decrypt(String encrypted) {
-
-        return new String(decrypt(encrypted, null));
-
-    }
-
-    public static byte[] decrypt(byte[] data) {
-
-        return decrypt(null, data);
-
-    }
-
-    private static byte[] decrypt(String key, String initVector, String encrypted, byte[] data) {
-        byte[] original;
-        try {
-//            Log.e("secret", shareedkey);
-
-            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
-
-
-            if (encrypted != null) {
-                original = cipher.doFinal(Base64.decode(encrypted, Base64.DEFAULT));
-            } else {
-                original = cipher.doFinal(data);
-            }
-            return original;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return null;
-    }
-
-
-    private String RSADecrypt(String myMessage) {
-        RSAPrivateKey pvKey = null;
-
-        byte[] keyBytes = null;
-        try {
-            keyBytes = Base64.decode(privatekey.getBytes("utf-8"), Base64.DEFAULT);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = null;
-        try {
-            keyFactory = KeyFactory.getInstance("RSA");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        try {
-            pvKey = (RSAPrivateKey) keyFactory.generatePrivate(spec);
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-
-///
-
-        // Get an instance of the Cipher for RSA encryption/decryption
-        Cipher c = null;
-        try {
-            c = Cipher.getInstance("RSA");
-            // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
-            c.init(Cipher.DECRYPT_MODE, pvKey);
-
-            // Encrypt that message using a new SealedObject and the Cipher we created before
-            String msg = new String(c.doFinal(Base64.decode(myMessage, Base64.DEFAULT)));
-
-            return msg;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public String checkhashkey() {

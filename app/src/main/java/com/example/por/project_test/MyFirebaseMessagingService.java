@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -91,7 +90,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void sendNotification(String username, String messageBody, String friendid) {
         Intent intent;
         String sender;
-        if (messageBody.startsWith("call")) {
+        if (messageBody.startsWith("call_group_from")) {
+            friendid = friendid.replace("G", "");
+            intent = new Intent(this, CallGroupActivity.class);
+            intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
+            intent.putExtra("frienduser", messageBody.split(":")[1]);
+            sender = username;
+        } else if (messageBody.startsWith("call")) {
             friendid = friendid.replace("U", "");
             intent = new Intent(this, CallSingleActivity.class);
             intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast

@@ -1,9 +1,8 @@
 package com.example.por.project_test;
 
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -11,18 +10,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.crypto.Cipher;
 
 public class CreateGroupActivity extends AppCompatActivity implements HttpRequestCallback {
     EditText et_namegroup;
@@ -30,6 +21,7 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
     ListView lv_addgroup;
     static String id, token, shareedkey;
     String groupId;
+    RSAEncryption rsaEncryption;
     CreateGrouptAdapter createGrouptAdapter;
     ArrayList<AddUserGroupInfo> addUserGroupInfos;
     CheckBox chk_addgroup;
@@ -43,6 +35,8 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
         bt_creategroup_submit = (Button) findViewById(R.id.bt_creategroup_submit);
         lv_addgroup = (ListView) findViewById(R.id.lv_addgroup);
         chk_addgroup = (CheckBox) findViewById(R.id.chk_addgroup);
+
+        rsaEncryption = new RSAEncryption(this);
 
         addUserGroupInfos = new ArrayList<>();
         createGrouptAdapter = new CreateGrouptAdapter(this, R.layout.contact_creategroup, addUserGroupInfos);
@@ -90,7 +84,7 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
         if ((result != null) && (result[0].equals("getpublickey"))) {
             String friendid = result[1];
             String publickey = result[2];
-            String sharedKeyMessage = RSAEncrypt(publickey, shareedkey);
+            String sharedKeyMessage = rsaEncryption.RSAEncrypt(publickey, shareedkey);
             BackgoundWorker backgoundWorker = new BackgoundWorker(CreateGroupActivity.this);
             backgoundWorker.execute("sendmessagegroup", id, groupId, sharedKeyMessage, "authen", "", "", "", token, friendid);
         }
@@ -117,7 +111,7 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
 
         SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
         editor.putString("SHARED_KEY_GROUP:" + groupid, shareedkey);
-        editor.commit();
+        editor.apply();
 
         //for loop
         for (int friendid : groupMember) {
@@ -126,46 +120,5 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
 
         }
 
-    }
-
-    private String RSAEncrypt(String publickey, String myMessage) {
-        RSAPublicKey pbKey = null;
-
-        byte[] keyBytes = null;
-        try {
-            keyBytes = Base64.decode(publickey.getBytes("utf-8"), Base64.DEFAULT);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = null;
-        try {
-            keyFactory = KeyFactory.getInstance("RSA");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        try {
-            pbKey = (RSAPublicKey) keyFactory.generatePublic(spec);
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-
-///
-
-        // Get an instance of the Cipher for RSA encryption/decryption
-        Cipher c = null;
-        try {
-            c = Cipher.getInstance("RSA");
-            // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
-            c.init(Cipher.ENCRYPT_MODE, pbKey);
-
-            // Encrypt that message using a new SealedObject and the Cipher we created before
-            String msg = Base64.encodeToString(c.doFinal(myMessage.getBytes("UTF-8")), Base64.DEFAULT);
-
-            return msg;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

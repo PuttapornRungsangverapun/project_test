@@ -1,7 +1,6 @@
 package com.example.por.project_test;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -154,7 +153,7 @@ public class GroupMessageAdapter extends ArrayAdapter<GroupMessageInfo> {
                     count += read;//countอ่านมาแล้วกี่ไบ
                 }
 
-                byte[] original = GroupMessageActivity.decrypt(bytesdecrypt);
+                byte[] original = ((GroupMessageActivity) ctx).aesEncryption.decrypt(bytesdecrypt);
                 bitmap = BitmapFactory.decodeByteArray(original, 0, original.length);
                 is.close();
 

@@ -128,10 +128,10 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.logout:
-                SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
-                editor.clear();
-                editor.commit();
-                Intent i = new Intent(ContactActivity.this, MainActivity.class);
+//                SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
+//                editor.clear();
+//                editor.commit();
+                Intent i = new Intent(ContactActivity.this, LogoutActivity.class);
                 startActivity(i);
                 return true;
             case R.id.create_group:

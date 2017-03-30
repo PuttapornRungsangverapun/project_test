@@ -149,7 +149,6 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             } else if (params.length >= 10) {
                 param.put("targetid", params[9]);
             }
-
             httpRequest(url_server + "sendmessagegroup.php", param);
         } else if (type.equals("getpublickey")) {
             HashMap<String, String> param = new HashMap<>();

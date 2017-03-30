@@ -4,11 +4,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -30,8 +30,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleApiClient mGoogleApiClient;
     private double lat, lon;
     private String id, token;
-    private boolean status = true;
+    private boolean status = true, click = false;
     private double longmark, latmark;
+    AESEncryption aesEncryption;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,31 +173,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean onMarkerClick(Marker marker) {
 
 
-        if (getIntent().hasExtra("friendid")) {
-
+        if (getIntent().hasExtra("friendid") && getIntent().hasExtra("sharedkey") && (!click)) {
 
             Intent intent = getIntent();
             String friendid = intent.getStringExtra("friendid");
 
-            MessageActivity messageActivity = new MessageActivity();
-            String lonEncrypt = messageActivity.encrypt(longmark + "");
-            String latEncrypt = messageActivity.encrypt(latmark + "");
+            aesEncryption = new AESEncryption(intent.getStringExtra("sharedkey"));
+
+//            MessageActivity messageActivity = new MessageActivity();
+            String lonEncrypt = aesEncryption.encrypt(longmark + "");
+            String latEncrypt = aesEncryption.encrypt(latmark + "");
 
             BackgoundWorker backgoundWorker = new BackgoundWorker(MapsActivity.this);
             backgoundWorker.execute("sendmessage", id, friendid, "", "map", "", latEncrypt, lonEncrypt, token, "");
+            click = true;
             return true;//ไม่ต้องการให้bahivior defaultของแมพ
-        } else if (getIntent().hasExtra("groupid")) {
+        } else if (getIntent().hasExtra("groupid") && getIntent().hasExtra("sharedkey") && (!click)) {
 
 
             Intent intent = getIntent();
             String groupid = intent.getStringExtra("groupid");
 
-            GroupMessageActivity groupMessageActivity = new GroupMessageActivity();
-            String lonEncrypt = groupMessageActivity.encrypt(longmark + "");
-            String latEncrypt = groupMessageActivity.encrypt(latmark + "");
+            aesEncryption = new AESEncryption(intent.getStringExtra("sharedkey"));
+//            GroupMessageActivity groupMessageActivity = new GroupMessageActivity();
+            String lonEncrypt = aesEncryption.encrypt(longmark + "");
+            String latEncrypt = aesEncryption.encrypt(latmark + "");
 
             BackgoundWorker backgoundWorker = new BackgoundWorker(MapsActivity.this);
             backgoundWorker.execute("sendmessagegroup", id, groupid, "", "map", "", latEncrypt, lonEncrypt, token);
+            click = true;
             return true;//ไม่ต้องการให้bahivior defaultของแมพ
         }
         //Toast.makeText(this, marker.getPosition().toString(), Toast.LENGTH_SHORT).show();
@@ -223,4 +228,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         longmark = marker.getPosition().longitude;
         latmark = marker.getPosition().latitude;
     }
+
+
 }

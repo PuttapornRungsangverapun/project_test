@@ -20,7 +20,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class DownloadFileService extends Service {
-
+    AESEncryption aesEncryption;
     private NotificationCompat.Builder notification;
 
     public DownloadFileService() {
@@ -38,7 +38,8 @@ public class DownloadFileService extends Service {
         String url = intent.getStringExtra("url");
         String filename = intent.getStringExtra("filename");
         String type = intent.getStringExtra("type");
-        new DownloadTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url, filename, type);
+        String sharedKey = intent.getStringExtra("sharedkey");
+        new DownloadTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url, filename, type, sharedKey);
 
         notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(android.R.drawable.arrow_down_float)
@@ -62,7 +63,7 @@ public class DownloadFileService extends Service {
                 URL url = new URL(strings[0]);
                 String filename = strings[1];
                 String type = strings[2];
-
+                String sharedKey = strings[3];
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);
 
@@ -75,7 +76,7 @@ public class DownloadFileService extends Service {
                 byte[] bytes = new byte[512];//โหลดทีละ512
                 byte[] bytesdecrypt = new byte[size];
                 int read, count = 0;
-                byte[] original=new byte[0];
+                byte[] original = new byte[0];
                 float update = 0f;
                 while ((read = bis.read(bytes)) != -1) {
                     //  fos.write(bytes, 0, read);
@@ -86,10 +87,11 @@ public class DownloadFileService extends Service {
                         publishProgress((int) (((float) count * 100) / size));
                     }
                 }
+                aesEncryption = new AESEncryption(sharedKey);
                 if (type.equals("single")) {
-                    original = MessageActivity.decrypt(bytesdecrypt);
-                } else if(type.equals("group")){
-                    original = GroupMessageActivity.decrypt(bytesdecrypt);
+                    original = aesEncryption.decrypt(bytesdecrypt);
+                } else if (type.equals("group")) {
+                    original = aesEncryption.decrypt(bytesdecrypt);
                 }
                 fos.write(original, 0, original.length);
 //                fos.write(bytesdecrypt, 0, bytesdecrypt.length);//no encryptjx

@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
 
 public class CallSingleActivity extends AppCompatActivity implements SocketCallback {
     public final int SAMPLE_RATE = 5000;
-    public final int ENCODING = AudioFormat.ENCODING_PCM_8BIT;
+    public final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private String[] permissions = {android.Manifest.permission.RECORD_AUDIO};
@@ -201,27 +201,27 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
         public void run() {
             BufferedOutputStream bos = new BufferedOutputStream(socketTransmitter.getOutputstream());
             int n;
-            byte[] data = new byte[minBufferSize * 2];
+            byte[] data = new byte[minBufferSize];
             while (doRecord) {
                 try {
                     n = audioRecorder.read(data, 0, data.length);
                     byte[] callId = ByteBuffer.allocate(4).putInt(CallSingleActivity.this.callId).array();
                     byte[] timeStamp = ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array();
-                    byte[] type = ByteBuffer.allocate(4).putInt(1).array();
+                    byte[] type = ByteBuffer.allocate(1).put((byte) 1).array();
                     byte[] length = ByteBuffer.allocate(4).putInt(n).array();
                     byte[] payLoad = new byte[n];
                     System.arraycopy(data, 0, payLoad, 0, n);
-                    byte[] packet = new byte[callId.length + timeStamp.length + type.length + length.length + n];
+                    byte[] packet = new byte[callId.length + 6 + 1+ 2 + n];
 
                     int count = 0;
                     System.arraycopy(callId, 0, packet, count, callId.length);
                     count += callId.length;
                     System.arraycopy(type, 0, packet, count, type.length);
-                    count += type.length;
-                    System.arraycopy(timeStamp, 0, packet, count, timeStamp.length);
-                    count += timeStamp.length;
-                    System.arraycopy(length, 0, packet, count, length.length);
-                    count += length.length;
+                    count += 1;
+                    System.arraycopy(timeStamp, 2, packet, count,6);
+                    count += 6;
+                    System.arraycopy(length, 2, packet, count, 2);
+                    count += 2;
                     System.arraycopy(payLoad, 0, packet, count, payLoad.length);
                     bos.write(packet);
                     bos.flush();

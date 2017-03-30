@@ -6,9 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,8 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -37,13 +33,14 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
     String user_id_current;
     ImageView img_file;
     String token, id;
+    AESEncryption aesEncryption;
 
     public MessageAdapter(Context ctx, int resource, int textViewResourceId, ArrayList<MessageInfo> value, String token, String id) {
         super(ctx, resource, textViewResourceId, value);
         this.ctx = ctx;
         this.value = value;
-        SharedPreferences sp = ctx.getSharedPreferences("MySetting", ctx.MODE_PRIVATE);
-        user_id_current = sp.getString("user_id_current", "-1");
+        SharedPreferences sp = ctx.getSharedPreferences("MySetting", Context.MODE_PRIVATE);
+        this.user_id_current = sp.getString("user_id_current", "-1");
         this.token = token;
         this.id = id;
     }
@@ -140,6 +137,7 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
             try {
                 URL url = new URL(strings[0]);
 
+
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);
 
@@ -158,7 +156,7 @@ public class MessageAdapter extends ArrayAdapter<MessageInfo> {
                     count += read;//countอ่านมาแล้วกี่ไบ
                 }
 
-                byte[] original = MessageActivity.decrypt(bytesdecrypt);
+                byte[] original = ((MessageActivity) ctx).aesEncryption.decrypt(bytesdecrypt);
                 bitmap = BitmapFactory.decodeByteArray(original, 0, original.length);
                 is.close();
 

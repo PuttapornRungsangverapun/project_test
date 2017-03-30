@@ -4,7 +4,7 @@ package com.example.por.project_test;
  * Created by Por on 10/14/2016.
  */
 
-public class MessageInfo {
+class MessageInfo {
 
     String message, filename, type, tmpLat, tmpLon, time;
     int message_id, message_sender_id, message_status;

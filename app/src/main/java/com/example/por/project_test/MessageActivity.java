@@ -17,7 +17,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -31,28 +30,19 @@ import android.widget.Toast;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
 public class MessageActivity extends AppCompatActivity implements HttpRequestCallback {
     ListView listView_message;
     Button bt_send, bt_file;
+    RSAEncryption rsaEncryption;
+    AESEncryption aesEncryption;
     EditText et_message;
     static String id, token, shareedkey;
     static int REQUEST_FILE = 1;
@@ -73,10 +63,16 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         bt_send = (Button) findViewById(R.id.bt_send_message);
         bt_file = (Button) findViewById(R.id.bt_file);
 
+        rsaEncryption = new RSAEncryption(this);
+
+
         Intent i = getIntent();
         friendid = i.getStringExtra("friendid");
         publickey = i.getStringExtra("publickey");
+
         shareedkey = checkhashkey();
+        aesEncryption = new AESEncryption(shareedkey);
+
 
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         id = sp.getString("user_id_current", "-1");
@@ -100,6 +96,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                     intent.putExtra("url", url);
                     intent.putExtra("filename", filename);
                     intent.putExtra("type", "single");
+                    intent.putExtra("sharedkey", shareedkey);
                     startService(intent);
                 } else if (message.type.equals("map")) {
                     Intent intent = new Intent(MessageActivity.this, MapsActivity.class);
@@ -112,21 +109,19 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         bt_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String type2 = "sendmessage";
+
 
                 String str_message = et_message.getText().toString().trim();
                 if (str_message.isEmpty() || str_message.length() == 0 || str_message.equals("") || str_message == null) {
                     return;
                 } else {
-
                     if (shareedkey == null) {
-
-                        genSharedKey(type2);
+                        genSharedKey();
                     }
-
                     //secure
-                    str_message = encrypt(str_message);
-                    Log.d("str message", str_message);
+                    aesEncryption = new AESEncryption(shareedkey);
+                    str_message = aesEncryption.encrypt(str_message);
+//                    Log.d("str message", str_message);
 
                     BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
                     backgoundWorker.execute("sendmessage", id, friendid, str_message, "text", "", "", "", token);
@@ -139,11 +134,8 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         bt_file.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String type3 = "sendmessage";
                 if (shareedkey == null) {
-
-
-                    genSharedKey(type3);
+                    genSharedKey();
                 }
 
                 CharSequence colors[] = new CharSequence[]{"FIle", "Share Location"};
@@ -154,7 +146,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == 0) {
-                            if (checkFilePermission() == false) {
+                            if (!checkFilePermission()) {
                                 return;
                             }
                             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -164,6 +156,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                         } else if (which == 1) {
                             Intent intent = new Intent(MessageActivity.this, MapsActivity.class);
                             intent.putExtra("friendid", friendid);
+                            intent.putExtra("sharedkey", shareedkey);
                             startActivity(intent);
 
 
@@ -198,15 +191,14 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                     return;
                 } else {
                     isRequesting = true;
-                    String type1 = "readmessage";
                     BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-                    backgoundWorker.execute(type1, id, friendid, lastMessageId + "", token);
+                    backgoundWorker.execute("readmessage", id, friendid, lastMessageId + "", token);
                 }
             }
         }, 500, 500);
     }
 
-    private void genSharedKey(String type2) {
+    private void genSharedKey() {
         while ((shareedkey == null) || (shareedkey.length() != 32)) {
             shareedkey = new BigInteger(160, new SecureRandom()).toString(32);
         }
@@ -215,10 +207,10 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         editor.putString("SHARED_KEY:" + friendid, shareedkey);
         editor.commit();
 
-        String sharedKeyMessage = RSAEncrypt(shareedkey);
+        String sharedKeyMessage = rsaEncryption.RSAEncrypt(publickey, shareedkey);
 
         BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-        backgoundWorker.execute(type2, id, friendid, sharedKeyMessage, "authen", "", "", "", token);
+        backgoundWorker.execute("sendmessage", id, friendid, sharedKeyMessage, "authen", "", "", "", token);
     }
 
     @Override
@@ -245,8 +237,9 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                 resized.compress(Bitmap.CompressFormat.JPEG, 90, baos);
                 filedata = baos.toByteArray();
             }
-            String md5 = getMD5EncryptedString(Base64.encodeToString(filedata, Base64.DEFAULT));
-            String encryptFile = encrypt(filedata);
+            String md5 = GetMD5.getMD5EncryptedString(Base64.encodeToString(filedata, Base64.DEFAULT));
+
+            String encryptFile = aesEncryption.encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
 
 
@@ -279,20 +272,19 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                 //secure
                 if (mo.type.equals("authen")) {
                     if (shareedkey == null) {
-                        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
-                        privatekey = sp.getString("privatekey", "-1");
-                        shareedkey = RSADecrypt(mo.message);
+                        shareedkey = rsaEncryption.RSADecrypt(mo.message);
+                        aesEncryption = new AESEncryption(shareedkey);
                     }
                 } else if (mo.type.equals("map")) {
                     try {
-                        mo.latitude = Double.parseDouble(decrypt(mo.tmpLat));
-                        mo.longtitude = Double.parseDouble(decrypt(mo.tmpLon));
+                        mo.latitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLat));
+                        mo.longtitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLon));
                         messageInfos.add(mo);
                     } catch (Exception e) {
                     }
                 } else if (mo.type.equals("text")) {
                     try {
-                        mo.message = decrypt(mo.message);
+                        mo.message = aesEncryption.decrypt(mo.message);
                         messageInfos.add(mo);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -313,7 +305,6 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             lastMessageId = messageInfos.get(messageInfos.size() - 1).message_id;//ขนาดของตัวมัน-1 ถ้ามี20 ได้19
             messageAdapter.notifyDataSetChanged();
         }
-
         isRequesting = false;
         bt_send.setEnabled(true);
     }
@@ -381,217 +372,10 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         return result;
     }
 
-    public String encrypt(String msg, byte[] data) {
-        String key = shareedkey; // 256 bit key
-        String initVector = new BigInteger(80, new SecureRandom()).toString(32); // 80/5=16 bytes IV   80bitแบบrandom tostringเป็นbase32 ตัวหนังสือ1ตัวเท่ากับ32bit ได้ 16 ตัว
-        return initVector + encrypt(key, initVector, msg, data);
-    }
-
-    public String encrypt(String msg) {
-        return encrypt(msg, null);
-    }
-
-    public String encrypt(byte[] data) {
-        return encrypt(null, data);
-    }
-
-
-    public String encrypt(String key, String initVector, String value, byte[] data) {
-        byte[] encrypted;
-        try {
-            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7PADDING");
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
-
-            if (value != null) {
-
-                encrypted = cipher.doFinal(value.getBytes("UTF-8"));
-//                System.out.println("encrypted string: " + Base64.encodeToString(encrypted, Base64.DEFAULT));
-            } else {
-                //ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                //CipherOutputStream cios = new CipherOutputStream(bos, cipher);
-                //cios.write(data);
-                //encrypted = bos.toByteArray();
-
-                encrypted = cipher.doFinal(data);
-//                System.out.println("encrypted string: " + Base64.encodeToString(encrypted, Base64.DEFAULT));
-            }
-            return Base64.encodeToString(encrypted, Base64.DEFAULT);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private static byte[] decrypt(String encrypted, byte[] data) {
-        String iv = null;
-        String cyphertext = null;
-        String key = shareedkey;
-
-        if (encrypted == null) {
-            byte[] iv2 = new byte[16];
-            byte[] data2 = new byte[data.length - 16];
-            System.arraycopy(data, 0, iv2, 0, 16);
-            System.arraycopy(data, 16, data2, 0, data2.length);
-            return decrypt(key, new String(iv2), null, data2);
-
-        } else {
-            iv = encrypted.substring(0, 16);
-            cyphertext = encrypted.substring(16);//begin index 16
-            return decrypt(key, iv, cyphertext, data);
-        }
-    }
-
-    public static String decrypt(String encrypted) {
-
-        return new String(decrypt(encrypted, null));
-
-    }
-
-    public static byte[] decrypt(byte[] data) {
-
-        return decrypt(null, data);
-
-    }
-
-    private static byte[] decrypt(String key, String initVector, String encrypted, byte[] data) {
-        byte[] original;
-        try {
-            Log.e("secret", shareedkey);
-
-            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-            cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
-
-
-            if (encrypted != null) {
-                original = cipher.doFinal(Base64.decode(encrypted, Base64.DEFAULT));
-            } else {
-                original = cipher.doFinal(data);
-            }
-            return original;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        return null;
-    }
-
     public String checkhashkey() {
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
 //        return sp.getString("SHARED_KEY:" + friendid, "1234567890asdfgh1234567890asdfgh");
         return sp.getString("SHARED_KEY:" + friendid, null);
-    }
-
-    //    public String gensharesecretkey(){
-//        String initVector = new BigInteger(160, new SecureRandom()).toString(32);
-//    }
-    private String RSAEncrypt(String myMessage) {
-        RSAPublicKey pbKey = null;
-
-        byte[] keyBytes = null;
-        try {
-            keyBytes = Base64.decode(publickey.getBytes("utf-8"), Base64.DEFAULT);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = null;
-        try {
-            keyFactory = KeyFactory.getInstance("RSA");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        try {
-            pbKey = (RSAPublicKey) keyFactory.generatePublic(spec);
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-
-///
-
-        // Get an instance of the Cipher for RSA encryption/decryption
-        Cipher c = null;
-        try {
-            c = Cipher.getInstance("RSA");
-            // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
-            c.init(Cipher.ENCRYPT_MODE, pbKey);
-
-            // Encrypt that message using a new SealedObject and the Cipher we created before
-            String msg = Base64.encodeToString(c.doFinal(myMessage.getBytes("UTF-8")), Base64.DEFAULT);
-
-            return msg;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private String RSADecrypt(String myMessage) {
-        RSAPrivateKey pvKey = null;
-
-        byte[] keyBytes = null;
-        try {
-            keyBytes = Base64.decode(privatekey.getBytes("utf-8"), Base64.DEFAULT);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = null;
-        try {
-            keyFactory = KeyFactory.getInstance("RSA");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        try {
-            pvKey = (RSAPrivateKey) keyFactory.generatePrivate(spec);
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-
-///
-
-        // Get an instance of the Cipher for RSA encryption/decryption
-        Cipher c = null;
-        try {
-            c = Cipher.getInstance("RSA");
-            // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
-            c.init(Cipher.DECRYPT_MODE, pvKey);
-
-            // Encrypt that message using a new SealedObject and the Cipher we created before
-            String msg = new String(c.doFinal(Base64.decode(myMessage, Base64.DEFAULT)));
-
-            return msg;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static String getMD5EncryptedString(String encTarget) {
-        MessageDigest mdEnc = null;
-        byte[] data = Base64.decode(encTarget, Base64.DEFAULT);
-        try {
-            mdEnc = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println("Exception while encrypting to md5");
-            e.printStackTrace();
-        } // Encryption algorithm
-        mdEnc.update(data);//encTarget.getBytes()
-        byte messageDigest[] = mdEnc.digest();
-        StringBuilder hexString = new StringBuilder();
-        for (byte aMessageDigest : messageDigest) {
-            String h = Integer.toHexString(0xFF & aMessageDigest);
-            while (h.length() < 2)
-                h = "0" + h;
-            hexString.append(h);
-        }
-        return hexString.toString();
     }
 
     @Override
