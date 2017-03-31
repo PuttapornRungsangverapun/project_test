@@ -12,6 +12,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -19,6 +21,7 @@ import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class RegisterActivity extends AppCompatActivity implements HttpRequestCallback {
 
@@ -48,29 +51,20 @@ public class RegisterActivity extends AppCompatActivity implements HttpRequestCa
                 String str_email = et_email.getText().toString().trim();
                 String str_confirmpassword = et_confirmpassword.getText().toString().trim();
                 String EMAIL_PATTERN = "^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
-                BackgoundWorker backgoundWorker = new BackgoundWorker(RegisterActivity.this);
+
                 if (!str_password.equals(str_confirmpassword)) {
                     et_password.setError("Passwords do not match");
                     et_confirmpassword.setError("Passwords do not match");
-                    return;
-                } else if ((str_username.isEmpty() || str_username.length() == 0 || str_username.equals("") || str_username == null)) {
+                } else if (str_username.isEmpty() || str_username.length() == 0 || str_username.equals("")) {
                     et_username.setError("Username must be filled");
-                    return;
-
-                } else if ((str_password.isEmpty() || str_password.length() == 0 || str_password.equals("") || str_password == null)) {
+                } else if (str_password.isEmpty() || str_password.length() == 0 || str_password.equals("")) {
                     et_password.setError("Password must be filled");
-                    return;
-
                 } else if (str_password.length() < 7) {
                     et_password.setError("Password must be more than 8");
-                    return;
                 } else if (!str_email.matches(EMAIL_PATTERN)) {
                     et_email.setError("Invalid email address");
-                    return;
                 } else {
-                    getRSAKey();
-                    backgoundWorker.execute("register", str_username, str_password, str_email, publicKey);
-
+                    new BackgoundWorker(RegisterActivity.this).execute("register", str_username, str_password, str_email);
                 }
             }
         });
@@ -87,13 +81,14 @@ public class RegisterActivity extends AppCompatActivity implements HttpRequestCa
             editor.putString("token", result[3]);
             editor.putString("username", result[4]);
             editor.putBoolean("re_login", false);
-            editor.commit();
+            editor.apply();
+            getRSAKey(result[2], result[3]);
             Intent i = new Intent(RegisterActivity.this, ContactActivity.class);
             startActivity(i);
         }
     }
 
-    public void getRSAKey() {
+    public void getRSAKey(String user_id, String token) {
         KeyPairGenerator kpg = null;
         try {
             kpg = KeyPairGenerator.getInstance("RSA");
@@ -117,8 +112,18 @@ public class RegisterActivity extends AppCompatActivity implements HttpRequestCa
         SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
         editor.putString("publickey", publicKey);
         editor.putString("privatekey", privateKey);
-        editor.commit();
+        editor.apply();
 
+        try {
+            byte[] key = et_password.getText().toString().getBytes("UTF-8");
+            key = Arrays.copyOf(key, 32);
+            String str_key = new String(key, "UTF-8");
+            AESEncryption aesEncryption = new AESEncryption(str_key);
+            String encryptPK = aesEncryption.encrypt(privateKey);
+            new BackgoundWorker(this).execute("storekey", encryptPK, publicKey, token, user_id);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
     }
 

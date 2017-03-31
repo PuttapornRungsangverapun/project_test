@@ -5,13 +5,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -28,10 +26,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -39,7 +33,7 @@ import java.util.TimerTask;
 public class GroupMessageActivity extends AppCompatActivity implements HttpRequestCallback {
 
     private static String id, token, shareedkey;
-    private String groupId, groupName, privatekey;
+    private String groupId, groupName;
     private boolean isRequesting;
     private ArrayList<GroupMessageInfo> groupMessageInfos;
     private GroupMessageAdapter groupMessageAdapter;
@@ -61,8 +55,6 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
         et_group_message = (EditText) findViewById(R.id.et_group_message);
         bt_group_send_message = (Button) findViewById(R.id.bt_group_send_message);
         listView_group_message = (ListView) findViewById(R.id.listview_group_message);
-
-        rsaEncryption = new RSAEncryption(this);
 
         Intent i = getIntent();
         groupId = i.getStringExtra("groupid");
@@ -128,7 +120,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == 0) {
-                            if (checkFilePermission() == false) {
+                            if (!checkFilePermission()) {
                                 return;
                             }
                             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -196,9 +188,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                 GroupMessageInfo mo = (GroupMessageInfo) o;
                 if (mo.type.equals("authen")) {
                     if (shareedkey == null) {
-//                        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
-//                        privatekey = sp.getString("privatekey", "-1");
-//                        shareedkey = RSADecrypt(mo.message);
+                        rsaEncryption = new RSAEncryption(this);
                         shareedkey = rsaEncryption.RSADecrypt(mo.message);
                         aesEncryption = new AESEncryption(shareedkey);
                     }
@@ -208,6 +198,9 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                         mo.longtitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLon));
                         groupMessageInfos.add(mo);
                     } catch (Exception e) {
+                        e.printStackTrace();
+                        mo.message = "failed to decrypt...";
+                        groupMessageInfos.add(mo);
                     }
                 } else if (mo.type.equals("text")) {
                     try {
@@ -237,8 +230,10 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1 && resultCode == Activity.RESULT_OK && data != null) {
             Uri uri = data.getData();
-            String filename = getFileName(uri);
-            byte[] filedata = getData(uri);
+
+            GetFile getFile = new GetFile(this);
+            String filename = getFile.getFileName(uri);
+            byte[] filedata = getFile.getData(uri);
 
             if (filedata == null) {
                 return;
@@ -281,56 +276,6 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
         return true;
     }
 
-    private byte[] getData(Uri uri) {//อ่านไฟล์โดยให้pathไปreturnเป็นbyte binaryกลับมา
-        byte[] result = null;
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-
-            if (inputStream.available() > 10e6) {
-                Toast.makeText(this, "File size must be 10mb", Toast.LENGTH_SHORT).show();
-                inputStream.close();
-                return null;
-            }
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            int nRead;
-            byte[] data = new byte[16384];//อ่านทั้ฝหมด16kb ในเgoogleบอกเร็วสุด
-            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
-                buffer.write(data, 0, nRead);
-            }
-            buffer.flush();//เขียนข้อไปให้หมด
-
-            result = buffer.toByteArray();
-            inputStream.close();//ถ้าไม่ปิดแสดงว่ามีคนใช้อยู่จะลบไม่ได้
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    public String getFileName(Uri uri) {
-        String result = null;
-        if (uri.getScheme().equals("content")) {
-            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-            try {
-                if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-        if (result == null) {
-            result = uri.getPath();
-            int cut = result.lastIndexOf('/');
-            if (cut != -1) {
-                result = result.substring(cut + 1);
-            }
-        }
-        return result;
-    }
-
     public String checkhashkey() {
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
 //        return sp.getString("SHARED_KEY:" + friendid, "1234567890asdfgh1234567890asdfgh");
@@ -370,24 +315,5 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
         }
     }
 
-    public static String getMD5EncryptedString(String encTarget) {
-        MessageDigest mdEnc = null;
-        byte[] data = Base64.decode(encTarget, Base64.DEFAULT);
-        try {
-            mdEnc = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println("Exception while encrypting to md5");
-            e.printStackTrace();
-        } // Encryption algorithm
-        mdEnc.update(data);//encTarget.getBytes()
-        byte messageDigest[] = mdEnc.digest();
-        StringBuilder hexString = new StringBuilder();
-        for (byte aMessageDigest : messageDigest) {
-            String h = Integer.toHexString(0xFF & aMessageDigest);
-            while (h.length() < 2)
-                h = "0" + h;
-            hexString.append(h);
-        }
-        return hexString.toString();
-    }
+
 }

@@ -40,122 +40,163 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
         //String url_server = "http://192.168.137.2/";
 
         this.type = type;
-        if (type.equals("register")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("username", params[1]);
-            param.put("password", params[2]);
-            param.put("email", params[3]);
-            param.put("publickey", params[4]);
-            httpRequest(url_server + "register.php", param);
-        } else if (type.equals("login")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("username", params[1]);
-            param.put("password", params[2]);
-            httpRequest(url_server + "login.php", param);
-        } else if (type.equals("searchfriend")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("username", params[2]);
-            param.put("token", params[3]);
-            httpRequest(url_server + "searchfriend.php", param);
-        } else if (type.equals("addfriend")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("username", params[1]);
-            param.put("userid", params[2]);
-            param.put("token", params[3]);
-            httpRequest(url_server + "addfriend.php", param);
-        } else if (type.equals("listfriend")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("token", params[2]);
-            httpRequest(url_server + "listfriend.php", param);
-        } else if (type.equals("sendmessage")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("friendid", params[2]);
-            param.put("message", params[3]);
-            param.put("type", params[4]);
-            param.put("filename", params[5]);
-            param.put("latitude", params[6]);
-            param.put("longitude", params[7]);
-            param.put("token", params[8]);
-            if (params[4].equals("file")) {
-                param.put("md5", params[9]);
+        switch (type) {
+            case "register": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("username", params[1]);
+                param.put("password", params[2]);
+                param.put("email", params[3]);
+                httpRequest(url_server + "register.php", param);
+                break;
             }
-            httpRequest(url_server + "message.php", param);
-        } else if (type.equals("readmessage")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("friendid", params[2]);
-            param.put("lastmessageid", params[3]);
-            param.put("token", params[4]);
-            httpRequest(url_server + "messagestatus.php", param);
-        } else if (type.equals("notification")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("token_noti", params[2]);
-            param.put("token", params[3]);
-            httpRequest(url_server + "tokennotification.php", param);
-        } else if (type.equals("listaddgroup")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("token", params[2]);
-            httpRequest(url_server + "listaddgroupcreate.php", param);
-        } else if (type.equals("crategroup")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("token", params[2]);
-            param.put("frienid", params[3]);
-            param.put("groupname", params[4]);
-            httpRequest(url_server + "creategroup.php", param);
-        } else if (type.equals("membergroup")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("token", params[2]);
-            param.put("groupid", params[3]);
-            httpRequest(url_server + "membergroup.php", param);
-        } else if (type.equals("listinvitefriend")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("token", params[2]);
-            param.put("groupid", params[3]);
-            httpRequest(url_server + "listinvitegroup.php", param);
-        } else if (type.equals("invitefriend")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("token", params[2]);
-            param.put("friendid", params[3]);
-            param.put("groupid", params[4]);
-            httpRequest(url_server + "inviteaddgroup.php", param);
-        } else if (type.equals("readmessagegroup")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("groupid", params[2]);
-            param.put("lastmessageid", params[3]);
-            param.put("token", params[4]);
-            httpRequest(url_server + "readmessagegroup.php", param);
-        } else if (type.equals("sendmessagegroup")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("groupid", params[2]);
-            param.put("message", params[3]);
-            param.put("type", params[4]);
-            param.put("filename", params[5]);
-            param.put("latitude", params[6]);
-            param.put("longitude", params[7]);
-            param.put("token", params[8]);
-            if (params[4].equals("file")) {
-                param.put("md5", params[9]);
-            } else if (params.length >= 10) {
-                param.put("targetid", params[9]);
+            case "login": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("username", params[1]);
+                param.put("password", params[2]);
+                httpRequest(url_server + "login.php", param);
+                break;
             }
-            httpRequest(url_server + "sendmessagegroup.php", param);
-        } else if (type.equals("getpublickey")) {
-            HashMap<String, String> param = new HashMap<>();
-            param.put("userid", params[1]);
-            param.put("friendid", params[2]);
-            param.put("token", params[3]);
-            httpRequest(url_server + "getpublickey.php", param);
+            case "searchfriend": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("username", params[2]);
+                param.put("token", params[3]);
+                httpRequest(url_server + "searchfriend.php", param);
+                break;
+            }
+            case "addfriend": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("username", params[1]);
+                param.put("userid", params[2]);
+                param.put("token", params[3]);
+                httpRequest(url_server + "addfriend.php", param);
+                break;
+            }
+            case "listfriend": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("token", params[2]);
+                httpRequest(url_server + "listfriend.php", param);
+                break;
+            }
+            case "sendmessage": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("friendid", params[2]);
+                param.put("message", params[3]);
+                param.put("type", params[4]);
+                param.put("filename", params[5]);
+                param.put("latitude", params[6]);
+                param.put("longitude", params[7]);
+                param.put("token", params[8]);
+                if (params[4].equals("file")) {
+                    param.put("md5", params[9]);
+                }
+                httpRequest(url_server + "message.php", param);
+                break;
+            }
+            case "readmessage": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("friendid", params[2]);
+                param.put("lastmessageid", params[3]);
+                param.put("token", params[4]);
+                httpRequest(url_server + "messagestatus.php", param);
+                break;
+            }
+            case "notification": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("token_noti", params[2]);
+                param.put("token", params[3]);
+                httpRequest(url_server + "tokennotification.php", param);
+                break;
+            }
+            case "listaddgroup": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("token", params[2]);
+                httpRequest(url_server + "listaddgroupcreate.php", param);
+                break;
+            }
+            case "crategroup": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("token", params[2]);
+                param.put("frienid", params[3]);
+                param.put("groupname", params[4]);
+                httpRequest(url_server + "creategroup.php", param);
+                break;
+            }
+            case "membergroup": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("token", params[2]);
+                param.put("groupid", params[3]);
+                httpRequest(url_server + "membergroup.php", param);
+                break;
+            }
+            case "listinvitefriend": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("token", params[2]);
+                param.put("groupid", params[3]);
+                httpRequest(url_server + "listinvitegroup.php", param);
+                break;
+            }
+            case "invitefriend": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("token", params[2]);
+                param.put("friendid", params[3]);
+                param.put("groupid", params[4]);
+                httpRequest(url_server + "inviteaddgroup.php", param);
+                break;
+            }
+            case "readmessagegroup": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("groupid", params[2]);
+                param.put("lastmessageid", params[3]);
+                param.put("token", params[4]);
+                httpRequest(url_server + "readmessagegroup.php", param);
+                break;
+            }
+            case "sendmessagegroup": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("groupid", params[2]);
+                param.put("message", params[3]);
+                param.put("type", params[4]);
+                param.put("filename", params[5]);
+                param.put("latitude", params[6]);
+                param.put("longitude", params[7]);
+                param.put("token", params[8]);
+                if (params[4].equals("file")) {
+                    param.put("md5", params[9]);
+                } else if (params.length >= 10) {
+                    param.put("targetid", params[9]);
+                }
+                httpRequest(url_server + "sendmessagegroup.php", param);
+                break;
+            }
+            case "getpublickey": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("friendid", params[2]);
+                param.put("token", params[3]);
+                httpRequest(url_server + "getpublickey.php", param);
+                break;
+            }
+            case "storekey": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("encryptpk", params[1]);
+                param.put("publickey", params[2]);
+                param.put("token", params[3]);
+                param.put("userid", params[4]);
+                httpRequest(url_server + "storekey.php", param);
+                break;
+            }
         }
 
         return status;
@@ -194,8 +235,6 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
 //                status = "403";
 //            }
 
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -216,226 +255,246 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
             e.printStackTrace();
             return;
         }
-
-        if (type.equals("login")) {
-            try {
-
-                if (resource.getString("status").equals("success")) {
-                    callback.onResult(new String[]{TRUE, resource.getString("message"),
-                            resource.getString("userid"), resource.getString("token"),
-                            resource.getString("username")}, null);
-                } else {
-                    callback.onResult(new String[]{FALSE, resource.getString("message"), null}, null);
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (type.equals("register")) {
-            try {
-
-                if (resource.getString("status").equals("success")) {
-                    callback.onResult(new String[]{TRUE, resource.getString("message"),
-                            resource.getString("userid"),
-                            resource.getString("token"),
-                            resource.getString("username")}, null);
-                } else {
-                    callback.onResult(new String[]{FALSE, resource.getString("message"), null}, null);
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (type.equals("searchfriend")) {
-
-            try {
-                if (resource.getString("status").equals("success")) {
-                    callback.onResult(new String[]{TRUE, resource.getString("message"), FALSE}, null);
-                } else {
-                    callback.onResult(new String[]{FALSE, resource.getString("message"), FALSE}, null);
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (type.equals("addfriend")) {
-
-            try {
-                if (resource.getString("status").equals("success")) {
-                    callback.onResult(new String[]{resource.getString("message"), "addfriend"}, null);
-                } else {
-                    callback.onResult(new String[]{FALSE, resource.getString("message")}, null);
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (type.equals("listfriend")) {
-            ArrayList<Object> temp = new ArrayList<>();
-            try {
-                JSONArray jsonfriendlist = resource.getJSONArray("message");
-                for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
-                    UserInfo userInfo = new UserInfo(jsonfriendlist.getJSONObject(i).getInt("user_id"),
-                            jsonfriendlist.getJSONObject(i).getString("user_username"),
-                            jsonfriendlist.getJSONObject(i).getString("publickey"),
-                            jsonfriendlist.getJSONObject(i).getInt("group_id"),
-                            jsonfriendlist.getJSONObject(i).getString("group_name"),
-                            jsonfriendlist.getJSONObject(i).getInt("n"));
-                    temp.add(userInfo);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            callback.onResult(null, temp);
-        } else if (type.equals("sendmessage")) {
-
-            try {
-                if (resource.getString("status").equals("success")) {
-                    callback.onResult(new String[]{resource.getString("message"), TRUE}, null);
-                } else {
-                    callback.onResult(new String[]{resource.getString("message"), FALSE}, null);
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (type.equals("readmessage")) {
-
-            try {
-                ArrayList<Object> temp = new ArrayList<>();
-                JSONArray jsonmessage = resource.getJSONArray("message");
-                for (int i = 0; i < jsonmessage.length(); i++) {//ทำparsingแปลงjsonarray
-                    MessageInfo messageInfo = new MessageInfo(jsonmessage.getJSONObject(i).getInt("message_id"),
-                            jsonmessage.getJSONObject(i).getString("text_body"),
-                            jsonmessage.getJSONObject(i).getInt("message_status"),
-                            jsonmessage.getJSONObject(i).getInt("message_sender_id"),
-                            jsonmessage.getJSONObject(i).getString("file_filename"),
-                            jsonmessage.getJSONObject(i).getString("map_latitude"),
-                            jsonmessage.getJSONObject(i).getString("map_longitude"),
-                            jsonmessage.getJSONObject(i).getString("time"),
-                            jsonmessage.getJSONObject(i).getString("message_type"));
-
-                    temp.add(messageInfo);
-                }
-                callback.onResult(null, temp);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (type.equals("listaddgroup")) {
-            ArrayList<Object> temp = new ArrayList<>();
-            try {
-                JSONArray jsonfriendlist = resource.getJSONArray("message");
-                for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
-                    AddUserGroupInfo addUserGroupInfo = new AddUserGroupInfo(
-                            jsonfriendlist.getJSONObject(i).getInt("friend_id"),
-                            jsonfriendlist.getJSONObject(i).getString("user_username"));
-
-                    temp.add(addUserGroupInfo);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            callback.onResult(null, temp);
-        } else if (type.equals("crategroup")) {
-
-            try {
-                if (resource.getString("status").equals("success")) {
-                    if (resource.has("message")) {
-                        callback.onResult(new String[]{TRUE, resource.getString("message"), resource.getString("groupid")}, null);
+        switch (type) {
+            case "login":
+                try {
+                    if (resource.getString("status").equals("success")) {
+                        callback.onResult(new String[]{TRUE, resource.getString("message"),
+                                resource.getString("userid"), resource.getString("token"),
+                                resource.getString("username"),
+                                resource.getString("publickey"),
+                                resource.getString("privatekey")}, null);
+                    } else {
+                        callback.onResult(new String[]{FALSE, resource.getString("message"), null}, null);
                     }
-                } else {
-                    callback.onResult(new String[]{FALSE, resource.getString("message")}, null);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+                break;
+            case "register":
+                try {
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+                    if (resource.getString("status").equals("success")) {
+                        callback.onResult(new String[]{TRUE, resource.getString("message"),
+                                resource.getString("userid"),
+                                resource.getString("token"),
+                                resource.getString("username")}, null);
+                    } else {
+                        callback.onResult(new String[]{FALSE, resource.getString("message"), null}, null);
+                    }
 
-        } else if (type.equals("membergroup")) {
-            ArrayList<Object> temp = new ArrayList<>();
-            try {
-                JSONArray jsonfriendlist = resource.getJSONArray("message");
-                for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
-                    MemberGroupInfo memberGroupInfo = new MemberGroupInfo(
-                            jsonfriendlist.getJSONObject(i).getString("user_username"));
-                    temp.add(memberGroupInfo);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            callback.onResult(null, temp);
-        } else if (type.equals("listinvitefriend")) {
-            ArrayList<Object> temp = new ArrayList<>();
-            try {
-                JSONArray jsonfriendlist = resource.getJSONArray("message");
-                for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
-                    InviteGroupInfo inviteGroupInfo = new InviteGroupInfo(
-                            jsonfriendlist.getJSONObject(i).getInt("fid"),
-                            jsonfriendlist.getJSONObject(i).getString("user_username"));
-                    temp.add(inviteGroupInfo);
+                break;
+            case "searchfriend":
+
+                try {
+                    if (resource.getString("status").equals("success")) {
+                        callback.onResult(new String[]{TRUE, resource.getString("message"), FALSE}, null);
+                    } else {
+                        callback.onResult(new String[]{FALSE, resource.getString("message"), FALSE}, null);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            callback.onResult(null, temp);
-        } else if (type.equals("invitefriend")) {
+                break;
+            case "addfriend":
 
-            try {
-                if (resource.getString("status").equals("success")) {
-                    callback.onResult(new String[]{TRUE, resource.getString("message")}, null);
-                } else {
-                    callback.onResult(new String[]{FALSE, resource.getString("message")}, null);
+                try {
+                    if (resource.getString("status").equals("success")) {
+                        callback.onResult(new String[]{resource.getString("message"), "addfriend"}, null);
+                    } else {
+                        callback.onResult(new String[]{FALSE, resource.getString("message")}, null);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (type.equals("readmessagegroup")) {
-
-            try {
+                break;
+            case "listfriend": {
                 ArrayList<Object> temp = new ArrayList<>();
-                JSONArray jsonmessage = resource.getJSONArray("message");
-                for (int i = 0; i < jsonmessage.length(); i++) {//ทำparsingแปลงjsonarray
-                    GroupMessageInfo groupMessageInfo = new GroupMessageInfo(jsonmessage.getJSONObject(i).getInt("group_message_id"),
-                            jsonmessage.getJSONObject(i).getString("text_body"),
-                            jsonmessage.getJSONObject(i).getInt("group_message_status"),
-                            jsonmessage.getJSONObject(i).getInt("group_message_sender_id"),
-                            jsonmessage.getJSONObject(i).getString("user_username"),
-                            jsonmessage.getJSONObject(i).getString("file_filename"),
-                            jsonmessage.getJSONObject(i).getString("map_latitude"),
-                            jsonmessage.getJSONObject(i).getString("map_longitude"),
-                            jsonmessage.getJSONObject(i).getString("time"),
-                            jsonmessage.getJSONObject(i).getString("group_message_type"),
-                            jsonmessage.getJSONObject(i).getString("target_userid"));
-
-                    temp.add(groupMessageInfo);
+                try {
+                    JSONArray jsonfriendlist = resource.getJSONArray("message");
+                    for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
+                        UserInfo userInfo = new UserInfo(jsonfriendlist.getJSONObject(i).getInt("user_id"),
+                                jsonfriendlist.getJSONObject(i).getString("user_username"),
+                                jsonfriendlist.getJSONObject(i).getString("publickey"),
+                                jsonfriendlist.getJSONObject(i).getInt("group_id"),
+                                jsonfriendlist.getJSONObject(i).getString("group_name"),
+                                jsonfriendlist.getJSONObject(i).getInt("n"));
+                        temp.add(userInfo);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
                 callback.onResult(null, temp);
-            } catch (JSONException e) {
-                e.printStackTrace();
+                break;
             }
-        } else if (type.equals("sendmessagegroup")) {
+            case "sendmessage":
 
-            try {
-                if (resource.getString("status").equals("success")) {
-                    callback.onResult(new String[]{resource.getString("message"), TRUE}, null);
-                } else {
-                    callback.onResult(new String[]{resource.getString("message"), FALSE}, null);
+                try {
+                    if (resource.getString("status").equals("success")) {
+                        callback.onResult(new String[]{resource.getString("message"), TRUE}, null);
+                    } else {
+                        callback.onResult(new String[]{resource.getString("message"), FALSE}, null);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "readmessage":
+
+                try {
+                    ArrayList<Object> temp = new ArrayList<>();
+                    JSONArray jsonmessage = resource.getJSONArray("message");
+                    for (int i = 0; i < jsonmessage.length(); i++) {//ทำparsingแปลงjsonarray
+                        MessageInfo messageInfo = new MessageInfo(jsonmessage.getJSONObject(i).getInt("message_id"),
+                                jsonmessage.getJSONObject(i).getString("text_body"),
+                                jsonmessage.getJSONObject(i).getInt("message_status"),
+                                jsonmessage.getJSONObject(i).getInt("message_sender_id"),
+                                jsonmessage.getJSONObject(i).getString("file_filename"),
+                                jsonmessage.getJSONObject(i).getString("map_latitude"),
+                                jsonmessage.getJSONObject(i).getString("map_longitude"),
+                                jsonmessage.getJSONObject(i).getString("time"),
+                                jsonmessage.getJSONObject(i).getString("message_type"));
+
+                        temp.add(messageInfo);
+                    }
+                    callback.onResult(null, temp);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "listaddgroup": {
+                ArrayList<Object> temp = new ArrayList<>();
+                try {
+                    JSONArray jsonfriendlist = resource.getJSONArray("message");
+                    for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
+                        AddUserGroupInfo addUserGroupInfo = new AddUserGroupInfo(
+                                jsonfriendlist.getJSONObject(i).getInt("friend_id"),
+                                jsonfriendlist.getJSONObject(i).getString("user_username"));
+
+                        temp.add(addUserGroupInfo);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                callback.onResult(null, temp);
+                break;
+            }
+            case "crategroup":
+
+                try {
+                    if (resource.getString("status").equals("success")) {
+                        if (resource.has("message")) {
+                            callback.onResult(new String[]{TRUE, resource.getString("message"), resource.getString("groupid")}, null);
+                        }
+                    } else {
+                        callback.onResult(new String[]{FALSE, resource.getString("message")}, null);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (type.equals("getpublickey")) {
-
-            try {
-                if (resource.getString("status").equals("success")) {
-                    callback.onResult(new String[]{type, resource.getJSONObject("message").getString("user_id"),
-                            resource.getJSONObject("message").getString("publickey"), TRUE}, null);
+                break;
+            case "membergroup": {
+                ArrayList<Object> temp = new ArrayList<>();
+                try {
+                    JSONArray jsonfriendlist = resource.getJSONArray("message");
+                    for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
+                        MemberGroupInfo memberGroupInfo = new MemberGroupInfo(
+                                jsonfriendlist.getJSONObject(i).getString("user_username"));
+                        temp.add(memberGroupInfo);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
+                callback.onResult(null, temp);
+                break;
             }
+            case "listinvitefriend": {
+                ArrayList<Object> temp = new ArrayList<>();
+                try {
+                    JSONArray jsonfriendlist = resource.getJSONArray("message");
+                    for (int i = 0; i < jsonfriendlist.length(); i++) {//ทำparsingแปลงjsonarray
+                        InviteGroupInfo inviteGroupInfo = new InviteGroupInfo(
+                                jsonfriendlist.getJSONObject(i).getInt("fid"),
+                                jsonfriendlist.getJSONObject(i).getString("user_username"));
+                        temp.add(inviteGroupInfo);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                callback.onResult(null, temp);
+                break;
+            }
+            case "invitefriend":
+
+                try {
+                    if (resource.getString("status").equals("success")) {
+                        callback.onResult(new String[]{TRUE, resource.getString("message")}, null);
+                    } else {
+                        callback.onResult(new String[]{FALSE, resource.getString("message")}, null);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "readmessagegroup":
+
+                try {
+                    ArrayList<Object> temp = new ArrayList<>();
+                    JSONArray jsonmessage = resource.getJSONArray("message");
+                    for (int i = 0; i < jsonmessage.length(); i++) {//ทำparsingแปลงjsonarray
+                        GroupMessageInfo groupMessageInfo = new GroupMessageInfo(jsonmessage.getJSONObject(i).getInt("group_message_id"),
+                                jsonmessage.getJSONObject(i).getString("text_body"),
+                                jsonmessage.getJSONObject(i).getInt("group_message_status"),
+                                jsonmessage.getJSONObject(i).getInt("group_message_sender_id"),
+                                jsonmessage.getJSONObject(i).getString("user_username"),
+                                jsonmessage.getJSONObject(i).getString("file_filename"),
+                                jsonmessage.getJSONObject(i).getString("map_latitude"),
+                                jsonmessage.getJSONObject(i).getString("map_longitude"),
+                                jsonmessage.getJSONObject(i).getString("time"),
+                                jsonmessage.getJSONObject(i).getString("group_message_type"),
+                                jsonmessage.getJSONObject(i).getString("target_userid"));
+
+                        temp.add(groupMessageInfo);
+                    }
+                    callback.onResult(null, temp);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "sendmessagegroup":
+
+                try {
+                    if (resource.getString("status").equals("success")) {
+                        callback.onResult(new String[]{resource.getString("message"), TRUE}, null);
+                    } else {
+                        callback.onResult(new String[]{resource.getString("message"), FALSE}, null);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "getpublickey":
+
+                try {
+                    if (resource.getString("status").equals("success")) {
+                        callback.onResult(new String[]{type, resource.getJSONObject("message").getString("user_id"),
+                                resource.getJSONObject("message").getString("publickey"), TRUE}, null);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                break;
         }
         //super.onPostExecute(result);
 

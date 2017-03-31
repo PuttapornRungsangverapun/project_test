@@ -5,13 +5,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -28,11 +26,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Timer;
@@ -46,7 +40,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
     EditText et_message;
     static String id, token, shareedkey;
     static int REQUEST_FILE = 1;
-    String friendid, publickey, privatekey;
+    String friendid, publickey;
     int lastMessageId;
     ArrayList<MessageInfo> messageInfos;
     MessageAdapter messageAdapter;
@@ -63,7 +57,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         bt_send = (Button) findViewById(R.id.bt_send_message);
         bt_file = (Button) findViewById(R.id.bt_file);
 
-        rsaEncryption = new RSAEncryption(this);
+
 
 
         Intent i = getIntent();
@@ -77,7 +71,6 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         id = sp.getString("user_id_current", "-1");
         token = sp.getString("token", "-1");
-        privatekey = sp.getString("privatekey", "-1");
 
         messageInfos = new ArrayList<>();
         messageAdapter = new MessageAdapter(this, R.layout.message, R.id.tv_message_adapter, messageInfos, token, id);
@@ -205,7 +198,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
 
         SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
         editor.putString("SHARED_KEY:" + friendid, shareedkey);
-        editor.commit();
+        editor.apply();
 
         String sharedKeyMessage = rsaEncryption.RSAEncrypt(publickey, shareedkey);
 
@@ -217,8 +210,10 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {//data สิ่งที่activityกลับมาคืนเรา
         if (requestCode == 1 && resultCode == Activity.RESULT_OK && data != null) {
             Uri uri = data.getData();
-            String filename = getFileName(uri);
-            byte[] filedata = getData(uri);
+
+            GetFile getFile = new GetFile(this);
+            String filename = getFile.getFileName(uri);
+            byte[] filedata = getFile.getData(uri);
 
             if (filedata == null) {
                 return;
@@ -272,6 +267,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                 //secure
                 if (mo.type.equals("authen")) {
                     if (shareedkey == null) {
+                        rsaEncryption = new RSAEncryption(this);
                         shareedkey = rsaEncryption.RSADecrypt(mo.message);
                         aesEncryption = new AESEncryption(shareedkey);
                     }
@@ -281,6 +277,9 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                         mo.longtitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLon));
                         messageInfos.add(mo);
                     } catch (Exception e) {
+                        e.printStackTrace();
+                        mo.message = "failed to decrypt...";
+                        messageInfos.add(mo);
                     }
                 } else if (mo.type.equals("text")) {
                     try {
@@ -309,35 +308,6 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         bt_send.setEnabled(true);
     }
 
-    //Read file fromuri
-    private byte[] getData(Uri uri) {//อ่านไฟล์โดยให้pathไปreturnเป็นbyte binaryกลับมา
-        byte[] result = null;
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-
-            if (inputStream.available() > 10e6) {
-                Toast.makeText(this, "File size must be 10mb", Toast.LENGTH_SHORT).show();
-                inputStream.close();
-                return null;
-            }
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            int nRead;
-            byte[] data = new byte[16384];//อ่านทั้ฝหมด16kb ในเgoogleบอกเร็วสุด
-            while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
-                buffer.write(data, 0, nRead);
-            }
-            buffer.flush();//เขียนข้อไปให้หมด
-
-            result = buffer.toByteArray();
-            inputStream.close();//ถ้าไม่ปิดแสดงว่ามีคนใช้อยู่จะลบไม่ได้
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
     private boolean checkFilePermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true;
@@ -348,28 +318,6 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             return false;
         }
         return true;
-    }
-
-    public String getFileName(Uri uri) {
-        String result = null;
-        if (uri.getScheme().equals("content")) {
-            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-            try {
-                if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-        if (result == null) {
-            result = uri.getPath();
-            int cut = result.lastIndexOf('/');
-            if (cut != -1) {
-                result = result.substring(cut + 1);
-            }
-        }
-        return result;
     }
 
     public String checkhashkey() {

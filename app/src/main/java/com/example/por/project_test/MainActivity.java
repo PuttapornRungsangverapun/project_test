@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -11,14 +12,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements HttpRequestCallback {
 
     Button bt_login;
     EditText et_login_username, et_login_password;
     TextView tv_register;
-    CheckBox chk_keepme;
+
 
 
     @Override
@@ -37,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements HttpRequestCallba
         et_login_username = (EditText) findViewById(R.id.et_login_username);
         et_login_password = (EditText) findViewById(R.id.et_login_password);
         tv_register = (TextView) findViewById(R.id.tv_register);
-        chk_keepme = (CheckBox) findViewById(R.id.chk_keepme);
 
         bt_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,32 +76,28 @@ public class MainActivity extends AppCompatActivity implements HttpRequestCallba
             Intent i = new Intent(MainActivity.this, ContactActivity.class);
             startActivity(i);
 
-//            new RegisterActivity().getRSAKey();
 
-            if (chk_keepme.isChecked()) {
-                //SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                //SharedPreferences.Editor editor = sp.edit();
+            SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
+            editor.putString("user_id_current", result[2]);
+            editor.putBoolean("re_login", false);
 
-                SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
-                editor.putString("user_id_current", result[2]);
-                editor.putBoolean("re_login", false);
+            editor.putString("token", result[3]);
+            editor.putString("username", result[4]);
+            editor.putString("publickey", result[5]);
 
-                editor.putString("token", result[3]);
-                editor.putString("username", result[4]);
-                editor.commit();
-            } else {
-                //SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                //SharedPreferences.Editor editor = sp.edit();
+            try {
+                byte[] key = et_login_password.getText().toString().getBytes("UTF-8");
+                key = Arrays.copyOf(key, 32);
+                String str_key = new String(key, "UTF-8");
+                String privateKey = new AESEncryption(str_key).decrypt(result[6]);
+                editor.putString("privatekey", privateKey);
 
-                SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
-                editor.putString("user_id_current", result[2]);
-                editor.putBoolean("re_login", true);
-
-                editor.putString("token", result[3]);
-                editor.putString("username", result[4]);
-                editor.commit();
-
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
+
+            editor.apply();
+
         }
     }
 

@@ -46,11 +46,6 @@
         android:layout_marginTop="20dp"
         android:text="login" />
 
-    <CheckBox
-        android:id="@+id/chk_keepme"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Keep me login" />
 
     <TextView
         android:id="@+id/tv_register"
