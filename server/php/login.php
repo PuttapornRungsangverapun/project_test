@@ -5,7 +5,7 @@ $user_name = $_REQUEST["username"];
 $user_pass = sha1($_REQUEST["password"]);
 
 //$mysql_qry = "select user_id,user_username,user_password from users where user_username = '$user_name'";
-$mysql_qry ="select users.user_id,users.user_username username,users.user_password,tokens.token_body token
+$mysql_qry ="select users.user_id user_id,users.user_username username,users.user_password,tokens.token_body token
 from users left join tokens on users.user_id = tokens.user_id
 where users.user_username=?";
 
@@ -31,10 +31,22 @@ if($row){
     
     if($row['user_password']==($user_pass)){
         
+        $mysql_qry = "select users.user_id,users.user_username,users.user_publickey publickey,store_key.privatekey privatekey
+        from users inner join store_key on users.user_id=store_key.user_id
+        where (store_key.user_id = ?)";
+        $result = mysqli_prepare($conn ,$mysql_qry);
+        mysqli_stmt_bind_param($result,'i',$row['user_id']);
+        mysqli_stmt_execute($result);
+        $result= mysqli_stmt_get_result($result);
+        $row2=mysqli_fetch_array($result);
+        
         $ret['status']="success";
         $ret['userid']=intval($row['user_id']);
         $ret['message']="Login success";
         $ret['username']=$row['username'];
+        $ret['publickey']=$row2['publickey'];
+        $ret['privatekey']=$row2['privatekey'];
+        
         
         $mysql_qry = "select user_id,token_body from tokens where user_id = ?";
         // $result1 = mysqli_query($conn ,$mysql_qry1);
@@ -55,6 +67,11 @@ if($row){
             mysqli_stmt_bind_param($result,'ss',$token,$row['user_id']);
             mysqli_stmt_execute($result);
             $result= mysqli_stmt_get_result($result);
+            
+            
+            
+            
+            
             
             $ret['token']=$token;
         }

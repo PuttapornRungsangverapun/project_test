@@ -5,7 +5,6 @@ header('Content-type:application/json');
 $user_name = $_REQUEST["username"];
 $user_pass = sha1($_REQUEST["password"]);
 $user_email = $_REQUEST["email"];
-$user_publickey = $_REQUEST["publickey"];
 
 // Remove all illegal characters from email
 $email = filter_var($user_email, FILTER_SANITIZE_EMAIL);
@@ -21,10 +20,10 @@ $ret=array();
 
 if(!$row){
     
-    $mysql_qry = "insert into users(user_username,user_password,user_status_id ,user_email,user_publickey) values (?,?,'1',?,?)";
+    $mysql_qry = "insert into users(user_username,user_password,user_status_id ,user_email) values (?,?,'1',?)";
     // $result = mysqli_query($conn ,$mysql_qry);
     $result = mysqli_prepare($conn ,$mysql_qry);
-    mysqli_stmt_bind_param($result,'ssss',$user_name,$user_pass,$user_email,$user_publickey);
+    mysqli_stmt_bind_param($result,'sss',$user_name,$user_pass,$user_email);
     mysqli_stmt_execute($result);
     $result= mysqli_stmt_get_result($result);
     
