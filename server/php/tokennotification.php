@@ -5,20 +5,37 @@ include('token.php');
 
 $user_id = $_REQUEST["userid"];
 $token_noti= $_REQUEST["token_noti"];
-$mysql_qry = "select * from tokens_notification where user_id=$user_id";
-$result=mysqli_query($conn ,$mysql_qry);
+$mysql_qry = "select * from tokens_notification where user_id=?";
+// $result=mysqli_query($conn ,$mysql_qry);
+
+$result = mysqli_prepare($conn ,$mysql_qry);
+mysqli_stmt_bind_param($result,'s',$user_id);
+mysqli_stmt_execute($result);
+$result= mysqli_stmt_get_result($result);
+
 $row=mysqli_fetch_array($result);
 $ret=array();
 if($row){
-	$mysql_qry2 = "update tokens_notification set token_body=$token_noti where user_id=$user_id";
-$row2=mysqli_query($conn ,$mysql_qry2);
-$ret['status']="updatesuccess";	
-
+    $mysql_qry = "update tokens_notification set token_body=? where user_id=?";
+    // $row2=mysqli_query($conn ,$mysql_qry2);
+    
+    $result = mysqli_prepare($conn ,$mysql_qry);
+    mysqli_stmt_bind_param($result,'ss',$token_noti,$user_id);
+    mysqli_stmt_execute($result);
+    // $result= mysqli_stmt_get_result($result);
+    
+    $ret['status']="updatesuccess";
+    
 }else{
-
-$mysql_qry3 = "insert into tokens_notification(token_body,user_id) values ('$token_noti','$user_id')";
-$row3=mysqli_query($conn ,$mysql_qry3);
-$ret['status']="createsuccess";	
+    
+    $mysql_qry = "insert into tokens_notification(token_body,user_id) values (?,?)";
+    // $row3=mysqli_query($conn ,$mysql_qry3);
+    
+    $result = mysqli_prepare($conn ,$mysql_qry);
+    mysqli_stmt_bind_param($result,'ss',$token_noti,$user_id);
+    mysqli_stmt_execute($result);
+    
+    $ret['status']="createsuccess";
 }
-echo json_encode($ret);	
+echo json_encode($ret);
 ?>
