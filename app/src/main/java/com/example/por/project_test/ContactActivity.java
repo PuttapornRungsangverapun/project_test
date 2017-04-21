@@ -74,13 +74,10 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
         });
 
 
-        BackgoundWorker backgoundWorker = new BackgoundWorker(this);
-        backgoundWorker.execute("listfriend", id + "", token);
+        new BackgoundWorker(this).execute("listfriend", id + "", token);
 
         String token_noti = FirebaseInstanceId.getInstance().getToken();
-
-        backgoundWorker = new BackgoundWorker(this);
-        backgoundWorker.execute("notification", id + "", token_noti, token);
+        new BackgoundWorker(this).execute("notification", id + "", token_noti, token);
 
     }
 
@@ -88,8 +85,7 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        BackgoundWorker backgoundWorker = new BackgoundWorker(this);
-        backgoundWorker.execute("listfriend", id + "", token);
+        new BackgoundWorker(this).execute("listfriend", id + "", token);
     }
 
     @Override

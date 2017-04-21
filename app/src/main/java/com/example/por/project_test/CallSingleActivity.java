@@ -1,6 +1,5 @@
 package com.example.por.project_test;
 
-import android.*;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -9,14 +8,21 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -47,21 +53,42 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
     private PlayThread playThread;
     private RecordThread recordThread;
     SocketTransmitter socketTransmitter;
-    Button bt_call, bt_receive, bt_reject, bt_speaker;
-    EditText et_call;
+    Button bt_receive, bt_speaker;
+    ImageButton bt_call, bt_reject;
     String id, token, frienid, usernameFriend;
     int callId;
+    Ringtone r;
+    PowerManager.WakeLock mProximityWakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final Window win = getWindow();
+        win.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+
         setContentView(R.layout.activity_call_single);
-        bt_call = (Button) findViewById(R.id.call);
-        et_call = (EditText) findViewById(R.id.et_call);
-        bt_reject = (Button) findViewById(R.id.reject);
+
+        PowerManager powerManager = (PowerManager) getSystemService(CallSingleActivity.POWER_SERVICE);
+
+
+        mProximityWakeLock = powerManager.newWakeLock(
+                PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "");
+        mProximityWakeLock.acquire();
+
+
+        try {
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+            r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+            r.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        bt_call = (ImageButton) findViewById(R.id.call);
+        bt_reject = (ImageButton) findViewById(R.id.reject);
         bt_receive = (Button) findViewById(R.id.receive);
         bt_speaker = (Button) findViewById(R.id.speaker);
-        socketTransmitter = new SocketTransmitter("u3.punyapat.org", 1234);
+        socketTransmitter = new SocketTransmitter("vps145.vpshispeed.net", 1234);
         socketTransmitter.start();
 
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
@@ -84,6 +111,17 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
             @Override
             public void onClick(View v) {
                 socketTransmitter.send(1234, "reject:" + id + ":" + usernameFriend + "", CallSingleActivity.this);
+                r.stop();
+                if (audioTrack != null) {
+                    doPlay = false;
+                    doRecord = false;
+                    audioTrack.stop();
+                    audioTrack.release();
+                    audioRecorder.stop();
+                    audioRecorder.release();
+                }
+
+                finish();
             }
         });
         bt_receive.setOnClickListener(new View.OnClickListener() {
@@ -91,6 +129,7 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
             public void onClick(View v) {
                 socketTransmitter.send(1234, "accept:" + id + ":" + usernameFriend + "", CallSingleActivity.this);
                 startStreaming();
+                r.stop();
             }
         });
         bt_speaker.setOnClickListener(new View.OnClickListener() {
@@ -132,15 +171,21 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
     }
 
     @Override
+    protected void onPause() {
+
+        super.onPause();
+    }
+
+    @Override
     protected void onStop() {
-        if (audioTrack != null) {
-            doPlay = false;
-            doRecord = false;
-            audioTrack.stop();
-            audioTrack.release();
-            audioRecorder.stop();
-            audioRecorder.release();
-        }
+//        if (audioTrack != null) {
+//            doPlay = false;
+//            doRecord = false;
+//            audioTrack.stop();
+//            audioTrack.release();
+//            audioRecorder.stop();
+//            audioRecorder.release();
+//        }
         super.onStop();
     }
 
@@ -163,6 +208,12 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
                     @Override
                     public void run() {
                         Toast.makeText(CallSingleActivity.this, "Reject calling", Toast.LENGTH_SHORT).show();
+                        if (mProximityWakeLock != null) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                                mProximityWakeLock.release(0);
+                            }
+                        }
+
                     }
                 });
 
@@ -211,14 +262,14 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
                     byte[] length = ByteBuffer.allocate(4).putInt(n).array();
                     byte[] payLoad = new byte[n];
                     System.arraycopy(data, 0, payLoad, 0, n);
-                    byte[] packet = new byte[callId.length + 6 + 1+ 2 + n];
+                    byte[] packet = new byte[callId.length + 6 + 1 + 2 + n];
 
                     int count = 0;
                     System.arraycopy(callId, 0, packet, count, callId.length);
                     count += callId.length;
                     System.arraycopy(type, 0, packet, count, type.length);
                     count += 1;
-                    System.arraycopy(timeStamp, 2, packet, count,6);
+                    System.arraycopy(timeStamp, 2, packet, count, 6);
                     count += 6;
                     System.arraycopy(length, 2, packet, count, 2);
                     count += 2;
@@ -260,5 +311,10 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
             }
         }
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        return;
     }
 }

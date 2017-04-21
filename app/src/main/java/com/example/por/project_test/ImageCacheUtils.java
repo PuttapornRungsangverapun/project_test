@@ -13,11 +13,11 @@ import java.util.HashMap;
  * Created by por on 11/27/2016.
  */
 
-public class ImageCacheUtils {
+class ImageCacheUtils {
 
     private static HashMap<String,Bitmap> hash = new HashMap<>();
 
-    public static void save(Context context, String id, Bitmap image){
+    static void save(Context context, String id, Bitmap image){
         File target = new File(context.getCacheDir(),"image_cache_" + id);
         try {
             FileOutputStream fos = new FileOutputStream(target);
@@ -28,7 +28,7 @@ public class ImageCacheUtils {
         }
     }
 
-    public static Bitmap load(Context context, String id){
+    static Bitmap load(Context context, String id){
         if(hash.containsKey(id)){
             return hash.get(id);
         }
@@ -52,7 +52,7 @@ public class ImageCacheUtils {
         return bm;
     }
 
-    public static boolean hasCache(Context context, String id){
+    static boolean hasCache(Context context, String id){
         File target = new File(context.getCacheDir(),"image_cache_" + id);
         return target.exists();
     }

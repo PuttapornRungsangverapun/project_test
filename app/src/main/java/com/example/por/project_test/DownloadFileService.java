@@ -53,7 +53,7 @@ public class DownloadFileService extends Service {
         return Service.START_STICKY;//ถ้าถูกkillเริ่มใหม่อัตโนมัต
     }
 
-    class DownloadTask extends AsyncTask<String, Integer, Integer> {
+    private class DownloadTask extends AsyncTask<String, Integer, Integer> {
 
         File target;
 

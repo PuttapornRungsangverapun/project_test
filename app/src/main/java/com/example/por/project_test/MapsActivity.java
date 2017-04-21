@@ -180,7 +180,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             aesEncryption = new AESEncryption(intent.getStringExtra("sharedkey"));
 
-//            MessageActivity messageActivity = new MessageActivity();
             String lonEncrypt = aesEncryption.encrypt(longmark + "");
             String latEncrypt = aesEncryption.encrypt(latmark + "");
 
@@ -195,7 +194,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String groupid = intent.getStringExtra("groupid");
 
             aesEncryption = new AESEncryption(intent.getStringExtra("sharedkey"));
-//            GroupMessageActivity groupMessageActivity = new GroupMessageActivity();
+
             String lonEncrypt = aesEncryption.encrypt(longmark + "");
             String latEncrypt = aesEncryption.encrypt(latmark + "");
 

@@ -8,14 +8,13 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -26,7 +25,7 @@ import java.nio.ByteBuffer;
 
 public class CallGroupActivity extends AppCompatActivity implements SocketCallback {
     public final int SAMPLE_RATE = 5000;
-    public final int ENCODING = AudioFormat.ENCODING_PCM_8BIT;
+    public final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private String[] permissions = {android.Manifest.permission.RECORD_AUDIO};
@@ -59,7 +58,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
         bt_reject = (Button) findViewById(R.id.reject_group);
         bt_receive = (Button) findViewById(R.id.receive_group);
         bt_speaker = (Button) findViewById(R.id.speaker_group);
-        socketTransmitter = new SocketTransmitter("u3.punyapat.org", 1234);
+        socketTransmitter = new SocketTransmitter("vps145.vpshispeed.net", 1234);
         socketTransmitter.start();
 
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);

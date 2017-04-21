@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,6 +16,7 @@ public class AddfriendActivity extends AppCompatActivity implements TextWatcher,
     EditText et_searchfriend;
     TextView tv_searchfriend;
     Button bt_add;
+    String id, token;
 
 
     @Override
@@ -28,25 +28,18 @@ public class AddfriendActivity extends AppCompatActivity implements TextWatcher,
         bt_add = (Button) findViewById(R.id.bt_addfriend);
         setTitle("Add friend");
         et_searchfriend.addTextChangedListener(this);
-
+        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
+        id = sp.getString("user_id_current", "");
+        token = sp.getString("token", "");
 
         bt_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 String str_username = et_searchfriend.getText().toString().trim();
-
-//                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(AddfriendActivity.this);
-                SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
-                String id = sp.getString("user_id_current", "");
-                String token = sp.getString("token", "");
-
-                if ((str_username.isEmpty() || str_username.length() == 0 || str_username.equals("") || str_username == null)) {
+                if (str_username.isEmpty() || str_username.length() == 0 || str_username.equals("")) {
                     et_searchfriend.setError("Not found");
-
                 } else {
-                    BackgoundWorker backgoundWorker = new BackgoundWorker(AddfriendActivity.this);
-                    backgoundWorker.execute("addfriend", str_username, id + "", token);
+                    new BackgoundWorker(AddfriendActivity.this).execute("addfriend", str_username, id,token);
 //                    Log.i("Addfriend", "Click");
                 }
             }
@@ -66,17 +59,8 @@ public class AddfriendActivity extends AppCompatActivity implements TextWatcher,
 
     @Override
     public void afterTextChanged(Editable editable) {
-
-
-        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
-        String id = sp.getString("user_id_current", "");
-        String token = sp.getString("token", "");
-
-        BackgoundWorker backgoundWorker = new BackgoundWorker(this);
-        backgoundWorker.execute("searchfriend", id, editable.toString(), token);
+        new BackgoundWorker(this).execute("searchfriend", id, editable.toString(),token);
         //Log.i("Searchfriend", id,editable.toString(),token);
-
-
     }
 
 

@@ -1,6 +1,7 @@
 package com.example.por.project_test;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -17,20 +18,21 @@ import java.util.List;
 /**
  * Created by Por on 9/18/2016.
  */
-public class CreateGrouptAdapter extends ArrayAdapter<AddUserGroupInfo> implements CompoundButton.OnCheckedChangeListener {
+class CreateGrouptAdapter extends ArrayAdapter<AddUserGroupInfo> implements CompoundButton.OnCheckedChangeListener {
     SparseBooleanArray mCheckStates;
     private final Context ctx;
     List<AddUserGroupInfo> value;
 
-    public CreateGrouptAdapter(Context ctx, int resource, List<AddUserGroupInfo> value) {
+    CreateGrouptAdapter(Context ctx, int resource, List<AddUserGroupInfo> value) {
         super(ctx, resource, value);//สร้างarrayเปล่าที่มีขนาดเท่ากับlist ในadapterมีทั้งหมดกี่บรรทัด
         this.ctx = ctx;
         this.value = value;
         mCheckStates = new SparseBooleanArray(value.size());
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 
         LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -57,20 +59,6 @@ public class CreateGrouptAdapter extends ArrayAdapter<AddUserGroupInfo> implemen
     @Override
     public AddUserGroupInfo getItem(int position) {
         return value.get(position);
-    }
-
-    public boolean isChecked(int position) {
-        return mCheckStates.get(position, false);
-    }
-
-    public void setChecked(int position, boolean isChecked) {
-        mCheckStates.put(position, isChecked);
-
-    }
-
-    public void toggle(int position) {
-        setChecked(position, !isChecked(position));
-
     }
 
     @Override

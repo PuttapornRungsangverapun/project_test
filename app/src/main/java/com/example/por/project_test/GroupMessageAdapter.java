@@ -3,9 +3,7 @@ package com.example.por.project_test;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,10 +13,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,18 +20,18 @@ import java.util.List;
  * Created by Por on 10/9/2016.
  */
 
-public class GroupMessageAdapter extends ArrayAdapter<GroupMessageInfo> {
+class GroupMessageAdapter extends ArrayAdapter<GroupMessageInfo> {
     private final Context ctx;
     List<GroupMessageInfo> value;
     String user_id_current;
     ImageView img_file;
     String token, id;
 
-    public GroupMessageAdapter(Context ctx, int resource, int textViewResourceId, ArrayList<GroupMessageInfo> value, String token, String id) {
+    GroupMessageAdapter(Context ctx, int resource, int textViewResourceId, ArrayList<GroupMessageInfo> value, String token, String id) {
         super(ctx, resource, textViewResourceId, value);
         this.ctx = ctx;
         this.value = value;
-        SharedPreferences sp = ctx.getSharedPreferences("MySetting", ctx.MODE_PRIVATE);
+        SharedPreferences sp = ctx.getSharedPreferences("MySetting", Context.MODE_PRIVATE);
         user_id_current = sp.getString("user_id_current", "-1");
         this.token = token;
         this.id = id;
@@ -45,7 +39,7 @@ public class GroupMessageAdapter extends ArrayAdapter<GroupMessageInfo> {
 
     @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 
         TextView textView, tv_time_sender, tv_time_receiver;
         Drawable img;
@@ -97,7 +91,7 @@ public class GroupMessageAdapter extends ArrayAdapter<GroupMessageInfo> {
                         img_file.setImageBitmap(bm);
                     }
                 } else {
-                    new ImgTask(msgId, img_file).execute(url);
+                    new LoadImageTask(ctx, msgId, img_file).execute(url,"group");
                 }
             } else {
                 textView.setText(value.get(position).filename);
@@ -112,64 +106,8 @@ public class GroupMessageAdapter extends ArrayAdapter<GroupMessageInfo> {
             img = rowView.getResources().getDrawable(R.drawable.makermap);
             img.setBounds(0, 0, 70, 70);
             textView.setCompoundDrawables(img, null, null, null);
-
         }
-
-
         return rowView;
     }
-
-    class ImgTask extends AsyncTask<String, Integer, Integer> {
-
-        Bitmap bitmap;
-        ImageView iv;
-        String msgId;
-
-        ImgTask(String msgId, ImageView iv) {
-            this.msgId = msgId;
-            this.iv = iv;
-        }
-
-        @Override
-        protected Integer doInBackground(String... strings) {
-            try {
-                URL url = new URL(strings[0]);
-
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setDoInput(true);
-
-                int size = Integer.parseInt(connection.getHeaderField("Content-length"));//ขนาดข้อมูลเท่าไหร่ หน่วยbyte
-                InputStream is = connection.getInputStream();
-                BufferedInputStream bis = new BufferedInputStream(is);
-
-                byte[] bytes = new byte[512];//โหลดทีละ512
-                byte[] bytesdecrypt = new byte[size];
-                int read, count = 0;
-
-                float update = 0f;
-                while ((read = bis.read(bytes)) != -1) {
-                    //  fos.write(bytes, 0, read);
-                    System.arraycopy(bytes, 0, bytesdecrypt, count, read);//sourceกอปจากไหน,เริ่มต้นของsource,destinationเริ่มต้น,กอปทั้งหทดกี่ตัว
-                    count += read;//countอ่านมาแล้วกี่ไบ
-                }
-
-                byte[] original = ((GroupMessageActivity) ctx).aesEncryption.decrypt(bytesdecrypt);
-                bitmap = BitmapFactory.decodeByteArray(original, 0, original.length);
-                is.close();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer integer) {
-            iv.setImageBitmap(bitmap);
-            ImageCacheUtils.save(ctx, msgId, bitmap);
-        }
-    }
-
 
 }

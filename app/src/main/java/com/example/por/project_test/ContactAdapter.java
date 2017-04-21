@@ -1,6 +1,7 @@
 package com.example.por.project_test;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,19 +15,20 @@ import java.util.List;
 /**
  * Created by Por on 9/18/2016.
  */
-public class ContactAdapter extends ArrayAdapter<UserInfo> {
+class ContactAdapter extends ArrayAdapter<UserInfo> {
 
     private final Context ctx;
     List<UserInfo> value;
 
-    public ContactAdapter(Context ctx, int resource, List<UserInfo> value) {
+    ContactAdapter(Context ctx, int resource, List<UserInfo> value) {
         super(ctx, resource, value);//สร้างarrayเปล่าที่มีขนาดเท่ากับlist ในadapterมีทั้งหมดกี่บรรทัด
         this.ctx = ctx;
         this.value = value;
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
 
         LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 

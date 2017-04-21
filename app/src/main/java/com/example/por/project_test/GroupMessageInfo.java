@@ -4,7 +4,7 @@ package com.example.por.project_test;
  * Created by Por on 6/1/2560.
  */
 
-public class GroupMessageInfo {
+class GroupMessageInfo {
     String message, filename, type, tmpLat, tmpLon, time, username, target_id;
     int group_message_id, message_sender_id, message_status;
     double latitude, longtitude;

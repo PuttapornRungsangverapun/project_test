@@ -98,15 +98,28 @@ public class RegisterActivity extends AppCompatActivity implements HttpRequestCa
         }
 
         // Generate the keys — might take sometime on slow computers
-        KeyPair myPair = kpg.generateKeyPair();
+        KeyPair myPair = null;
+        if (kpg != null) {
+            myPair = kpg.generateKeyPair();
+        }
 
-        RSAPublicKey pbKey = (RSAPublicKey) myPair.getPublic();
-        RSAPrivateKey pvKey = (RSAPrivateKey) myPair.getPrivate();
+        RSAPublicKey pbKey = null;
+        if (myPair != null) {
+            pbKey = (RSAPublicKey) myPair.getPublic();
+        }
+        RSAPrivateKey pvKey = null;
+        if (myPair != null) {
+            pvKey = (RSAPrivateKey) myPair.getPrivate();
+        }
 
-        publicKey = Base64.encodeToString(pbKey.getEncoded(), Base64.DEFAULT);
+        if (pbKey != null) {
+            publicKey = Base64.encodeToString(pbKey.getEncoded(), Base64.DEFAULT);
+        }
 //        Log.d("xxx", publicKey);
 
-        privateKey = Base64.encodeToString(pvKey.getEncoded(), Base64.DEFAULT);
+        if (pvKey != null) {
+            privateKey = Base64.encodeToString(pvKey.getEncoded(), Base64.DEFAULT);
+        }
 //        Log.d("xxx", privateKey);
 
         SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();

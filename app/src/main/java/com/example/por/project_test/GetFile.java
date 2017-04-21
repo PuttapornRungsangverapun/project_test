@@ -14,14 +14,14 @@ import java.io.InputStream;
  * Created by User on 31/3/2560.
  */
 
-public class GetFile {
+class GetFile {
     private Context ctx;
 
     GetFile(Context ctx) {
         this.ctx = ctx;
     }
 
-    public byte[] getData(Uri uri) {//อ่านไฟล์โดยให้pathไปreturnเป็นbyte binaryกลับมา
+    byte[] getData(Uri uri) {//อ่านไฟล์โดยให้pathไปreturnเป็นbyte binaryกลับมา
         byte[] result = null;
         try {
             InputStream inputStream = ctx.getContentResolver().openInputStream(uri);
@@ -53,7 +53,7 @@ public class GetFile {
         return result;
     }
 
-    public String getFileName(Uri uri) {
+    String getFileName(Uri uri) {
         String result = null;
         if (uri.getScheme().equals("content")) {
             Cursor cursor = ctx.getContentResolver().query(uri, null, null, null, null);

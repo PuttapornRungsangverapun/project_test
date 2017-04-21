@@ -58,8 +58,6 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         bt_file = (Button) findViewById(R.id.bt_file);
 
 
-
-
         Intent i = getIntent();
         friendid = i.getStringExtra("friendid");
         publickey = i.getStringExtra("publickey");
@@ -116,8 +114,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                     str_message = aesEncryption.encrypt(str_message);
 //                    Log.d("str message", str_message);
 
-                    BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-                    backgoundWorker.execute("sendmessage", id, friendid, str_message, "text", "", "", "", token);
+                    new BackgoundWorker(MessageActivity.this).execute("sendmessage", id, friendid, str_message, "text", "", "", "", token);
                     et_message.setText("");
                 }
 
@@ -184,8 +181,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                     return;
                 } else {
                     isRequesting = true;
-                    BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-                    backgoundWorker.execute("readmessage", id, friendid, lastMessageId + "", token);
+                    new BackgoundWorker(MessageActivity.this).execute("readmessage", id, friendid, lastMessageId + "", token);
                 }
             }
         }, 500, 500);
@@ -194,16 +190,20 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
     private void genSharedKey() {
         while ((shareedkey == null) || (shareedkey.length() != 32)) {
             shareedkey = new BigInteger(160, new SecureRandom()).toString(32);
+            shareedkey = "00000000000000000000000000000000".substring(shareedkey.length()) + shareedkey;
         }
 
         SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
         editor.putString("SHARED_KEY:" + friendid, shareedkey);
         editor.apply();
-
+        rsaEncryption = new RSAEncryption(this);
         String sharedKeyMessage = rsaEncryption.RSAEncrypt(publickey, shareedkey);
 
-        BackgoundWorker backgoundWorker = new BackgoundWorker(MessageActivity.this);
-        backgoundWorker.execute("sendmessage", id, friendid, sharedKeyMessage, "authen", "", "", "", token);
+        new BackgoundWorker(this).execute("sendmessage", id, friendid, sharedKeyMessage, "authen", "", "", "", token);
+
+        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
+        String mySharedKeyMessage = rsaEncryption.RSAEncrypt(sp.getString("publickey", "-1"), shareedkey);
+        new BackgoundWorker(this).execute("sendmessage", id, id, mySharedKeyMessage, "authen", "", "", "", token);
     }
 
     @Override
@@ -238,8 +238,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
 
 
-            BackgoundWorker backgoundWorker2 = new BackgoundWorker(MessageActivity.this);
-            backgoundWorker2.execute("sendmessage", id, friendid, encryptFile, "file", filename, "", "", token, md5);
+            new BackgoundWorker(MessageActivity.this).execute("sendmessage", id, friendid, encryptFile, "file", filename, "", "", token, md5);
 
 
         }

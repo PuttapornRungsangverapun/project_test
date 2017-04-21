@@ -60,7 +60,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
         }
-
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
@@ -102,6 +101,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
             intent.putExtra("frienduser", messageBody.split(":")[1]);
             sender = username;
+            startActivity(intent);
+            return;
         } else if (friendid.startsWith("U")) {
             friendid = friendid.replace("U", "");
             intent = new Intent(this, MessageActivity.class);
@@ -138,8 +139,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 .setVibrate(new long[]{100, 100, 100, 100, 100, 100, 100, 100, 100})
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(Notification.PRIORITY_MAX)
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setOngoing(true);
+                .setDefaults(Notification.DEFAULT_ALL);
+//                .setOngoing(true);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

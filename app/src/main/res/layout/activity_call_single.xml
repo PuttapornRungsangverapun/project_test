@@ -8,28 +8,39 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#858585"
     tools:context="com.example.por.project_test.CallSingleActivity">
 
-    <EditText
-        android:id="@+id/et_call"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    ฺ
-
-    <Button
-
+<ImageView
+    android:layout_marginTop="80dp"
+    android:layout_centerHorizontal="true"
+    android:src="@drawable/contactscall"
+    android:layout_width="200dp"
+    android:layout_height="200dp" />
+    <ImageButton
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="450dp"
+        android:layout_width="70dp"
+        android:src="@android:drawable/ic_btn_speak_now"
+        android:layout_height="70dp" />
+    <ImageButton
         android:id="@+id/call"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/et_call"
-        android:text="Call" />
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="380dp"
+        android:background="@drawable/bg_call_recieve"
+        android:src="@android:drawable/ic_menu_call" />
 
-    <Button
+    <ImageButton
         android:id="@+id/reject"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/call"
-        android:text="reject" />
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginLeft="250dp"
+        android:layout_marginTop="380dp"
+        android:background="@drawable/bg_call_reject"
+        android:src="@android:drawable/stat_notify_missed_call" />
+
 
     <Button
         android:id="@+id/receive"
@@ -42,6 +53,6 @@
         android:id="@+id/speaker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="speaker"
-        android:layout_below="@+id/receive" />
+        android:layout_below="@+id/receive"
+        android:text="speaker" />
 </RelativeLayout>

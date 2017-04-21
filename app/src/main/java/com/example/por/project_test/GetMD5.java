@@ -9,8 +9,8 @@ import java.security.NoSuchAlgorithmException;
  * Created by User on 31/3/2560.
  */
 
-public class GetMD5 {
-    public static String getMD5EncryptedString(String encTarget) {
+class GetMD5 {
+    static String getMD5EncryptedString(String encTarget) {
         MessageDigest mdEnc = null;
         byte[] data = Base64.decode(encTarget, Base64.DEFAULT);
         try {

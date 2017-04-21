@@ -55,16 +55,14 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
             @Override
             public void onClick(View v) {
                 String groupName = et_namegroup.getText().toString().trim();
-                if (groupName.isEmpty() || groupName.length() == 0 || groupName.equals("") || groupName == null) {
+                if (groupName.isEmpty() || groupName.length() == 0 || groupName.equals("")) {
                     et_namegroup.setError("Group name must be filled");
-                    return;
                 } else {
 
                     for (int i = 0; i < createGrouptAdapter.value.size(); i++) {
-                        if (createGrouptAdapter.mCheckStates.get(i) == true) {
+                        if (createGrouptAdapter.mCheckStates.get(i)) {
                             String friendid = addUserGroupInfos.get(i).userid + "";
-                            BackgoundWorker backgoundWorker = new BackgoundWorker(CreateGroupActivity.this);
-                            backgoundWorker.execute("crategroup", id, token, friendid, groupName);
+                            new BackgoundWorker(CreateGroupActivity.this).execute("crategroup", id, token, friendid, groupName);
                             groupMember.add(addUserGroupInfos.get(i).userid);
                         }
                     }
@@ -85,14 +83,16 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
             String friendid = result[1];
             String publickey = result[2];
             String sharedKeyMessage = rsaEncryption.RSAEncrypt(publickey, shareedkey);
-            BackgoundWorker backgoundWorker = new BackgoundWorker(CreateGroupActivity.this);
-            backgoundWorker.execute("sendmessagegroup", id, groupId, sharedKeyMessage, "authen", "", "", "", token, friendid);
+
+            new BackgoundWorker(CreateGroupActivity.this).execute("sendmessagegroup", id, groupId, sharedKeyMessage, "authen", "", "", "", token, friendid);
+
+            new BackgoundWorker(CreateGroupActivity.this).execute("sendmessagegroup", id, groupId, sharedKeyMessage, "authen", "", "", "", token, id);
         }
         if ((userList == null) && (result == null)) {
             return;
         } else if (userList == null) {
             return;
-        } else if ((result == null) && userList != null) {
+        } else if (result == null) {
             addUserGroupInfos = new ArrayList<>();
             for (Object o : userList) {
                 if (o instanceof AddUserGroupInfo)//เข็คoใช่objectของclassหรือไม่
@@ -107,6 +107,7 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
     private void genSharedKey(String groupid) {
         while ((shareedkey == null) || (shareedkey.length() != 32)) {
             shareedkey = new BigInteger(160, new SecureRandom()).toString(32);
+            shareedkey = "00000000000000000000000000000000".substring(shareedkey.length()) + shareedkey;
         }
 
         SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
@@ -115,9 +116,7 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
 
         //for loop
         for (int friendid : groupMember) {
-            BackgoundWorker backgoundWorker = new BackgoundWorker(CreateGroupActivity.this);
-            backgoundWorker.execute("getpublickey", id, friendid + "", token);
-
+            new BackgoundWorker(this).execute("getpublickey", id, friendid + "", token);
         }
 
     }

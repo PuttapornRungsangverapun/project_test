@@ -57,19 +57,16 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
         groupId = i.getStringExtra("groupid");
         setTitle("Group : " + i.getStringExtra("groupname"));
 
-
-        BackgoundWorker backgoundWorker = new BackgoundWorker(InviteGroupActivity.this);
-        backgoundWorker.execute("listinvitefriend", id, token, groupId);
+        new BackgoundWorker(this).execute("listinvitefriend", id, token, groupId);
 
         bt_invite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 for (int i = 0; i < inviteGroupAdapter.value.size(); i++) {
-                    if (inviteGroupAdapter.mCheckStates.get(i) == true) {
+                    if (inviteGroupAdapter.mCheckStates.get(i)) {
                         String friendid = inviteGroupInfos.get(i).userid + "";
-                        BackgoundWorker backgoundWorker = new BackgoundWorker(InviteGroupActivity.this);
-                        backgoundWorker.execute("invitefriend", id, token, friendid, groupId);
+                      new BackgoundWorker(InviteGroupActivity.this).execute("invitefriend", id, token, friendid, groupId);
                         groupMember.add(inviteGroupInfos.get(i).userid);
                     }
                 }
@@ -87,8 +84,7 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
             shareedkey = sp.getString("SHARED_KEY_GROUP:" + groupId, "-1");
 
             for (int friendid : groupMember) {
-                BackgoundWorker backgoundWorker = new BackgoundWorker(InviteGroupActivity.this);
-                backgoundWorker.execute("getpublickey", id, friendid + "", token);
+                new BackgoundWorker(this).execute("getpublickey", id, friendid + "", token);
 
             }
 
@@ -98,14 +94,13 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
             String friendid = result[1];
             String publickey = result[2];
             String sharedKeyMessage = rsaEncryption.RSAEncrypt(publickey, shareedkey);
-            BackgoundWorker backgoundWorker = new BackgoundWorker(InviteGroupActivity.this);
-            backgoundWorker.execute("sendmessagegroup", id, groupId, sharedKeyMessage, "authen", "", "", "", token, friendid);
+            new BackgoundWorker(this).execute("sendmessagegroup", id, groupId, sharedKeyMessage, "authen", "", "", "", token, friendid);
         }
         if ((userList == null) && (result == null)) {
             return;
         } else if (userList == null) {
             return;
-        } else if ((result == null) && userList != null) {
+        } else if (result == null) {
             inviteGroupInfos = new ArrayList<>();
             for (Object o : userList) {
                 if (o instanceof InviteGroupInfo)//เข็คoใช่objectของclassหรือไม่
@@ -115,64 +110,5 @@ public class InviteGroupActivity extends AppCompatActivity implements HttpReques
             inviteGroupAdapter = new InviteGroupAdapter(this, R.layout.invitegroup, inviteGroupInfos);
             lv_invitegroup.setAdapter(inviteGroupAdapter);
         }
-    }
-
-    private void genSharedKey(String groupid) {
-        while ((shareedkey == null) || (shareedkey.length() != 32)) {
-            shareedkey = new BigInteger(160, new SecureRandom()).toString(32);
-        }
-
-        SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
-        editor.putString("SHARED_KEY_GROUP:" + groupid, shareedkey);
-        editor.commit();
-
-
-        for (int friendid : groupMember) {
-            BackgoundWorker backgoundWorker = new BackgoundWorker(InviteGroupActivity.this);
-            backgoundWorker.execute("getpublickey", id, friendid + "", token);
-
-        }
-
-    }
-
-    private String RSAEncrypt(String publickey, String myMessage) {
-        RSAPublicKey pbKey = null;
-
-        byte[] keyBytes = null;
-        try {
-            keyBytes = Base64.decode(publickey.getBytes("utf-8"), Base64.DEFAULT);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = null;
-        try {
-            keyFactory = KeyFactory.getInstance("RSA");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        try {
-            pbKey = (RSAPublicKey) keyFactory.generatePublic(spec);
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
-
-///
-
-        // Get an instance of the Cipher for RSA encryption/decryption
-        Cipher c = null;
-        try {
-            c = Cipher.getInstance("RSA");
-            // Initiate the Cipher, telling it that it is going to Encrypt, giving it the public key
-            c.init(Cipher.ENCRYPT_MODE, pbKey);
-
-            // Encrypt that message using a new SealedObject and the Cipher we created before
-            String msg = Base64.encodeToString(c.doFinal(myMessage.getBytes("UTF-8")), Base64.DEFAULT);
-
-            return msg;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

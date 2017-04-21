@@ -13,7 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Created by User on 29/3/2560.
  */
 
-public class AESEncryption {
+class AESEncryption {
     private String sharedKey;
 
     AESEncryption(String sharedKey) {
@@ -23,6 +23,7 @@ public class AESEncryption {
     private String encrypt(String msg, byte[] data) {
 //        String key = sharedKey; // 256 bit key
         String initVector = new BigInteger(80, new SecureRandom()).toString(32); // 80/5=16 bytes IV   80bitแบบrandom tostringเป็นbase32 ตัวหนังสือ1ตัวเท่ากับ32bit ได้ 16 ตัว
+        initVector = "0000000000000000".substring(initVector.length()) + initVector;
         return initVector + encrypt(sharedKey, initVector, msg, data);
     }
 
@@ -57,14 +58,18 @@ public class AESEncryption {
         return null;
     }
 
-    public  String decrypt(String encrypted) {return new String(decrypt(encrypted, null));}
+    String decrypt(String encrypted) {
+        return new String(decrypt(encrypted, null));
+    }
 
-    public byte[] decrypt(byte[] data) {return decrypt(null, data);}
+    byte[] decrypt(byte[] data) {
+        return decrypt(null, data);
+    }
 
     private byte[] decrypt(String encrypted, byte[] data) {
         String iv = null;
         String cyphertext = null;
-//        String key = shareedkey;
+
 
         if (encrypted == null) {
             byte[] iv2 = new byte[16];
@@ -79,7 +84,6 @@ public class AESEncryption {
             return decrypt(sharedKey, iv, cyphertext, data);
         }
     }
-
 
 
     private byte[] decrypt(String key, String initVector, String encrypted, byte[] data) {

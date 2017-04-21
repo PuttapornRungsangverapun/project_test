@@ -47,13 +47,12 @@ public class MainActivity extends AppCompatActivity implements HttpRequestCallba
                 String str_username = et_login_username.getText().toString().trim();
                 String str_password = et_login_password.getText().toString().trim();
 
-                if ((str_username.isEmpty() || str_username.length() == 0 || str_username.equals("") || str_username == null)) {
+                if (str_username.isEmpty() || str_username.length() == 0 || str_username.equals("")) {
                     et_login_username.setError("Username must be filled");
-                } else if (str_password.isEmpty() || str_password.length() == 0 || str_password.equals("") || str_password == null) {
+                } else if (str_password.isEmpty() || str_password.length() == 0 || str_password.equals("")) {
                     et_login_password.setError("Password must be filled");
                 } else {
-                    BackgoundWorker backgoundWorker = new BackgoundWorker(MainActivity.this);
-                    backgoundWorker.execute("login", str_username, str_password);
+                    new BackgoundWorker(MainActivity.this).execute("login", str_username, str_password);
                 }
 
             }

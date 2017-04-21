@@ -32,8 +32,7 @@ public class MemberGroupActivity extends AppCompatActivity implements HttpReques
         id = sp.getString("user_id_current", "-1");
         token = sp.getString("token", "-1");
 
-        BackgoundWorker backgoundWorker = new BackgoundWorker(MemberGroupActivity.this);
-        backgoundWorker.execute("membergroup", id, token, groupId);
+        new BackgoundWorker(this).execute("membergroup", id, token, groupId);
 
         memberGroupInfos = new ArrayList<>();
         memberGroupAdapter = new MemberGroupAdapter(this, R.layout.membergroup, memberGroupInfos);

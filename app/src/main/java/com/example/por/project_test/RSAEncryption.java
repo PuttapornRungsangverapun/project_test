@@ -19,8 +19,8 @@ import javax.crypto.Cipher;
  * Created by User on 29/3/2560.
  */
 
-public class RSAEncryption {
-    private static String  privateKey;
+class RSAEncryption {
+    private static String privateKey;
 
     RSAEncryption(Context ctx) {
         SharedPreferences sp = ctx.getSharedPreferences("MySetting", Context.MODE_PRIVATE);
@@ -28,7 +28,7 @@ public class RSAEncryption {
 
     }
 
-    public String RSAEncrypt(String publicKey,String myMessage) {
+    String RSAEncrypt(String publicKey, String myMessage) {
 
 
         RSAPublicKey pbKey = null;
@@ -46,7 +46,9 @@ public class RSAEncryption {
             e.printStackTrace();
         }
         try {
-            pbKey = (RSAPublicKey) keyFactory.generatePublic(spec);
+            if (keyFactory != null) {
+                pbKey = (RSAPublicKey) keyFactory.generatePublic(spec);
+            }
         } catch (InvalidKeySpecException e) {
             e.printStackTrace();
         }
@@ -61,16 +63,15 @@ public class RSAEncryption {
             c.init(Cipher.ENCRYPT_MODE, pbKey);
 
             // Encrypt that message using a new SealedObject and the Cipher we created before
-            String msg = Base64.encodeToString(c.doFinal(myMessage.getBytes("UTF-8")), Base64.DEFAULT);
 
-            return msg;
+            return Base64.encodeToString(c.doFinal(myMessage.getBytes("UTF-8")), Base64.DEFAULT);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public String RSADecrypt(String myMessage) {
+    String RSADecrypt(String myMessage) {
         RSAPrivateKey pvKey = null;
 
         byte[] keyBytes = null;
@@ -87,7 +88,9 @@ public class RSAEncryption {
             e.printStackTrace();
         }
         try {
-            pvKey = (RSAPrivateKey) keyFactory.generatePrivate(spec);
+            if (keyFactory != null) {
+                pvKey = (RSAPrivateKey) keyFactory.generatePrivate(spec);
+            }
         } catch (InvalidKeySpecException e) {
             e.printStackTrace();
         }
@@ -102,9 +105,8 @@ public class RSAEncryption {
             c.init(Cipher.DECRYPT_MODE, pvKey);
 
             // Encrypt that message using a new SealedObject and the Cipher we created before
-            String msg = new String(c.doFinal(Base64.decode(myMessage, Base64.DEFAULT)));
 
-            return msg;
+            return new String(c.doFinal(Base64.decode(myMessage, Base64.DEFAULT)), "UTF-8");
         } catch (Exception e) {
             e.printStackTrace();
         }

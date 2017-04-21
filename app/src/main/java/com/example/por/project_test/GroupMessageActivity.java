@@ -98,12 +98,10 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             @Override
             public void onClick(View v) {
                 String str_message = et_group_message.getText().toString().trim();
-                if (str_message.isEmpty() || str_message.length() == 0 || str_message.equals("") || str_message == null) {
-                    return;
+                if (str_message.isEmpty() || str_message.length() == 0 || str_message.equals("")) {
                 } else {
                     str_message = aesEncryption.encrypt(str_message);
-                    BackgoundWorker backgoundWorker = new BackgoundWorker(GroupMessageActivity.this);
-                    backgoundWorker.execute("sendmessagegroup", id, groupId, str_message, "text", "", "", "", token);
+                    new BackgoundWorker(GroupMessageActivity.this).execute("sendmessagegroup", id, groupId, str_message, "text", "", "", "", token);
                     et_group_message.setText("");
                 }
             }
@@ -161,8 +159,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                     return;
                 } else {
                     isRequesting = true;
-                    BackgoundWorker backgoundWorker = new BackgoundWorker(GroupMessageActivity.this);
-                    backgoundWorker.execute("readmessagegroup", id, groupId, lastMessageId + "", token);
+                    new BackgoundWorker(GroupMessageActivity.this).execute("readmessagegroup", id, groupId, lastMessageId + "", token);
                 }
             }
         }, 500, 500);
@@ -256,9 +253,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             String md5 = GetMD5.getMD5EncryptedString(Base64.encodeToString(filedata, Base64.DEFAULT));
             String encryptFile = aesEncryption.encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
-
-            BackgoundWorker backgoundWorker = new BackgoundWorker(GroupMessageActivity.this);
-            backgoundWorker.execute("sendmessagegroup", id, groupId, encryptFile, "file", filename, "", "", token, md5);
+            new BackgoundWorker(GroupMessageActivity.this).execute("sendmessagegroup", id, groupId, encryptFile, "file", filename, "", "", token, md5);
 
 
         }
