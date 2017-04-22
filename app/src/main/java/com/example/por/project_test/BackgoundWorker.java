@@ -197,6 +197,14 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 httpRequest(url_server + "storekey.php", param);
                 break;
             }
+            case "leavegroup": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("token", params[2]);
+                param.put("groupid", params[3]);
+                httpRequest(url_server + "leavegroup.php", param);
+                break;
+            }
         }
 
         return status;

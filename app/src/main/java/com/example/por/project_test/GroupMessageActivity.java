@@ -286,6 +286,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         switch (item.getItemId()) {
             case R.id.call_group:
                 Intent i3 = new Intent(GroupMessageActivity.this, CallGroupActivity.class);
@@ -304,6 +305,30 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                 i2.putExtra("groupid", groupId);
                 i2.putExtra("groupname", groupName);
                 startActivity(i2);
+                return true;
+            case R.id.leave:
+                new AlertDialog.Builder(this)
+                        .setTitle("Leave group")
+                        .setMessage("Are you sure you want to leave this group?")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                Intent i4 = new Intent(GroupMessageActivity.this, ContactActivity.class);
+                                new BackgoundWorker(GroupMessageActivity.this).execute("leavegroup", id, token, groupId);
+                                SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
+                                editor.remove("SHARED_KEY_GROUP:" + groupId);
+                                editor.apply();
+                                startActivityForResult(i4, 1);
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // do nothing
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

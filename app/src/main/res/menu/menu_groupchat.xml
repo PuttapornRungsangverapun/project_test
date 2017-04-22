@@ -9,4 +9,7 @@
     <item
         android:id="@+id/member"
         android:title="Member"></item>
+    <item
+        android:id="@+id/leave"
+        android:title="Leave"></item>
 </menu>

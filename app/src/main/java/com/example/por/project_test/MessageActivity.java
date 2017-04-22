@@ -103,7 +103,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
 
 
                 String str_message = et_message.getText().toString().trim();
-                if (str_message.isEmpty() || str_message.length() == 0 || str_message.equals("") || str_message == null) {
+                if (str_message.isEmpty() || str_message.length() == 0 || str_message.equals("")) {
                     return;
                 } else {
                     if (shareedkey == null) {
@@ -196,6 +196,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
         editor.putString("SHARED_KEY:" + friendid, shareedkey);
         editor.apply();
+
         rsaEncryption = new RSAEncryption(this);
         String sharedKeyMessage = rsaEncryption.RSAEncrypt(publickey, shareedkey);
 

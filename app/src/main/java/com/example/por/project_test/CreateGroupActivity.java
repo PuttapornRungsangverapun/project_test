@@ -20,7 +20,7 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
     Button bt_creategroup_submit;
     ListView lv_addgroup;
     static String id, token, shareedkey;
-    String groupId;
+    String groupId, publicKey;
     RSAEncryption rsaEncryption;
     CreateGrouptAdapter createGrouptAdapter;
     ArrayList<AddUserGroupInfo> addUserGroupInfos;
@@ -45,6 +45,7 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         id = sp.getString("user_id_current", "-1");
         token = sp.getString("token", "-1");
+        publicKey=sp.getString("publickey","-1");
 
 
         BackgoundWorker backgoundWorker = new BackgoundWorker(this);
@@ -83,10 +84,11 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
             String friendid = result[1];
             String publickey = result[2];
             String sharedKeyMessage = rsaEncryption.RSAEncrypt(publickey, shareedkey);
+            String mysSharedKeyMessage = rsaEncryption.RSAEncrypt(this.publicKey, shareedkey);
 
             new BackgoundWorker(CreateGroupActivity.this).execute("sendmessagegroup", id, groupId, sharedKeyMessage, "authen", "", "", "", token, friendid);
 
-            new BackgoundWorker(CreateGroupActivity.this).execute("sendmessagegroup", id, groupId, sharedKeyMessage, "authen", "", "", "", token, id);
+            new BackgoundWorker(CreateGroupActivity.this).execute("sendmessagegroup", id, groupId, mysSharedKeyMessage, "authen", "", "", "", token, id);
         }
         if ((userList == null) && (result == null)) {
             return;
