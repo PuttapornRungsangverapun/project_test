@@ -24,15 +24,17 @@ on messages.message_id =  messages_texts.message_id
 left JOIN messages_maps
 on messages.message_id =  messages_maps.message_id
 where ((message_sender_id=? and message_receiver_id=?)
-or (message_sender_id=? and message_receiver_id=?)) and (messages.message_id > ?)
+or (message_sender_id=? and message_receiver_id=?) or 
+(messages.message_sender_id=? AND messages.message_receiver_id=? and messages_texts.targer_userid=?)) 
+and (messages.message_id > ?)
 and (messages_files.message_id is not null
 or messages_texts.message_id is not null
 or messages_maps.message_id is not null)
-order by  messages.message_id asc";
+order by messages_texts.targer_userid=? desc";
 //echo $mysql_qry;
 // $result = mysqli_query($conn ,$mysql_qry);
 $result = mysqli_prepare($conn ,$mysql_qry);
-mysqli_stmt_bind_param($result,'sssss',$user_id,$user_id_friend,$user_id_friend,$user_id,$last_message_id);
+mysqli_stmt_bind_param($result,'sssssssss',$user_id,$user_id_friend,$user_id_friend,$user_id,$user_id,$user_id,$user_id_friend,$last_message_id,$user_id_friend);
 mysqli_stmt_execute($result);
 $result= mysqli_stmt_get_result($result);
 

@@ -31,9 +31,8 @@ if($row){
     
     if($row['user_password']==($user_pass)){
         
-        $mysql_qry = "select users.user_id,users.user_username,users.user_publickey publickey,store_key.privatekey privatekey
-        from users inner join store_key on users.user_id=store_key.user_id
-        where (store_key.user_id = ?)";
+        $mysql_qry = "select users.user_id,users.user_username,users.user_publickey publickey,users.user_privatekey privatekey
+        from users  where user_id = ?";
         $result = mysqli_prepare($conn ,$mysql_qry);
         mysqli_stmt_bind_param($result,'i',$row['user_id']);
         mysqli_stmt_execute($result);
