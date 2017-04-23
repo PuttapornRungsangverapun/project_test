@@ -48,7 +48,6 @@ else{
     $ret['status']="fail2";
     $ret['message']="Register fail";
 }
-
 echo json_encode($ret);
 
 ?>

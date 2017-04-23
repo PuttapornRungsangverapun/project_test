@@ -9,6 +9,9 @@ $message_type =$_REQUEST["type"];
 $message_filename = $_REQUEST["filename"];
 $map_latitude = $_REQUEST["latitude"];
 $map_longitude=$_REQUEST["longitude"];
+if($message_type=='authen'){
+$target_id=$_REQUEST["targetid"];
+}
 if($message_type=='file'){
     $md5=$_REQUEST["md5"];
 }
@@ -113,9 +116,9 @@ else if($message_type=='map'){
     $result= mysqli_stmt_get_result($result);
 }
 else if($message_type=='authen'){
-    $mysql_qry = "insert into messages_texts(text_body  ,message_id) values (?,?)";
+    $mysql_qry = "insert into messages_texts(text_body,message_id,targer_userid) values (?,?,?)";
     $result = mysqli_prepare($conn ,$mysql_qry);
-    mysqli_stmt_bind_param($result,'ss',$user_message,$messagesid);
+    mysqli_stmt_bind_param($result,'sss',$user_message,$messagesid,$target_id);
     mysqli_stmt_execute($result);
     $result= mysqli_stmt_get_result($result);
 }
