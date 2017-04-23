@@ -45,11 +45,9 @@ public class CreateGroupActivity extends AppCompatActivity implements HttpReques
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         id = sp.getString("user_id_current", "-1");
         token = sp.getString("token", "-1");
-        publicKey=sp.getString("publickey","-1");
+        publicKey = sp.getString("publickey", "-1");
 
-
-        BackgoundWorker backgoundWorker = new BackgoundWorker(this);
-        backgoundWorker.execute("listaddgroup", id + "", token);
+        new BackgoundWorker(this).execute("listaddgroup", id + "", token);
         groupMember = new ArrayList<>();
 
         bt_creategroup_submit.setOnClickListener(new View.OnClickListener() {

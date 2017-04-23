@@ -148,16 +148,12 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                             intent.putExtra("friendid", friendid);
                             intent.putExtra("sharedkey", shareedkey);
                             startActivity(intent);
-
-
                         }
                     }
                 });
                 builder.show();
             }
         });
-
-
     }
 
     @Override
@@ -204,7 +200,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
 
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         String mySharedKeyMessage = rsaEncryption.RSAEncrypt(sp.getString("publickey", "-1"), shareedkey);
-        new BackgoundWorker(this).execute("sendmessage", id, id, mySharedKeyMessage, "authen", "", "", "", token);
+        new BackgoundWorker(this).execute("sendmessage", id, id, mySharedKeyMessage, "authen", "", "", "", token,friendid);
     }
 
     @Override
@@ -265,33 +261,42 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             if (o instanceof MessageInfo) {//เข็คoใช่objectของclassหรือไม่
                 MessageInfo mo = (MessageInfo) o;
                 //secure
-                if (mo.type.equals("authen")) {
-                    if (shareedkey == null) {
-                        rsaEncryption = new RSAEncryption(this);
-                        shareedkey = rsaEncryption.RSADecrypt(mo.message);
-                        aesEncryption = new AESEncryption(shareedkey);
-                    }
-                } else if (mo.type.equals("map")) {
-                    try {
-                        mo.latitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLat));
-                        mo.longtitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLon));
+                switch (mo.type) {
+                    case "authen":
+                        if (shareedkey == null) {
+                            rsaEncryption = new RSAEncryption(this);
+                            shareedkey = rsaEncryption.RSADecrypt(mo.message);
+                            aesEncryption = new AESEncryption(shareedkey);
+
+                            SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
+                            editor.putString("SHARED_KEY:" + friendid, shareedkey);
+                            editor.apply();
+                        }
+                        break;
+                    case "map":
+                        try {
+                            mo.latitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLat));
+                            mo.longtitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLon));
+                            messageInfos.add(mo);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            mo.message = "failed to decrypt...";
+                            messageInfos.add(mo);
+                        }
+                        break;
+                    case "text":
+                        try {
+                            mo.message = aesEncryption.decrypt(mo.message);
+                            messageInfos.add(mo);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            mo.message = "failed to decrypt...";
+                            messageInfos.add(mo);
+                        }
+                        break;
+                    default:
                         messageInfos.add(mo);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        mo.message = "failed to decrypt...";
-                        messageInfos.add(mo);
-                    }
-                } else if (mo.type.equals("text")) {
-                    try {
-                        mo.message = aesEncryption.decrypt(mo.message);
-                        messageInfos.add(mo);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        mo.message = "failed to decrypt...";
-                        messageInfos.add(mo);
-                    }
-                } else {
-                    messageInfos.add(mo);
+                        break;
                 }
 
 

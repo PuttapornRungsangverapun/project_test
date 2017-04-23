@@ -36,10 +36,10 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
 
     @Override
     protected String doInBackground(String... params) {
-        String type = params[0];
+
         //String url_server = "http://192.168.137.2/";
 
-        this.type = type;
+        this.type = params[0];
         switch (type) {
             case "register": {
                 HashMap<String, String> param = new HashMap<>();
@@ -91,6 +91,8 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("token", params[8]);
                 if (params[4].equals("file")) {
                     param.put("md5", params[9]);
+                } else if (params.length >= 10) {
+                    param.put("targetid", params[9]);
                 }
                 httpRequest(url_server + "message.php", param);
                 break;

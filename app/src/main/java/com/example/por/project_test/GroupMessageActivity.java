@@ -183,33 +183,38 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
 
             if (o instanceof GroupMessageInfo) {//เข็คoใช่objectของclassหรือไม่
                 GroupMessageInfo mo = (GroupMessageInfo) o;
-                if (mo.type.equals("authen")) {
-                    if (shareedkey == null) {
-                        rsaEncryption = new RSAEncryption(this);
-                        shareedkey = rsaEncryption.RSADecrypt(mo.message);
-                        aesEncryption = new AESEncryption(shareedkey);
-                    }
-                } else if (mo.type.equals("map")) {
-                    try {
-                        mo.latitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLat));
-                        mo.longtitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLon));
+                switch (mo.type) {
+                    case "authen":
+                        if (shareedkey == null) {
+                            rsaEncryption = new RSAEncryption(this);
+                            shareedkey = rsaEncryption.RSADecrypt(mo.message);
+                            aesEncryption = new AESEncryption(shareedkey);
+                        }
+                        break;
+                    case "map":
+                        try {
+                            mo.latitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLat));
+                            mo.longtitude = Double.parseDouble(aesEncryption.decrypt(mo.tmpLon));
+                            groupMessageInfos.add(mo);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            mo.message = "failed to decrypt...";
+                            groupMessageInfos.add(mo);
+                        }
+                        break;
+                    case "text":
+                        try {
+                            mo.message = aesEncryption.decrypt(mo.message);
+                            groupMessageInfos.add(mo);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            mo.message = "failed to decrypt...";
+                            groupMessageInfos.add(mo);
+                        }
+                        break;
+                    default:
                         groupMessageInfos.add(mo);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        mo.message = "failed to decrypt...";
-                        groupMessageInfos.add(mo);
-                    }
-                } else if (mo.type.equals("text")) {
-                    try {
-                        mo.message = aesEncryption.decrypt(mo.message);
-                        groupMessageInfos.add(mo);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        mo.message = "failed to decrypt...";
-                        groupMessageInfos.add(mo);
-                    }
-                } else {
-                    groupMessageInfos.add(mo);
+                        break;
                 }
             }
         }
