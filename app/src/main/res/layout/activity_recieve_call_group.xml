@@ -18,18 +18,23 @@
         android:layout_width="200dp"
         android:layout_height="200dp" />
     <ImageButton
-        android:id="@+id/group_speaker"
-
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="380dp"
+        android:id="@+id/group_reciece_speaker"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="450dp"
         android:layout_width="70dp"
         android:src="@android:drawable/ic_btn_speak_now"
-        android:background="@null"
         android:layout_height="70dp" />
-
+    <ImageButton
+        android:id="@+id/group_recieve_call"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="380dp"
+        android:background="@drawable/bg_call_recieve"
+        android:src="@android:drawable/ic_menu_call" />
 
     <ImageButton
-        android:id="@+id/group_reject"
+        android:id="@+id/group_recieve_reject"
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_marginLeft="250dp"

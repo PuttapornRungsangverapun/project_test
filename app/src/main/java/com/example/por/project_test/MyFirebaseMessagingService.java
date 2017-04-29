@@ -91,15 +91,19 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         String sender;
         if (messageBody.startsWith("call_group_from")) {
             friendid = friendid.replace("G", "");
-            intent = new Intent(this, CallGroupActivity.class);
+            intent = new Intent(this, RecieveCallGroupActivity.class);
             intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
             intent.putExtra("frienduser", messageBody.split(":")[1]);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             sender = username;
+            startActivity(intent);
+            return;
         } else if (messageBody.startsWith("call")) {
             friendid = friendid.replace("U", "");
-            intent = new Intent(this, CallSingleActivity.class);
+            intent = new Intent(this, RecieveCallActivity.class);
             intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
             intent.putExtra("frienduser", messageBody.split(":")[1]);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             sender = username;
             startActivity(intent);
             return;

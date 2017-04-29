@@ -50,11 +50,14 @@
         <activity
             android:name=".AddfriendActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.Dialog" />
+            android:parentActivityName=".ContactActivity"
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".MessageActivity"
+            android:parentActivityName=".ContactActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
+
 
         <service
             android:name=".DownloadFileService"
@@ -98,24 +101,37 @@
             android:name=".CreateGroupActivity"
             android:label="Create group"
             android:screenOrientation="portrait"
+            android:parentActivityName=".ContactActivity"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".GroupMessageActivity"
+            android:parentActivityName=".ContactActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".MemberGroupActivity"
             android:screenOrientation="portrait"
+            android:parentActivityName=".ContactActivity"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".InviteGroupActivity"
             android:screenOrientation="portrait"
+            android:parentActivityName=".GroupMessageActivity"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".CallSingleActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".CallGroupActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RecieveCallActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RecieveCallGroupActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".SettingsActivity"
             android:screenOrientation="portrait" />
     </application>
 

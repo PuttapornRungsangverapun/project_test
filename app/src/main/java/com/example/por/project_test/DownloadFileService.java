@@ -37,9 +37,8 @@ public class DownloadFileService extends Service {
 
         String url = intent.getStringExtra("url");
         String filename = intent.getStringExtra("filename");
-        String type = intent.getStringExtra("type");
         String sharedKey = intent.getStringExtra("sharedkey");
-        new DownloadTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url, filename, type, sharedKey);
+        new DownloadTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url, filename, sharedKey);
 
         notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(android.R.drawable.arrow_down_float)
@@ -62,8 +61,7 @@ public class DownloadFileService extends Service {
             try {
                 URL url = new URL(strings[0]);
                 String filename = strings[1];
-                String type = strings[2];
-                String sharedKey = strings[3];
+                String sharedKey = strings[2];
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);
 
@@ -88,11 +86,9 @@ public class DownloadFileService extends Service {
                     }
                 }
                 aesEncryption = new AESEncryption(sharedKey);
-                if (type.equals("single")) {
-                    original = aesEncryption.decrypt(bytesdecrypt);
-                } else if (type.equals("group")) {
-                    original = aesEncryption.decrypt(bytesdecrypt);
-                }
+                original = aesEncryption.decrypt(bytesdecrypt);
+
+
                 fos.write(original, 0, original.length);
 //                fos.write(bytesdecrypt, 0, bytesdecrypt.length);//no encryptjx
                 fos.close();

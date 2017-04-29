@@ -10,20 +10,27 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.por.project_test.AddfriendActivity">
 
+    <android.support.v7.widget.SearchView
+        android:id="@+id/search_friend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true" />
+
     <EditText
         android:id="@+id/et_searchfriend"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Search friend" />
+        android:hint="Search friend"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tv_searchfriend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/et_searchfriend"
+        android:layout_below="@+id/search_friend"
         android:layout_centerInParent="true"
         android:layout_marginTop="30dp"
-        />
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/bt_addfriend"
@@ -33,4 +40,6 @@
         android:layout_centerInParent="true"
         android:layout_marginTop="30dp"
         android:text="Add" />
+
+
 </RelativeLayout>

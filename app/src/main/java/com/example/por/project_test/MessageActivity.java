@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -86,7 +87,6 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                     Intent intent = new Intent(MessageActivity.this, DownloadFileService.class);
                     intent.putExtra("url", url);
                     intent.putExtra("filename", filename);
-                    intent.putExtra("type", "single");
                     intent.putExtra("sharedkey", shareedkey);
                     startService(intent);
                 } else if (message.type.equals("map")) {
@@ -329,6 +329,17 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
 //        return sp.getString("SHARED_KEY:" + friendid, "1234567890asdfgh1234567890asdfgh");
         return sp.getString("SHARED_KEY:" + friendid, null);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Intent intent = new Intent(MessageActivity.this,ContactActivity.class);
+            startActivity(intent);
+            overridePendingTransition(R.anim.trans_right_in, R.anim.trans_right_out);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override

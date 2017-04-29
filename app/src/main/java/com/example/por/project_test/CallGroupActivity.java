@@ -14,7 +14,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -45,20 +48,24 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
     private CallGroupActivity.PlayThread playThread;
     private CallGroupActivity.RecordThread recordThread;
     SocketTransmitter socketTransmitter;
-    Button bt_call, bt_receive, bt_reject, bt_speaker;
+    ImageButton bt_call, bt_receive, bt_reject, bt_speaker;
     String id, token, frienid;
     int callId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_call_group);
-        bt_call = (Button) findViewById(R.id.bt_call_group);
 
-        bt_reject = (Button) findViewById(R.id.reject_group);
-        bt_receive = (Button) findViewById(R.id.receive_group);
-        bt_speaker = (Button) findViewById(R.id.speaker_group);
-        socketTransmitter = new SocketTransmitter("vps145.vpshispeed.net", 1234);
+        final Window win = getWindow();
+        win.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+
+        setContentView(R.layout.activity_call_group);
+
+
+        bt_reject = (ImageButton) findViewById(R.id.group_reject);
+        bt_speaker = (ImageButton) findViewById(R.id.group_speaker);
+        socketTransmitter = new SocketTransmitter("vps145.vpshispeed.net", 4000);
         socketTransmitter.start();
 
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
@@ -73,23 +80,18 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
         }
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-        bt_call.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                socketTransmitter.send(1234, "request_call:" + id + ":" + frienid, CallGroupActivity.this);
-            }
-        });
+
+
         bt_reject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 socketTransmitter.send(1234, "reject:" + id + ":" + callId + "", CallGroupActivity.this);
-            }
-        });
-        bt_receive.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                socketTransmitter.send(1234, "accept:" + id + ":" + callId + "", CallGroupActivity.this);
-                startStreaming();
+                doPlay = false;
+                doRecord = false;
+                audioTrack.stop();
+                audioTrack.release();
+                audioRecorder.stop();
+                audioRecorder.release();
             }
         });
         bt_speaker.setOnClickListener(new View.OnClickListener() {
@@ -164,6 +166,8 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
         playThread = new PlayThread();
         audioRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, ENCODING, minBufferSize);
         recordThread = new RecordThread();
+
+        socketTransmitter.send(1234, "request_call:" + id + ":" + frienid, CallGroupActivity.this);
     }
 
     @Override
@@ -237,6 +241,12 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
                     audioTrack.write(data, 0, n);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    doPlay = false;
+                    doRecord = false;
+                    audioTrack.stop();
+                    audioTrack.release();
+                    audioRecorder.stop();
+                    audioRecorder.release();
                 }
             }
 
@@ -251,12 +261,12 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
     @Override
     protected void onStop() {
         if (audioTrack != null) {
-            doPlay = false;
-            doRecord = false;
-            audioTrack.stop();
-            audioTrack.release();
-            audioRecorder.stop();
-            audioRecorder.release();
+//            doPlay = false;
+//            doRecord = false;
+//            audioTrack.stop();
+//            audioTrack.release();
+//            audioRecorder.stop();
+//            audioRecorder.release();
         }
         super.onStop();
     }

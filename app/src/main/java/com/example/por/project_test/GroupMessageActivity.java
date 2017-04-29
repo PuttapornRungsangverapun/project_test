@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -82,7 +83,6 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                     Intent intent = new Intent(GroupMessageActivity.this, DownloadFileService.class);
                     intent.putExtra("url", url);
                     intent.putExtra("filename", filename);
-                    intent.putExtra("type", "group");
                     intent.putExtra("sharedkey", shareedkey);
                     startService(intent);
                 } else if (groupMessageInfo.type.equals("map")) {
@@ -189,6 +189,10 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                             rsaEncryption = new RSAEncryption(this);
                             shareedkey = rsaEncryption.RSADecrypt(mo.message);
                             aesEncryption = new AESEncryption(shareedkey);
+
+                            SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
+                            editor.putString("SHARED_KEY_GROUP:" + groupId, shareedkey);
+                            editor.apply();
                         }
                         break;
                     case "map":
@@ -288,6 +292,18 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
         inflater.inflate(R.menu.menu_groupchat, menu);
         return super.onCreateOptionsMenu(menu);
     }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Intent intent = new Intent(GroupMessageActivity.this, ContactActivity.class);
+            startActivity(intent);
+            overridePendingTransition(R.anim.trans_right_in, R.anim.trans_right_out);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
