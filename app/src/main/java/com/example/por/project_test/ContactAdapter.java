@@ -8,9 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,11 +22,19 @@ class ContactAdapter extends ArrayAdapter<UserInfo> {
 
     private final Context ctx;
     List<UserInfo> value;
+    List<UserInfo> valueOriginal;
 
     ContactAdapter(Context ctx, int resource, List<UserInfo> value) {
         super(ctx, resource, value);//สร้างarrayเปล่าที่มีขนาดเท่ากับlist ในadapterมีทั้งหมดกี่บรรทัด
         this.ctx = ctx;
         this.value = value;
+        valueOriginal = new ArrayList<>(value);
+    }
+
+    @NonNull
+    @Override
+    public Filter getFilter() {
+        return new UserFilter();
     }
 
     @NonNull
@@ -57,5 +67,33 @@ class ContactAdapter extends ArrayAdapter<UserInfo> {
         return value.get(position);
     }
 
+    class UserFilter extends Filter {
 
+        @Override
+
+        protected FilterResults performFiltering(CharSequence constraint) {
+            FilterResults results = new FilterResults();
+            List<UserInfo> data = new ArrayList<>(valueOriginal);
+            List<UserInfo> filterResult = new ArrayList<>();
+            for (UserInfo userInfo : data) {
+                if (userInfo.getName().toLowerCase().contains(constraint.toString().toLowerCase())) {
+                    filterResult.add(userInfo);
+                }
+            }
+            results.count = filterResult.size();
+            results.values = filterResult;
+            return results;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            clear();
+            List<UserInfo> data = (List<UserInfo>) results.values;
+            for (UserInfo userInfo : data) {
+                add(userInfo);
+            }
+            notifyDataSetChanged();
+        }
+    }
 }

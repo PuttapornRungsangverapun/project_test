@@ -123,6 +123,7 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
                     audioTrack.release();
                     audioRecorder.stop();
                     audioRecorder.release();
+                    mProximityWakeLock.release();
                 }
 
                 finish();

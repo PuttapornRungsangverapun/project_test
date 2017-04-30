@@ -16,12 +16,6 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true" />
 
-    <EditText
-        android:id="@+id/et_searchfriend"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Search friend"
-        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tv_searchfriend"

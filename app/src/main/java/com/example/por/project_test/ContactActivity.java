@@ -11,6 +11,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -25,7 +27,7 @@ import java.util.Comparator;
 public class ContactActivity extends AppCompatActivity implements HttpRequestCallback {
 
     private ListView lv_contact;
-    com.github.clans.fab.FloatingActionButton add_friend;
+    com.github.clans.fab.FloatingActionButton fb_searchFriend, fb_createGroup, fb_requestFriend;
     private String id, token;
     private ContactAdapter contactAdapter;
     private ArrayList<UserInfo> userInfos;
@@ -37,12 +39,15 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
 
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         lv_contact = (ListView) findViewById(R.id.lv_contact);
 //        add_friend = (FloatingActionButton) findViewById(R.id.add_friend);
 
         materialDesignFAM = (FloatingActionMenu) findViewById(R.id.material_design_android_floating_action_menu);
-        add_friend = (FloatingActionButton) findViewById(R.id.add_friend);
+        fb_searchFriend = (FloatingActionButton) findViewById(R.id.fb_searchFriend);
+        fb_createGroup = (FloatingActionButton) findViewById(R.id.fb_createGroup);
+        fb_requestFriend = (FloatingActionButton) findViewById(R.id.fb_requestFriend);
 
 
         userInfos = new ArrayList<>();
@@ -80,14 +85,27 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
             }
         });
 
-        add_friend.setOnClickListener(new View.OnClickListener() {
+        fb_createGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(ContactActivity.this, CreateGroupActivity.class);
+                startActivityForResult(i, 1);
+            }
+        });
+        fb_searchFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(ContactActivity.this, AddfriendActivity.class);
                 startActivityForResult(i, 1);
             }
         });
-
+        fb_requestFriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(ContactActivity.this, RequestFriendActivity.class);
+                startActivityForResult(i, 1);
+            }
+        });
 
         new BackgoundWorker(this).execute("listfriend", id + "", token);
 

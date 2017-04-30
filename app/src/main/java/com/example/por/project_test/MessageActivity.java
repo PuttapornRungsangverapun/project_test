@@ -20,6 +20,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -52,6 +54,9 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
+
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
         lastMessageId = 0;
         listView_message = (ListView) findViewById(R.id.listview_message);
         et_message = (EditText) findViewById(R.id.et_message);

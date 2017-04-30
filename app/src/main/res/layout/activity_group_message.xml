@@ -37,6 +37,7 @@
         <EditText
             android:id="@+id/et_group_message"
             android:layout_width="0dp"
+            android:hint="Message"
             android:layout_height="30dp"
             android:layout_weight="1"
             android:background="@null"

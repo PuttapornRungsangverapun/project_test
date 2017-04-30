@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.por.project_test">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -32,7 +33,8 @@
 
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Design.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -42,22 +44,23 @@
         <activity
             android:name=".RegisterActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.Design.NoActionBar" />
         <activity
             android:name=".ContactActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".AddfriendActivity"
-            android:screenOrientation="portrait"
             android:parentActivityName=".ContactActivity"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            tools:targetApi="jelly_bean" />
         <activity
             android:name=".MessageActivity"
             android:parentActivityName=".ContactActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
-
+            android:theme="@style/AppTheme"
+            tools:targetApi="jelly_bean" />
 
         <service
             android:name=".DownloadFileService"
@@ -100,24 +103,28 @@
         <activity
             android:name=".CreateGroupActivity"
             android:label="Create group"
-            android:screenOrientation="portrait"
             android:parentActivityName=".ContactActivity"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            tools:targetApi="jelly_bean" />
         <activity
             android:name=".GroupMessageActivity"
             android:parentActivityName=".ContactActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            tools:targetApi="jelly_bean" />
         <activity
             android:name=".MemberGroupActivity"
-            android:screenOrientation="portrait"
             android:parentActivityName=".ContactActivity"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            tools:targetApi="jelly_bean" />
         <activity
             android:name=".InviteGroupActivity"
-            android:screenOrientation="portrait"
             android:parentActivityName=".GroupMessageActivity"
-            android:theme="@style/AppTheme" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            tools:targetApi="jelly_bean" />
         <activity
             android:name=".CallSingleActivity"
             android:screenOrientation="portrait" />
@@ -133,6 +140,12 @@
         <activity
             android:name=".SettingsActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".RequestFriendActivity"
+            android:parentActivityName=".ContactActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            tools:targetApi="jelly_bean" />
     </application>
 
 </manifest>

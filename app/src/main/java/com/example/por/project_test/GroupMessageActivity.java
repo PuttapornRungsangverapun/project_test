@@ -20,6 +20,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -51,6 +53,8 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_message);
+
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         bt_group_file = (Button) findViewById(R.id.bt_group_file);
         et_group_message = (EditText) findViewById(R.id.et_group_message);

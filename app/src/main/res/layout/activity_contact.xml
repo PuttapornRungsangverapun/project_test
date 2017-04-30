@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
-
-
-
 
 
     <ListView
@@ -33,7 +30,6 @@
         fab:menu_colorNormal="#da3c2f"
         fab:menu_colorPressed="#dc4b3f"
         fab:menu_colorRipple="#99d4d4d4"
-        fab:menu_fab_label="Floating Action Menu"
         fab:menu_fab_size="normal"
         fab:menu_icon="@drawable/fab_add"
         fab:menu_labels_colorNormal="#333"
@@ -52,39 +48,47 @@
         fab:menu_labels_textColor="#f2f1f1"
         fab:menu_labels_textSize="15sp"
         fab:menu_openDirection="up"
-        fab:menu_shadowColor="#66aff198"
+
         fab:menu_shadowRadius="4dp"
         fab:menu_shadowXOffset="1dp"
         fab:menu_shadowYOffset="4dp"
         fab:menu_showShadow="true">
 
 
-
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/material_design_floating_action_menu_item2"
+            android:id="@+id/fb_searchFriend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_menu_search"
-            fab:fab_label="Menu Item 2"
+            fab:fab_label="Search friend"
             fab:fab_size="mini" />
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/add_friend"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/addfriend"
-            fab:fab_label="Menu Item 3"
+            android:id="@+id/fb_createGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_group_add_white_24dp"
+            fab:fab_label="Create group"
+            fab:fab_size="mini" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fb_requestFriend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:src="@drawable/ic_person_add_white_24dp"
+            fab:fab_label="Request friend"
             fab:fab_size="mini" />
     </com.github.clans.fab.FloatingActionMenu>
 
     <!--<android.support.design.widget.FloatingActionButton-->
-        <!--android:id="@+id/add_friend"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_gravity="bottom|end"-->
-        <!--android:layout_margin="@dimen/fab_margin"-->
-        <!--android:src="@drawable/addfriend" />-->
+    <!--android:id="@+id/add_friend"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignParentBottom="true"-->
+    <!--android:layout_alignParentRight="true"-->
+    <!--android:layout_gravity="bottom|end"-->
+    <!--android:layout_margin="@dimen/fab_margin"-->
+    <!--android:src="@drawable/addfriend" />-->
 
 </RelativeLayout>

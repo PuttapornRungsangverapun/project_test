@@ -207,6 +207,13 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 httpRequest(url_server + "leavegroup.php", param);
                 break;
             }
+            case "requestfriend": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("token", params[2]);
+                httpRequest(url_server + "friendrequest.php", param);
+                break;
+            }
         }
 
         return status;
@@ -505,7 +512,24 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                     e.printStackTrace();
                 }
                 break;
+            case "requestfriend":
+
+                try {
+                    ArrayList<Object> temp = new ArrayList<>();
+                    JSONArray jsonmessage = resource.getJSONArray("message");
+                    for (int i = 0; i < jsonmessage.length(); i++) {//ทำparsingแปลงjsonarray
+                        RequestFriendInfo requestFriendInfo = new RequestFriendInfo(
+                                jsonmessage.getJSONObject(i).getString("user_id"),
+                                jsonmessage.getJSONObject(i).getString("user_username"));
+                        temp.add(requestFriendInfo);
+                    }
+                    callback.onResult(null, temp);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                break;
         }
+
         //super.onPostExecute(result);
 
     }

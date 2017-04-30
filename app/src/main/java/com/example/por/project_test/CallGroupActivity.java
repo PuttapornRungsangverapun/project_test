@@ -9,6 +9,7 @@ import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -51,6 +52,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
     ImageButton bt_call, bt_receive, bt_reject, bt_speaker;
     String id, token, frienid;
     int callId;
+    PowerManager.WakeLock mProximityWakeLock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +64,16 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
 
         setContentView(R.layout.activity_call_group);
 
+        PowerManager powerManager = (PowerManager) getSystemService(CallSingleActivity.POWER_SERVICE);
+
+
+        mProximityWakeLock = powerManager.newWakeLock(
+                PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "");
+        mProximityWakeLock.acquire();
 
         bt_reject = (ImageButton) findViewById(R.id.group_reject);
         bt_speaker = (ImageButton) findViewById(R.id.group_speaker);
-        socketTransmitter = new SocketTransmitter("vps145.vpshispeed.net", 4000);
+        socketTransmitter = new SocketTransmitter("192.168.1.105", 1234);
         socketTransmitter.start();
 
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
@@ -86,12 +94,18 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
             @Override
             public void onClick(View v) {
                 socketTransmitter.send(1234, "reject:" + id + ":" + callId + "", CallGroupActivity.this);
-                doPlay = false;
-                doRecord = false;
-                audioTrack.stop();
-                audioTrack.release();
-                audioRecorder.stop();
-                audioRecorder.release();
+                if (audioTrack != null) {
+                    doPlay = false;
+                    doRecord = false;
+                    audioTrack.stop();
+                    audioTrack.release();
+                    audioRecorder.stop();
+                    audioRecorder.release();
+                    mProximityWakeLock.release();
+                }
+
+                finish();
+
             }
         });
         bt_speaker.setOnClickListener(new View.OnClickListener() {
