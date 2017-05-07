@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -73,7 +74,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
 
         bt_reject = (ImageButton) findViewById(R.id.group_reject);
         bt_speaker = (ImageButton) findViewById(R.id.group_speaker);
-        socketTransmitter = new SocketTransmitter("192.168.1.105", 1234);
+        socketTransmitter = new SocketTransmitter("vps145.vpshispeed.net", 4000);
         socketTransmitter.start();
 
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
@@ -284,5 +285,6 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
         }
         super.onStop();
     }
+
 
 }

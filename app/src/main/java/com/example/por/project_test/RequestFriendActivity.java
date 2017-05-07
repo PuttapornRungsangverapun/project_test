@@ -43,14 +43,7 @@ public class RequestFriendActivity extends AppCompatActivity implements HttpRequ
         token = sp.getString("token", "-1");
         setTitle("Request friend");
 
-//        lv_requestFriend.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                new BackgoundWorker(RequestFriendActivity.this).execute("addfriend", requestFriendInfos.get(position).userName, requestFriendInfos.get(position).id, token);
-////               requestFriendInfos.remove(position);
-//                requestFriendAdapter.notifyDataSetChanged();
-//            }
-//        });
+
         new BackgoundWorker(this).execute("requestfriend", id, token);
 
     }

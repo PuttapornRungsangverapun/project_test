@@ -76,7 +76,8 @@ class ContactAdapter extends ArrayAdapter<UserInfo> {
             List<UserInfo> data = new ArrayList<>(valueOriginal);
             List<UserInfo> filterResult = new ArrayList<>();
             for (UserInfo userInfo : data) {
-                if (userInfo.getName().toLowerCase().contains(constraint.toString().toLowerCase())) {
+
+                if (userInfo.username.toLowerCase().contains(constraint.toString().toLowerCase()) || userInfo.groupname.toLowerCase().contains(constraint.toString().toLowerCase())) {
                     filterResult.add(userInfo);
                 }
             }

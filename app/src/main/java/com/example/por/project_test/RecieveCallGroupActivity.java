@@ -78,7 +78,7 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
         bt_reject = (ImageButton) findViewById(R.id.group_recieve_reject);
         bt_receive = (ImageButton) findViewById(R.id.group_recieve_call);
         bt_speaker = (ImageButton) findViewById(R.id.group_reciece_speaker);
-        socketTransmitter = new SocketTransmitter("192.168.1.105", 1234);
+        socketTransmitter = new SocketTransmitter("vps145.vpshispeed.net", 4000);
         socketTransmitter.start();
 
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
