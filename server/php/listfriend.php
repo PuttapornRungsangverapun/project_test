@@ -1,7 +1,8 @@
 <?php
 include("db_con.php");
-header('Content-type:application/json');
 include('token.php');
+header('Content-type:application/json');
+
 //$user_id = $_REQUEST["userid"];
 /*$mysql_qry = "select users.user_id,users.user_username,users.user_publickey publickey
 from users inner join friends on users.user_id=friends.friend_id
