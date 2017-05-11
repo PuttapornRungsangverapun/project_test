@@ -62,17 +62,25 @@ public class App2 {
 		BufferedOutputStream fbos;
 		BufferedInputStream bis;
 		BufferedOutputStream bos;
+		boolean alive = true;
+		String friendCallId;
 
 		public Handler(Socket socket) {
 			this.socket = socket;
 
 			PreparedStatement preparedStatement;
 			try {
-				preparedStatement = connection.prepareStatement("SELECT max(call_id)  FROM call_history");
+				preparedStatement = connection.prepareStatement("SELECT max(call_id)  FROM log_socket");
 				ResultSet result = preparedStatement.executeQuery();
 				result.next();
 				callId = result.getInt(1);
 				callId += 1;
+
+				preparedStatement = connection.prepareStatement("insert into log_socket(call_id,ip) values(?,?)");
+				preparedStatement.setInt(1, callId);
+				preparedStatement.setString(2, socket.getInetAddress().getHostAddress());
+				preparedStatement.executeUpdate();
+
 				System.out.println("Gencallid :" + callId);
 				socketTable.put(callId + "", this);
 			} catch (SQLException e) {
@@ -85,13 +93,23 @@ public class App2 {
 			sleep = new Object();
 		}
 
+		public void hangup() {
+			alive = false;
+		}
+
+		public void hangup(String callId) {
+			hangup();
+			log.info(this.callId + ":hangup:" + friendCallId);
+			socketTable.get(callId + "").hangup();
+		}
+
 		@Override
 		public void run() {
 
 			try {
 				// if(socketTable.size()!=2){return;}
 
-				log.info("Incoming connection..."+socket.getRemoteSocketAddress().toString());
+				log.info("Incoming connection..." + socket.getRemoteSocketAddress().toString());
 				bis = new BufferedInputStream(socket.getInputStream());
 				bos = new BufferedOutputStream(socket.getOutputStream());
 
@@ -101,6 +119,12 @@ public class App2 {
 				byte[] data = new byte[100 * 1024];
 				int n, buffersize = 0;
 				while ((n = bis.read(data)) != -1) {
+
+					if (!alive) {
+						log.info("break");
+						break;
+					}
+
 					try {
 						if (step == 0) {
 							String request = new String(data, 0, n);
@@ -125,7 +149,7 @@ public class App2 {
 									break;
 								}
 								senderId = Integer.parseInt(temp[1]);
-								recieverId = new int[temp.length-2];
+								recieverId = new int[temp.length - 2];
 								for (int i = 2; i < temp.length; i++) {
 									recieverId[i - 2] = Integer.parseInt(temp[i]);
 								}
@@ -161,6 +185,9 @@ public class App2 {
 									String[] tempResult = waitResult.split(":");
 									send(bos, tempResult[0] + ":" + tempResult[2]);
 									String callId = tempResult[1];
+
+									friendCallId = tempResult[1];
+
 									fbis = socketTable.get(callId + "").bis;
 									fbos = socketTable.get(callId + "").bos;
 									step = 1;
@@ -184,7 +211,7 @@ public class App2 {
 								preparedStatement.executeUpdate();
 								send(bos, "cancel:" + callId);
 
-								System.out.println(callId);
+								// System.out.println(callId);
 
 								// for waiting caller
 								socketTable.get(callId + "").waitResult = "reject";
@@ -204,6 +231,7 @@ public class App2 {
 								}
 								senderId = Integer.parseInt(temp[1]);
 								int callId = Integer.parseInt(temp[2]);
+								friendCallId = temp[2];
 								Long time = System.currentTimeMillis();
 								PreparedStatement preparedStatement = connection
 										.prepareStatement("update call_history set call_status=? where call_id=?");
@@ -242,7 +270,7 @@ public class App2 {
 							int type = ByteBuffer.wrap(temp).get();
 
 							temp = new byte[8];
-							System.arraycopy(buffer, count, temp, 2, 6);//345678
+							System.arraycopy(buffer, count, temp, 2, 6);// 345678
 							count += 6;
 							long timeStamp = ByteBuffer.wrap(temp).getLong();
 
@@ -250,14 +278,26 @@ public class App2 {
 							System.arraycopy(buffer, count, temp, 2, 2);
 							int length = ByteBuffer.wrap(temp).getInt();
 							count += 2;
-					
-							 System.out.println(callId + ":" + type + ":" +
-							 timeStamp + ":" + length + ":" + (n - count)
-							 + ":" + buffersize);
-								if (callId < 0  || type < 0 || type > 99 || length < 0 || length > 100000) {
-									System.out.println("broken pakage");
-									continue;
-								}
+
+							// System.out.println(callId + ":" + type + ":" +
+							// timeStamp + ":" + length + ":" + (n - count)
+							// + ":" + buffersize);
+							
+							
+								log.info("call_id : " + callId + " type : " + type + " timestamp : " + timeStamp
+										+ " length : " + length);
+							
+							
+							if (callId < 0 || callId > 100000 || type < 0 || type > 128 || length < 0
+									|| length > 100000) {
+								// System.out.println("broken pakage");
+								log.info("Broken pakage");
+								continue;
+							}
+							if (type == 123) {
+
+								hangup(friendCallId);
+							}
 							byte[] payLoad = new byte[length];
 							System.arraycopy(buffer, count, payLoad, 0, length);
 
@@ -274,7 +314,8 @@ public class App2 {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					System.out.println(this.callId + ":" + n);
+					// System.out.println(this.callId + ":" + n);
+//					log.info("call_id : " + this.callId + " length : " + n);
 				}
 
 				bis.close();
@@ -284,7 +325,8 @@ public class App2 {
 				e.printStackTrace();
 			}
 
-			System.out.println("END");
+			// System.out.println("END");
+			log.info("END");
 			socketTable.clear();
 		}
 
@@ -300,7 +342,7 @@ public class App2 {
 
 		private void sendNoti(String user_id, String user_id_friend, String topic, String message) {
 			try {
-				log.info("send noti : "+user_id+" to :"+user_id_friend);
+				log.info("send noti : " + user_id + " to :" + user_id_friend);
 				String token_noti;
 				PreparedStatement preparedStatement = connection
 						.prepareStatement("select token_body from tokens_notification where user_id = ?");
