@@ -24,7 +24,7 @@
         android:layout_marginTop="380dp"
         android:layout_width="70dp"
         android:src="@android:drawable/ic_btn_speak_now"
-        android:background="@null"
+        android:background="@drawable/bg_speaker"
         android:layout_height="70dp" />
 
 

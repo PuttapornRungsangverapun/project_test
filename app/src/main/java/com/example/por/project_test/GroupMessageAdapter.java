@@ -79,7 +79,7 @@ class GroupMessageAdapter extends ArrayAdapter<GroupMessageInfo> {
 
 
             if (filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
-                String url = BackgoundWorker.url_server + "downloadfilegroup.php?messageid=" + value.get(position).group_message_id + "&token=" + token + "&userid=" + id;
+                String url = BackgoundWorker.url_server + "download_filegroup.php?messageid=" + value.get(position).group_message_id + "&token=" + token + "&userid=" + id;
                 img_file.setVisibility(View.VISIBLE);
                 textView.setVisibility(View.GONE);
 

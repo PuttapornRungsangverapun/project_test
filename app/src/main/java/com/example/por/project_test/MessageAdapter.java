@@ -81,7 +81,7 @@ class MessageAdapter extends ArrayAdapter<MessageInfo> {
 
 
             if (filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
-                String url = BackgoundWorker.url_server + "downloadfile.php?messageid=" + value.get(position).message_id + "&token=" + token + "&userid=" + id;
+                String url = BackgoundWorker.url_server + "download_file.php?messageid=" + value.get(position).message_id + "&token=" + token + "&userid=" + id;
                 img_file.setVisibility(View.VISIBLE);
                 textView.setVisibility(View.GONE);
 

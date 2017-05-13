@@ -61,7 +61,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("userid", params[1]);
                 param.put("username", params[2]);
                 param.put("token", params[3]);
-                httpRequest(url_server + "searchfriend.php", param);
+                httpRequest(url_server + "search_friend.php", param);
                 break;
             }
             case "addfriend": {
@@ -69,14 +69,14 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("username", params[1]);
                 param.put("userid", params[2]);
                 param.put("token", params[3]);
-                httpRequest(url_server + "addfriend.php", param);
+                httpRequest(url_server + "add_friend.php", param);
                 break;
             }
             case "listfriend": {
                 HashMap<String, String> param = new HashMap<>();
                 param.put("userid", params[1]);
                 param.put("token", params[2]);
-                httpRequest(url_server + "listfriend.php", param);
+                httpRequest(url_server + "list_friend.php", param);
                 break;
             }
             case "sendmessage": {
@@ -94,7 +94,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 } else if (params.length >= 10) {
                     param.put("targetid", params[9]);
                 }
-                httpRequest(url_server + "message.php", param);
+                httpRequest(url_server + "send_message.php", param);
                 break;
             }
             case "readmessage": {
@@ -103,7 +103,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("friendid", params[2]);
                 param.put("lastmessageid", params[3]);
                 param.put("token", params[4]);
-                httpRequest(url_server + "messagestatus.php", param);
+                httpRequest(url_server + "read_message.php", param);
                 break;
             }
             case "notification": {
@@ -111,14 +111,14 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("userid", params[1]);
                 param.put("token_noti", params[2]);
                 param.put("token", params[3]);
-                httpRequest(url_server + "tokennotification.php", param);
+                httpRequest(url_server + "token_notification.php", param);
                 break;
             }
             case "listaddgroup": {
                 HashMap<String, String> param = new HashMap<>();
                 param.put("userid", params[1]);
                 param.put("token", params[2]);
-                httpRequest(url_server + "listaddgroupcreate.php", param);
+                httpRequest(url_server + "list_groupcreate.php", param);
                 break;
             }
             case "crategroup": {
@@ -127,7 +127,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("token", params[2]);
                 param.put("frienid", params[3]);
                 param.put("groupname", params[4]);
-                httpRequest(url_server + "creategroup.php", param);
+                httpRequest(url_server + "create_group.php", param);
                 break;
             }
             case "membergroup": {
@@ -135,7 +135,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("userid", params[1]);
                 param.put("token", params[2]);
                 param.put("groupid", params[3]);
-                httpRequest(url_server + "membergroup.php", param);
+                httpRequest(url_server + "member_group.php", param);
                 break;
             }
             case "listinvitefriend": {
@@ -143,7 +143,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("userid", params[1]);
                 param.put("token", params[2]);
                 param.put("groupid", params[3]);
-                httpRequest(url_server + "listinvitegroup.php", param);
+                httpRequest(url_server + "list_invitegroup.php", param);
                 break;
             }
             case "invitefriend": {
@@ -152,7 +152,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("token", params[2]);
                 param.put("friendid", params[3]);
                 param.put("groupid", params[4]);
-                httpRequest(url_server + "inviteaddgroup.php", param);
+                httpRequest(url_server + "invite_group.php", param);
                 break;
             }
             case "readmessagegroup": {
@@ -161,7 +161,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("groupid", params[2]);
                 param.put("lastmessageid", params[3]);
                 param.put("token", params[4]);
-                httpRequest(url_server + "readmessagegroup.php", param);
+                httpRequest(url_server + "read_messagegroup.php", param);
                 break;
             }
             case "sendmessagegroup": {
@@ -179,7 +179,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 } else if (params.length >= 10) {
                     param.put("targetid", params[9]);
                 }
-                httpRequest(url_server + "sendmessagegroup.php", param);
+                httpRequest(url_server + "send_messagegroup.php", param);
                 break;
             }
             case "getpublickey": {
@@ -187,7 +187,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("userid", params[1]);
                 param.put("friendid", params[2]);
                 param.put("token", params[3]);
-                httpRequest(url_server + "getpublickey.php", param);
+                httpRequest(url_server + "get_publickey.php", param);
                 break;
             }
             case "storekey": {
@@ -196,7 +196,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("publickey", params[2]);
                 param.put("token", params[3]);
                 param.put("userid", params[4]);
-                httpRequest(url_server + "storekey.php", param);
+                httpRequest(url_server + "store_key.php", param);
                 break;
             }
             case "leavegroup": {
@@ -204,14 +204,14 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 param.put("userid", params[1]);
                 param.put("token", params[2]);
                 param.put("groupid", params[3]);
-                httpRequest(url_server + "leavegroup.php", param);
+                httpRequest(url_server + "leave_group.php", param);
                 break;
             }
             case "requestfriend": {
                 HashMap<String, String> param = new HashMap<>();
                 param.put("userid", params[1]);
                 param.put("token", params[2]);
-                httpRequest(url_server + "friendrequest.php", param);
+                httpRequest(url_server + "request_friend.php", param);
                 break;
             }
         }
@@ -376,6 +376,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                                 jsonmessage.getJSONObject(i).getString("file_filename"),
                                 jsonmessage.getJSONObject(i).getString("map_latitude"),
                                 jsonmessage.getJSONObject(i).getString("map_longitude"),
+                                jsonmessage.getJSONObject(i).getString("authen_body"),
                                 jsonmessage.getJSONObject(i).getString("time"),
                                 jsonmessage.getJSONObject(i).getString("message_type"));
 
@@ -477,6 +478,7 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                                 jsonmessage.getJSONObject(i).getString("file_filename"),
                                 jsonmessage.getJSONObject(i).getString("map_latitude"),
                                 jsonmessage.getJSONObject(i).getString("map_longitude"),
+                                jsonmessage.getJSONObject(i).getString("authen_body"),
                                 jsonmessage.getJSONObject(i).getString("time"),
                                 jsonmessage.getJSONObject(i).getString("group_message_type"),
                                 jsonmessage.getJSONObject(i).getString("target_userid"));

@@ -81,7 +81,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             public void onItemClick(AdapterView<?> parent, View view, int position, long id2) {
                 GroupMessageInfo groupMessageInfo = groupMessageInfos.get(position);
 
-                String url = BackgoundWorker.url_server + "downloadfilegroup.php?messageid=" + groupMessageInfo.group_message_id + "&token=" + token + "&userid=" + id;
+                String url = BackgoundWorker.url_server + "download_filegroup.php?messageid=" + groupMessageInfo.group_message_id + "&token=" + token + "&userid=" + id;
                 String filename = groupMessageInfo.filename;
                 if (groupMessageInfo.type.equals("file")) {
                     Intent intent = new Intent(GroupMessageActivity.this, DownloadFileService.class);
@@ -191,7 +191,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                     case "authen":
                         if (shareedkey == null) {
                             rsaEncryption = new RSAEncryption(this);
-                            shareedkey = rsaEncryption.RSADecrypt(mo.message);
+                            shareedkey = rsaEncryption.RSADecrypt(mo.authen);
                             aesEncryption = new AESEncryption(shareedkey);
 
                             SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();

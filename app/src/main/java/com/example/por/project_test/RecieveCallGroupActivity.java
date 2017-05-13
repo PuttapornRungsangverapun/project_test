@@ -57,6 +57,8 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
     int callId;
     PowerManager.WakeLock mProximityWakeLock;
     Ringtone r;
+    byte type = 0;
+    boolean speaker = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,8 +91,6 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
         frienid = i.getStringExtra("groupid");
 
 
-
-
         try {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
             r = RingtoneManager.getRingtone(getApplicationContext(), notification);
@@ -108,16 +108,9 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
             @Override
             public void onClick(View v) {
                 socketTransmitter.send(1234, "reject:" + id + ":" + callId + "", RecieveCallGroupActivity.this);
+                type = 123;
                 r.stop();
-                if (audioTrack != null) {
-                    doPlay = false;
-                    doRecord = false;
-                    audioTrack.stop();
-                    audioTrack.release();
-                    audioRecorder.stop();
-                    audioRecorder.release();
-                }
-
+                mProximityWakeLock.release();
                 finish();
             }
         });
@@ -132,11 +125,20 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
         bt_speaker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!speaker) {
+                    audioTrack.stop();
+                    audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, ENCODING, minBufferSize, AudioTrack.MODE_STREAM);
+                    audioTrack.play();
+                    r.stop();
+                    speaker = true;
+                } else {
+                    audioTrack.stop();
+                    audioTrack = new AudioTrack(AudioManager.STREAM_VOICE_CALL, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, ENCODING, minBufferSize, AudioTrack.MODE_STREAM);
+                    audioTrack.play();
+                    r.stop();
+                    speaker = false;
+                }
 
-                audioTrack.stop();
-                audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, ENCODING, minBufferSize, AudioTrack.MODE_STREAM);
-                audioTrack.play();
-                r.stop();
             }
         });
     }
@@ -237,7 +239,7 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
                     n = audioRecorder.read(data, 0, data.length);
                     byte[] callId = ByteBuffer.allocate(4).putInt(RecieveCallGroupActivity.this.callId).array();
                     byte[] timeStamp = ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array();
-                    byte[] type = ByteBuffer.allocate(1).put((byte) 1).array();
+                    byte[] type = ByteBuffer.allocate(1).put(RecieveCallGroupActivity.this.type).array();
                     byte[] length = ByteBuffer.allocate(4).putInt(n).array();
                     byte[] payLoad = new byte[n];
                     System.arraycopy(data, 0, payLoad, 0, n);
@@ -257,13 +259,26 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
                     bos.flush();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    if (e.getMessage().contains("Broken pipe")) {
+                        break;
+                    }
                 }
             }
 
             try {
+                if (audioTrack != null) {
+                    doPlay = false;
+                    doRecord = false;
+                    audioTrack.stop();
+                    audioTrack.release();
+                    audioRecorder.stop();
+                    audioRecorder.release();
+
+                }
                 bos.close();
             } catch (Exception e) {
             }
+            finish();
         }
 
     }
@@ -287,6 +302,7 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
                     audioTrack.release();
                     audioRecorder.stop();
                     audioRecorder.release();
+                    mProximityWakeLock.release();
                 }
             }
 
@@ -311,4 +327,8 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
         super.onStop();
     }
 
+    @Override
+    public void onBackPressed() {
+        return;
+    }
 }

@@ -54,6 +54,8 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
     String id, token, frienid;
     int callId;
     PowerManager.WakeLock mProximityWakeLock;
+    byte type = 0;
+    boolean speaker = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +79,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
         socketTransmitter = new SocketTransmitter("vps145.vpshispeed.net", 4000);
         socketTransmitter.start();
 
-        SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
+        final SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         id = sp.getString("user_id_current", "-1");
         token = sp.getString("token", "-1");
 
@@ -95,16 +97,9 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
             @Override
             public void onClick(View v) {
                 socketTransmitter.send(1234, "reject:" + id + ":" + callId + "", CallGroupActivity.this);
-                if (audioTrack != null) {
-                    doPlay = false;
-                    doRecord = false;
-                    audioTrack.stop();
-                    audioTrack.release();
-                    audioRecorder.stop();
-                    audioRecorder.release();
-                    mProximityWakeLock.release();
-                }
+                type = 123;
 
+                mProximityWakeLock.release();
                 finish();
 
             }
@@ -112,10 +107,17 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
         bt_speaker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                audioTrack.stop();
-                audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, ENCODING, minBufferSize, AudioTrack.MODE_STREAM);
-                audioTrack.play();
+                if (!speaker) {
+                    audioTrack.stop();
+                    audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, ENCODING, minBufferSize, AudioTrack.MODE_STREAM);
+                    audioTrack.play();
+                    speaker = true;
+                } else {
+                    audioTrack.stop();
+                    audioTrack = new AudioTrack(AudioManager.STREAM_VOICE_CALL, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, ENCODING, minBufferSize, AudioTrack.MODE_STREAM);
+                    audioTrack.play();
+                    speaker = false;
+                }
             }
         });
     }
@@ -212,7 +214,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
                     n = audioRecorder.read(data, 0, data.length);
                     byte[] callId = ByteBuffer.allocate(4).putInt(CallGroupActivity.this.callId).array();
                     byte[] timeStamp = ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array();
-                    byte[] type = ByteBuffer.allocate(1).put((byte) 1).array();
+                    byte[] type = ByteBuffer.allocate(1).put(CallGroupActivity.this.type).array();
                     byte[] length = ByteBuffer.allocate(4).putInt(n).array();
                     byte[] payLoad = new byte[n];
                     System.arraycopy(data, 0, payLoad, 0, n);
@@ -232,10 +234,24 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
                     bos.flush();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    if (e.getMessage().contains("Broken pipe")) {
+                        break;
+                    }
                 }
             }
 
             try {
+
+                if (audioTrack != null) {
+                    doPlay = false;
+                    doRecord = false;
+                    audioTrack.stop();
+                    audioTrack.release();
+                    audioRecorder.stop();
+                    audioRecorder.release();
+
+                }
+
                 bos.close();
             } catch (Exception e) {
             }
@@ -262,6 +278,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
                     audioTrack.release();
                     audioRecorder.stop();
                     audioRecorder.release();
+                    mProximityWakeLock.release();
                 }
             }
 
@@ -269,6 +286,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
                 bis.close();
             } catch (IOException e) {
             }
+            finish();
         }
 
     }
@@ -286,5 +304,8 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
         super.onStop();
     }
 
-
+    @Override
+    public void onBackPressed() {
+        return;
+    }
 }

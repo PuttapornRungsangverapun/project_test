@@ -60,6 +60,8 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
     int callId;
     Ringtone r;
     PowerManager.WakeLock mProximityWakeLock;
+    byte type = 0;
+    boolean speaker = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,16 +118,8 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
             public void onClick(View v) {
                 socketTransmitter.send(1234, "reject:" + id + ":" + usernameFriend + "", CallSingleActivity.this);
 //                r.stop();
-                if (audioTrack != null) {
-                    doPlay = false;
-                    doRecord = false;
-                    audioTrack.stop();
-                    audioTrack.release();
-                    audioRecorder.stop();
-                    audioRecorder.release();
-                    mProximityWakeLock.release();
-                }
-
+                type = 123;
+                mProximityWakeLock.release();
                 finish();
             }
         });
@@ -133,10 +127,19 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
         bt_speaker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                audioTrack.stop();
-                audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, ENCODING, minBufferSize, AudioTrack.MODE_STREAM);
-                audioTrack.play();
+                if (audioTrack != null) {
+                    if (!speaker) {
+                        audioTrack.stop();
+                        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, ENCODING, minBufferSize, AudioTrack.MODE_STREAM);
+                        audioTrack.play();
+                        speaker = true;
+                    } else {
+                        audioTrack.stop();
+                        audioTrack = new AudioTrack(AudioManager.STREAM_VOICE_CALL, SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, ENCODING, minBufferSize, AudioTrack.MODE_STREAM);
+                        audioTrack.play();
+                        speaker = false;
+                    }
+                }
             }
         });
     }
@@ -260,7 +263,7 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
                     n = audioRecorder.read(data, 0, data.length);
                     byte[] callId = ByteBuffer.allocate(4).putInt(CallSingleActivity.this.callId).array();
                     byte[] timeStamp = ByteBuffer.allocate(8).putLong(System.currentTimeMillis()).array();
-                    byte[] type = ByteBuffer.allocate(1).put((byte) 1).array();
+                    byte[] type = ByteBuffer.allocate(1).put(CallSingleActivity.this.type).array();
                     byte[] length = ByteBuffer.allocate(4).putInt(n).array();
                     byte[] payLoad = new byte[n];
                     System.arraycopy(data, 0, payLoad, 0, n);
@@ -280,13 +283,31 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
                     bos.flush();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    Log.i("broken", e.getMessage());
+                    if (e.getMessage().contains("Broken pipe")) {
+                        break;
+                    }
                 }
             }
 
             try {
+                if (audioTrack != null) {
+                    doPlay = false;
+                    doRecord = false;
+                    audioTrack.stop();
+                    audioTrack.release();
+                    audioRecorder.stop();
+                    audioRecorder.release();
+                    mProximityWakeLock.release();
+                }
+
                 bos.close();
+
             } catch (Exception e) {
+
             }
+
+            finish();
         }
 
     }

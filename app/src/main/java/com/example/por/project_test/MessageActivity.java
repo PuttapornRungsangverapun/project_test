@@ -86,7 +86,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 MessageInfo message = messageInfos.get(i);
-                String url = BackgoundWorker.url_server + "downloadfile.php?messageid=" + message.message_id + "&token=" + token + "&userid=" + id;
+                String url = BackgoundWorker.url_server + "download_file.php?messageid=" + message.message_id + "&token=" + token + "&userid=" + id;
                 String filename = message.filename;
                 if (message.type.equals("file")) {
                     Intent intent = new Intent(MessageActivity.this, DownloadFileService.class);
@@ -205,7 +205,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
 
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         String mySharedKeyMessage = rsaEncryption.RSAEncrypt(sp.getString("publickey", "-1"), shareedkey);
-        new BackgoundWorker(this).execute("sendmessage", id, id, mySharedKeyMessage, "authen", "", "", "", token,friendid);
+        new BackgoundWorker(this).execute("sendmessage", id, id, mySharedKeyMessage, "authen", "", "", "", token, friendid);
     }
 
     @Override
@@ -270,7 +270,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                     case "authen":
                         if (shareedkey == null) {
                             rsaEncryption = new RSAEncryption(this);
-                            shareedkey = rsaEncryption.RSADecrypt(mo.message);
+                            shareedkey = rsaEncryption.RSADecrypt(mo.authen);
                             aesEncryption = new AESEncryption(shareedkey);
 
                             SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
@@ -339,7 +339,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            Intent intent = new Intent(MessageActivity.this,ContactActivity.class);
+            Intent intent = new Intent(MessageActivity.this, ContactActivity.class);
             startActivity(intent);
             overridePendingTransition(R.anim.trans_right_in, R.anim.trans_right_out);
             return true;

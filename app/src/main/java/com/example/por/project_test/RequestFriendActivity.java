@@ -51,7 +51,7 @@ public class RequestFriendActivity extends AppCompatActivity implements HttpRequ
     @Override
     public void onResult(String[] result, ArrayList<Object> objectses) {
         requestFriendInfos = new ArrayList<>();
-        if (objectses.size()==0) {
+        if (objectses==null) {
             tv_request.setVisibility(View.VISIBLE);
             lv_requestFriend.setVisibility(View.GONE);
             return;
