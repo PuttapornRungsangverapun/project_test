@@ -189,7 +189,7 @@ public class App3group3 {
 
 								// if (recieverId.length == 1) {
 								PreparedStatement preparedStatement = connection.prepareStatement(
-										"insert into call_history(call_id,call_sender_id,call_receiver_id,call_status) values(?,?,?,?)");
+										"insert into call_group_history(call_id,call_sender_id,call_receiver_id,call_status) values(?,?,?,?)");
 								preparedStatement.setInt(1, callId);
 								preparedStatement.setInt(2, senderId);
 								preparedStatement.setInt(3, recieverId);
@@ -256,7 +256,7 @@ public class App3group3 {
 								senderId = Integer.parseInt(temp[1]);
 								int callId = Integer.parseInt(temp[2]);
 								PreparedStatement preparedStatement = connection
-										.prepareStatement("update call_history set call_status=? where call_id=?");
+										.prepareStatement("update call_group_history set call_status=? where call_id=?");
 								preparedStatement.setString(1, "reject");
 								preparedStatement.setInt(2, callId);
 								preparedStatement.executeUpdate();
@@ -287,7 +287,7 @@ public class App3group3 {
 								groupCallId = callId;
 								Long time = System.currentTimeMillis();
 								PreparedStatement preparedStatement = connection
-										.prepareStatement("update call_history set call_status=? where call_id=?");
+										.prepareStatement("update call_group_history set call_status=? where call_id=?");
 								preparedStatement.setString(1, "accpet");
 								preparedStatement.setInt(2, callId);
 								preparedStatement.executeUpdate();
@@ -336,15 +336,18 @@ public class App3group3 {
 							count += 2;
 
 							if (callId < 0 || type < 0 || type > 128 || length < 0 || length > 100000) {
-								System.out.println("broken pakage");
+//								System.out.println("broken pakage");
+								log.info("Broken pakage");
 								continue;
 							}
 							if (type == 123) {
 								alive = false;
 								break;
 							}
-							System.out.println(callId + ":" + type + ":" + timeStamp + ":" + length + ":" + (n - count)
-									+ ":" + buffersize);
+//							System.out.println(callId + ":" + type + ":" + timeStamp + ":" + length + ":" + (n - count)
+//									+ ":" + buffersize);
+							
+							System.out.println("call_id : "+callId + " type : " + type + " timestamp :" + timeStamp + " length : " + length );
 
 							byte[] payLoad = new byte[length];
 							System.arraycopy(buffer, count, payLoad, 0, length);
