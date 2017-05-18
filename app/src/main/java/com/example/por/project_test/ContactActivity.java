@@ -211,20 +211,21 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
 
         switch (item.getItemId()) {
             case R.id.logout:
+                new BackgoundWorker(this).execute("logout", id, token);
                 SharedPreferences.Editor editor = getSharedPreferences("MySetting", MODE_PRIVATE).edit();
                 editor.clear();
                 editor.apply();
                 Intent i = new Intent(ContactActivity.this, MainActivity.class);
                 startActivity(i);
                 return true;
-            case R.id.create_group:
-                Intent i2 = new Intent(ContactActivity.this, CreateGroupActivity.class);
-                startActivityForResult(i2, 1);
-                return true;
-            case R.id.setting:
-                Intent i3 = new Intent(ContactActivity.this, SettingsActivity.class);
-                startActivityForResult(i3, 1);
-                return true;
+//            case R.id.create_group:
+//                Intent i2 = new Intent(ContactActivity.this, CreateGroupActivity.class);
+//                startActivityForResult(i2, 1);
+//                return true;
+//            case R.id.setting:
+//                Intent i3 = new Intent(ContactActivity.this, SettingsActivity.class);
+//                startActivityForResult(i3, 1);
+//                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

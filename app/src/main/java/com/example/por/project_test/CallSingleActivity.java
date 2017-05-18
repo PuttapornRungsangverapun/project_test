@@ -18,12 +18,14 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -55,13 +57,14 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
     private PlayThread playThread;
     private RecordThread recordThread;
     SocketTransmitter socketTransmitter;
-    ImageButton bt_call, bt_reject, bt_speaker;
+    ImageButton bt_reject, bt_speaker;
     String id, token, frienid, usernameFriend;
     int callId;
     Ringtone r;
     PowerManager.WakeLock mProximityWakeLock;
     byte type = 0;
     boolean speaker = false;
+    TextView tv_call;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,10 +100,10 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
         SharedPreferences sp = getSharedPreferences("MySetting", MODE_PRIVATE);
         id = sp.getString("user_id_current", "-1");
         token = sp.getString("token", "-1");
-
+        tv_call = (TextView) findViewById(R.id.tv_call);
         Intent i = getIntent();
         frienid = i.getStringExtra("friendid");
-
+        tv_call.setText(i.getStringExtra("username_friend"));
 
         usernameFriend = getIntent().getStringExtra("frienduser");
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
@@ -119,7 +122,10 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
                 socketTransmitter.send(1234, "reject:" + id + ":" + usernameFriend + "", CallSingleActivity.this);
 //                r.stop();
                 type = 123;
-                mProximityWakeLock.release();
+                try {
+                    mProximityWakeLock.release();
+                } catch (Throwable th) {
+                }
                 finish();
             }
         });
@@ -212,13 +218,16 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
                     @Override
                     public void run() {
                         Toast.makeText(CallSingleActivity.this, "Reject calling", Toast.LENGTH_SHORT).show();
+
                         if (mProximityWakeLock != null) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                                mProximityWakeLock.release(0);
+                                try {
+                                    mProximityWakeLock.release(0);
+                                } catch (Throwable th) {
+                                }
                             }
                         }
-
-
+                        finish();
                     }
                 });
 
@@ -335,6 +344,7 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
         }
 
     }
+
 
     @Override
     public void onBackPressed() {

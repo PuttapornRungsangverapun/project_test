@@ -95,7 +95,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
             intent.putExtra("frienduser", messageBody.split(":")[1]);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            sender = username;
+            sender = username.split(":")[1];
+            intent.putExtra("group_name", sender);
             startActivity(intent);
             return;
         } else if (messageBody.startsWith("call")) {
@@ -104,7 +105,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent.putExtra("friendid", friendid);//มันส่งobjectธรรมดามาเลยcast
             intent.putExtra("frienduser", messageBody.split(":")[1]);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            sender = username;
+            sender = username.split(":")[1];
+            intent.putExtra("username_friend", sender);
             startActivity(intent);
             return;
         } else if (friendid.startsWith("U")) {

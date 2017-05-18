@@ -37,7 +37,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
 
     private static String id, token, shareedkey;
     private String groupId, groupName;
-    private boolean isRequesting;
+    private boolean isRequesting, isMessage = false;
     private ArrayList<GroupMessageInfo> groupMessageInfos;
     private GroupMessageAdapter groupMessageAdapter;
     private int lastMessageId;
@@ -48,6 +48,7 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
     private Timer t;
     RSAEncryption rsaEncryption;
     AESEncryption aesEncryption;
+    GroupMessageInfo tmp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +105,16 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                 String str_message = et_group_message.getText().toString().trim();
                 if (str_message.isEmpty() || str_message.length() == 0 || str_message.equals("")) {
                 } else {
+                    String message = str_message;
                     str_message = aesEncryption.encrypt(str_message);
+
+
+                    tmp = new GroupMessageInfo(10000, message, Integer.parseInt(groupId), Integer.parseInt(id), "", "", "", "", "", "", "text", "");
+                    GroupMessageActivity.this.groupMessageInfos.add(tmp);
+                    groupMessageAdapter.notifyDataSetChanged();
+                    isMessage = true;
+
+
                     new BackgoundWorker(GroupMessageActivity.this).execute("sendmessagegroup", id, groupId, str_message, "text", "", "", "", token);
                     et_group_message.setText("");
                 }
@@ -212,7 +222,19 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                         break;
                     case "text":
                         try {
+
+
+                            if (isMessage) {
+                                int lastMessage = this.groupMessageInfos.size() - 1;
+                                this.groupMessageInfos.remove(lastMessage);
+                                isMessage = false;
+                            }
+
+
                             mo.message = aesEncryption.decrypt(mo.message);
+
+                            groupMessageAdapter.notifyDataSetChanged();
+
                             groupMessageInfos.add(mo);
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -221,6 +243,12 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
                         }
                         break;
                     default:
+                        if (isMessage) {
+                            int lastMessage = this.groupMessageInfos.size() - 1;
+                            this.groupMessageInfos.remove(lastMessage);
+                            isMessage = false;
+                        }
+                        groupMessageAdapter.notifyDataSetChanged();
                         groupMessageInfos.add(mo);
                         break;
                 }
@@ -266,6 +294,14 @@ public class GroupMessageActivity extends AppCompatActivity implements HttpReque
             String md5 = GetMD5.getMD5EncryptedString(Base64.encodeToString(filedata, Base64.DEFAULT));
             String encryptFile = aesEncryption.encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
+
+
+            tmp = new GroupMessageInfo(10000, "", Integer.parseInt(groupId), Integer.parseInt(id), filename, "", "", "", "", "","file","");
+            GroupMessageActivity.this.groupMessageInfos.add(tmp);
+            groupMessageAdapter.notifyDataSetChanged();
+            isMessage = true;
+
+
             new BackgoundWorker(GroupMessageActivity.this).execute("sendmessagegroup", id, groupId, encryptFile, "file", filename, "", "", token, md5);
 
 

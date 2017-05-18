@@ -43,12 +43,13 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
     EditText et_message;
     static String id, token, shareedkey;
     static int REQUEST_FILE = 1;
-    String friendid, publickey;
+    String friendid, publickey, usernameFriend;
     int lastMessageId;
     ArrayList<MessageInfo> messageInfos;
     MessageAdapter messageAdapter;
-    boolean isRequesting;
+    boolean isRequesting, isMessage = false,download=true;
     Timer t;
+    MessageInfo tmp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +65,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         bt_file = (Button) findViewById(R.id.bt_file);
 
 
-        Intent i = getIntent();
+        final Intent i = getIntent();
         friendid = i.getStringExtra("friendid");
         publickey = i.getStringExtra("publickey");
 
@@ -79,12 +80,13 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
         messageInfos = new ArrayList<>();
         messageAdapter = new MessageAdapter(this, R.layout.message, R.id.tv_message_adapter, messageInfos, token, id);
         listView_message.setAdapter(messageAdapter);
-
-        setTitle(i.getStringExtra("frienduser"));
+        usernameFriend = i.getStringExtra("frienduser");
+        setTitle(usernameFriend);
 
         listView_message.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
                 MessageInfo message = messageInfos.get(i);
                 String url = BackgoundWorker.url_server + "download_file.php?messageid=" + message.message_id + "&token=" + token + "&userid=" + id;
                 String filename = message.filename;
@@ -114,10 +116,28 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                     if (shareedkey == null) {
                         genSharedKey();
                     }
-                    //secure
+//                    //secure
+//                    aesEncryption = new AESEncryption(shareedkey);
+//                    str_message = aesEncryption.encrypt(str_message);
+////                    Log.d("str message", str_message);
+//
+//secure
                     aesEncryption = new AESEncryption(shareedkey);
+                    String message = str_message;
                     str_message = aesEncryption.encrypt(str_message);
 //                    Log.d("str message", str_message);
+
+//                    new BackgoundWorker(MessageActivity.this).execute("sendmessage", id, friendid, str_message, "text", "", "", "", token);
+//                    et_message.setText("");
+
+                    /******************/
+
+                    tmp = new MessageInfo(10000, message, Integer.parseInt(friendid), Integer.parseInt(id), "", "", "", "", "", "text");
+                    MessageActivity.this.messageInfos.add(tmp);
+                    messageAdapter.notifyDataSetChanged();
+                    isMessage = true;
+                    /******************/
+
 
                     new BackgoundWorker(MessageActivity.this).execute("sendmessage", id, friendid, str_message, "text", "", "", "", token);
                     et_message.setText("");
@@ -239,6 +259,11 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             String encryptFile = aesEncryption.encrypt(filedata);
 //            String encryptFile = Base64.encodeToString(filedata,Base64.DEFAULT);//no encrypt
 
+            tmp = new MessageInfo(10000, "", Integer.parseInt(friendid), Integer.parseInt(id), filename, "", "", "", "", "file");
+            MessageActivity.this.messageInfos.add(tmp);
+            messageAdapter.notifyDataSetChanged();
+            isMessage = true;
+
 
             new BackgoundWorker(MessageActivity.this).execute("sendmessage", id, friendid, encryptFile, "file", filename, "", "", token, md5);
 
@@ -291,8 +316,22 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                         break;
                     case "text":
                         try {
+
+                            if (isMessage) {
+                                int lastMessage = this.messageInfos.size() - 1;
+                                this.messageInfos.remove(lastMessage);
+                                isMessage = false;
+                            }
+
+
                             mo.message = aesEncryption.decrypt(mo.message);
+
+
+                            messageAdapter.notifyDataSetChanged();
+
                             messageInfos.add(mo);
+
+
                         } catch (Exception e) {
                             e.printStackTrace();
                             mo.message = "failed to decrypt...";
@@ -300,6 +339,12 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
                         }
                         break;
                     default:
+                        if (isMessage) {
+                            int lastMessage = this.messageInfos.size() - 1;
+                            this.messageInfos.remove(lastMessage);
+                            isMessage = false;
+                        }
+                        messageAdapter.notifyDataSetChanged();
                         messageInfos.add(mo);
                         break;
                 }
@@ -360,6 +405,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             case R.id.Call_Single:
                 Intent i = new Intent(MessageActivity.this, CallSingleActivity.class);
                 i.putExtra("friendid", friendid);
+                i.putExtra("username_friend", usernameFriend);
                 startActivity(i);
                 return true;
             default:

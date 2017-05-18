@@ -23,6 +23,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -59,6 +60,7 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
     Ringtone r;
     byte type = 0;
     boolean speaker = false;
+    TextView tv_call_from_group;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +82,7 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
         bt_reject = (ImageButton) findViewById(R.id.group_recieve_reject);
         bt_receive = (ImageButton) findViewById(R.id.group_recieve_call);
         bt_speaker = (ImageButton) findViewById(R.id.group_reciece_speaker);
+        tv_call_from_group = (TextView) findViewById(R.id.tv_call_from_group);
         socketTransmitter = new SocketTransmitter("vps145.vpshispeed.net", 4000);
         socketTransmitter.start();
 
@@ -89,6 +92,7 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
 
         Intent i = getIntent();
         frienid = i.getStringExtra("groupid");
+        tv_call_from_group.setText(i.getStringExtra("group_name"));
 
 
         try {
@@ -110,7 +114,11 @@ public class RecieveCallGroupActivity extends AppCompatActivity implements Socke
                 socketTransmitter.send(1234, "reject:" + id + ":" + callId + "", RecieveCallGroupActivity.this);
                 type = 123;
                 r.stop();
-                mProximityWakeLock.release();
+                try {
+                    mProximityWakeLock.release();
+                } catch (Throwable th) {
+                    // ignoring this exception, probably wakeLock was already released
+                }
                 finish();
             }
         });

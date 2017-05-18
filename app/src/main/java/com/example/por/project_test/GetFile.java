@@ -24,13 +24,27 @@ class GetFile {
     byte[] getData(Uri uri) {//อ่านไฟล์โดยให้pathไปreturnเป็นbyte binaryกลับมา
         byte[] result = null;
         try {
-            InputStream inputStream = ctx.getContentResolver().openInputStream(uri);
 
-            if (inputStream != null && inputStream.available() > 10e6) {
+
+
+            Uri fileUri = uri;
+            Cursor cursor = ctx.getContentResolver().query(fileUri,
+                    null, null, null, null);
+            cursor.moveToFirst();
+            long size = cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE));
+            cursor.close();
+
+            if (size > 10e6) {
                 Toast.makeText(ctx, "File size must be 10mb", Toast.LENGTH_SHORT).show();
-                inputStream.close();
+//                inputStream.close();
                 return null;
             }
+            InputStream inputStream = ctx.getContentResolver().openInputStream(uri);
+//            if (inputStream != null && inputStream.available() > 5e6) {
+//                Toast.makeText(ctx, "File size must be 10mb", Toast.LENGTH_SHORT).show();
+//                inputStream.close();
+//                return null;
+//            }
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             int nRead;
             byte[] data = new byte[16384];//อ่านทั้ฝหมด16kb ในเgoogleบอกเร็วสุด

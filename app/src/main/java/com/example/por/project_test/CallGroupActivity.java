@@ -21,6 +21,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -56,6 +57,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
     PowerManager.WakeLock mProximityWakeLock;
     byte type = 0;
     boolean speaker = false;
+    TextView tv_call_group;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +78,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
 
         bt_reject = (ImageButton) findViewById(R.id.group_reject);
         bt_speaker = (ImageButton) findViewById(R.id.group_speaker);
+        tv_call_group = (TextView) findViewById(R.id.tv_call_group);
         socketTransmitter = new SocketTransmitter("vps145.vpshispeed.net", 4000);
         socketTransmitter.start();
 
@@ -85,6 +88,7 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
 
         Intent i = getIntent();
         frienid = i.getStringExtra("groupid");
+        tv_call_group.setText(i.getStringExtra("groupname"));
 
         if (getIntent().getStringExtra("frienduser") != null) {
             callId = Integer.parseInt(getIntent().getStringExtra("frienduser"));
@@ -98,8 +102,10 @@ public class CallGroupActivity extends AppCompatActivity implements SocketCallba
             public void onClick(View v) {
                 socketTransmitter.send(1234, "reject:" + id + ":" + callId + "", CallGroupActivity.this);
                 type = 123;
-
-                mProximityWakeLock.release();
+                try {
+                    mProximityWakeLock.release();
+                } catch (Throwable th) {
+                }
                 finish();
 
             }

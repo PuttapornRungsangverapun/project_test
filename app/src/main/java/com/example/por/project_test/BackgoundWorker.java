@@ -214,6 +214,13 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 httpRequest(url_server + "request_friend.php", param);
                 break;
             }
+            case "logout": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("token", params[2]);
+                httpRequest(url_server + "logout.php", param);
+                break;
+            }
         }
 
         return status;

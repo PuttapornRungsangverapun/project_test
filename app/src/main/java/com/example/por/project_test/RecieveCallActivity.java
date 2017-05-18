@@ -24,6 +24,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
@@ -60,6 +61,7 @@ public class RecieveCallActivity extends AppCompatActivity implements SocketCall
     PowerManager.WakeLock mProximityWakeLock;
     byte type = 0;
     boolean speaker = false;
+    TextView tv_call_from;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +77,6 @@ public class RecieveCallActivity extends AppCompatActivity implements SocketCall
 
         mProximityWakeLock = powerManager.newWakeLock(
                 PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "");
-        mProximityWakeLock.acquire();
 
 
         try {
@@ -89,6 +90,7 @@ public class RecieveCallActivity extends AppCompatActivity implements SocketCall
         bt_reject = (ImageButton) findViewById(R.id.recieve_reject);
         bt_receive = (ImageButton) findViewById(R.id.recieve_call);
         bt_speaker = (ImageButton) findViewById(R.id.reciece_speaker);
+        tv_call_from = (TextView) findViewById(R.id.tv_call_from);
         socketTransmitter = new SocketTransmitter("vps145.vpshispeed.net", 1234);
         socketTransmitter.start();
 
@@ -98,9 +100,9 @@ public class RecieveCallActivity extends AppCompatActivity implements SocketCall
 
         Intent i = getIntent();
         frienid = i.getStringExtra("friendid");
-
-
         usernameFriend = getIntent().getStringExtra("frienduser");
+        tv_call_from.setText(getIntent().getStringExtra("username_friend"));
+
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
 
         bt_reject.setOnClickListener(new View.OnClickListener() {
@@ -109,7 +111,11 @@ public class RecieveCallActivity extends AppCompatActivity implements SocketCall
                 socketTransmitter.send(1234, "reject:" + id + ":" + usernameFriend + "", RecieveCallActivity.this);
                 r.stop();
                 type = 123;
-                mProximityWakeLock.release();
+                try {
+                    mProximityWakeLock.release();
+                } catch (Throwable th) {
+                    // ignoring this exception, probably wakeLock was already released
+                }
                 finish();
             }
         });
@@ -118,6 +124,7 @@ public class RecieveCallActivity extends AppCompatActivity implements SocketCall
             public void onClick(View v) {
                 socketTransmitter.send(1234, "accept:" + id + ":" + usernameFriend + "", RecieveCallActivity.this);
                 startStreaming();
+                mProximityWakeLock.acquire();
                 r.stop();
             }
         });
