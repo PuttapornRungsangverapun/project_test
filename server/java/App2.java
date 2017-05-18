@@ -168,8 +168,23 @@ public class App2 {
 								}
 								// send(bos, "test:" +
 								// System.currentTimeMillis());// send
+								
+								
+								
+								
+								PreparedStatement	preparedStatement = connection.prepareStatement("SELECT user_username FROM users WHERE user_id=?");
+								preparedStatement.setString(1, senderId+"");
+								ResultSet result = preparedStatement.executeQuery();
+								result.next();
+								String username_friend = result.getString(1);
+								
+								
+								
+								
+								
+								
 								// noti
-								sendNoti(senderId + "", recieverId[0] + "", "Incoming Call",
+								sendNoti(senderId + "", recieverId[0] + "", "Incoming Call:"+username_friend,
 										"call_from" + senderId + ":" + this.callId);
 								send(bos, "waiting:" + recieverId[0] + ":" + this.callId);
 								while (!ready) {
