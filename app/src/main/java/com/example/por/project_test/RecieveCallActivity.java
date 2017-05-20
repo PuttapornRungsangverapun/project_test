@@ -257,7 +257,7 @@ public class RecieveCallActivity extends AppCompatActivity implements SocketCall
         public void run() {
             BufferedOutputStream bos = new BufferedOutputStream(socketTransmitter.getOutputstream());
             int n;
-            byte[] data = new byte[minBufferSize];
+            byte[] data = new byte[minBufferSize*2];
             while (doRecord) {
                 try {
                     n = audioRecorder.read(data, 0, data.length);

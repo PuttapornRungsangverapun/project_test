@@ -88,7 +88,7 @@ public class MessageActivity extends AppCompatActivity implements HttpRequestCal
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 MessageInfo message = messageInfos.get(i);
-                String url = BackgoundWorker.url_server + "download_file.php?messageid=" + message.message_id + "&token=" + token + "&userid=" + id;
+                String url = BackgoundWorker.url_server + "test.php?messageid=" + message.message_id + "&token=" + token + "&userid=" + id;
                 String filename = message.filename;
                 if (message.type.equals("file")) {
                     Intent intent = new Intent(MessageActivity.this, DownloadFileService.class);
