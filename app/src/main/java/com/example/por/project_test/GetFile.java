@@ -47,13 +47,13 @@ class GetFile {
 //            }
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             int nRead;
-            byte[] data = new byte[16384];//อ่านทั้ฝหมด16kb ในเgoogleบอกเร็วสุด
+            byte[] data = new byte[16384];//อ่านทั้ฝหมด16kb
             if (inputStream != null) {
                 while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
                     buffer.write(data, 0, nRead);
                 }
             }
-            buffer.flush();//เขียนข้อไปให้หมด
+            buffer.flush();
 
             result = buffer.toByteArray();
             if (inputStream != null) {

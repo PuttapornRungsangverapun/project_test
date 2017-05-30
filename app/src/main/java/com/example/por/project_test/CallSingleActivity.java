@@ -266,7 +266,7 @@ public class CallSingleActivity extends AppCompatActivity implements SocketCallb
         public void run() {
             BufferedOutputStream bos = new BufferedOutputStream(socketTransmitter.getOutputstream());
             int n;
-            byte[] data = new byte[minBufferSize*2];
+            byte[] data = new byte[minBufferSize];
             while (doRecord) {
                 try {
                     n = audioRecorder.read(data, 0, data.length);

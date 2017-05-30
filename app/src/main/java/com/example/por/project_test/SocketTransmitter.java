@@ -65,7 +65,7 @@ public class SocketTransmitter extends Thread {
                         bos.flush();
                     }
                     int n;
-                    byte[] data2 = new byte[0];
+//                    byte[] data2 = new byte[0];
                     n = bis.read(data);
 //                    while ((n = bis.read(data)) != -1) {
 //                        byte[] temp = new byte[data2.length + n];
@@ -74,7 +74,7 @@ public class SocketTransmitter extends Thread {
 //                        data2 = temp;
 //                    }
                     message.remove(key);
-                    SocketCallback temp = callback.get(key);
+                    SocketCallback temp = callback.get(key); //get context ใส่ socketcallback
                     callback.remove(key);
                     temp.onSocketResult(key, new String(data, 0, n));
                 }

@@ -29,7 +29,7 @@ public class DownloadFileService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {//โชวตัวยพนเพำหห
-        return null;//ไม่อนุญาตactivityอื่นมาbind
+        return null;
     }
 
     @Override
@@ -39,6 +39,7 @@ public class DownloadFileService extends Service {
         String filename = intent.getStringExtra("filename");
         String sharedKey = intent.getStringExtra("sharedkey");
         new DownloadTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, url, filename, sharedKey);
+
 
         notification = new NotificationCompat.Builder(this)
                 .setSmallIcon(android.R.drawable.arrow_down_float)
@@ -66,7 +67,10 @@ public class DownloadFileService extends Service {
                 connection.setDoInput(true);
 
                 int size = Integer.parseInt(connection.getHeaderField("Content-length"));//byte
+
                 target = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filename);
+
+
                 FileOutputStream fos = new FileOutputStream(target);
                 InputStream is = connection.getInputStream();
                 BufferedInputStream bis = new BufferedInputStream(is);
