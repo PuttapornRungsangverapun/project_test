@@ -5,7 +5,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -14,7 +13,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -22,17 +20,17 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class App3group {
+public class test_1 {
 	Hashtable<String, List<Handler>> socketTable;
 	Connection connection;
-	private static final Log log = LogFactory.getLog(App3group.class);
+	private static final Log log = LogFactory.getLog(test_1.class);
 
-	public App3group() throws Exception {
+	public test_1() throws Exception {
 		socketTable = new Hashtable<>();
 
-		this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/chat", "root", "u3-test-db");
+		this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/chat", "root", "092259816");
 
-		ServerSocket server = new ServerSocket(1234);
+		ServerSocket server = new ServerSocket(4000);
 		log.info("waiting...");
 
 		try {
@@ -46,7 +44,7 @@ public class App3group {
 
 	public static void main(String[] args) {
 		try {
-			new App3group();
+			new test_1();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -59,14 +57,8 @@ public class App3group {
 		int senderId, recieverId, callId;
 		int groupCallId;
 		Object sleep;
-		// boolean ready;
-		// String waitResult;
-		// BufferedInputStream fbis;
-		// BufferedOutputStream fbos;
 		BufferedInputStream bis;
 		BufferedOutputStream bos;
-		byte[] sumBuffer = new byte[10240];
-		int sumBufferLenght;
 
 		public Handler(Socket socket) {
 			this.socket = socket;
@@ -90,12 +82,9 @@ public class App3group {
 				handlers.add(this);
 				socketTable.put(callId + "", handlers);
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
-			// callId = socketTable.size();
-			// socketTable.put(callId + "", this);
 			sleep = new Object();
 		}
 
@@ -103,14 +92,51 @@ public class App3group {
 		public void run() {
 
 			try {
-				// if(socketTable.size()!=2){return;}
-
 				log.info("Incoming connection..." + socket.getRemoteSocketAddress().toString());
 				bis = new BufferedInputStream(socket.getInputStream());
 				bos = new BufferedOutputStream(socket.getOutputStream());
 
-				// byte[] data = new byte[1024 * 128];
-				// int n;
+				new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						while (true) {
+							while (bufferSize == 0) {
+								try {
+									synchronized (sync) {
+										sync.wait();
+									}
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+							
+							short[] dump = null;
+							synchronized (buffer) {
+								dump = new short[bufferSize];
+								System.arraycopy(buffer, 0, dump, 0, bufferSize);
+								bufferSize = 0;
+							}
+
+							byte[] out = new byte[dump.length * 2];
+
+							for (int i = 0; i < dump.length; i++) {
+								byte[] tmp = ByteBuffer.allocate(2).putShort(dump[i]).array();
+								System.arraycopy(tmp, 0, out, i * 2, 2);
+							}
+
+							try {
+								bos.write(out);
+							} catch (IOException e) {
+								e.printStackTrace();
+								break;
+							}
+							log.info("send back to user: " + out.length);
+						}
+
+					}
+				}).start();
+
 				byte[] buffer = new byte[100 * 1024];
 				byte[] data = new byte[100 * 1024];
 				int n, buffersize = 0;
@@ -297,7 +323,7 @@ public class App3group {
 							int length = ByteBuffer.wrap(temp).getInt();
 							count += 2;
 
-							if (callId < 0 || type < 0 || type > 99 || length < 0 || length > 100000) {
+							if (callId < 0 ||callId>100000|| type < 0 || type > 99 || length < 0 || length > 100000) {
 								System.out.println("broken pakage");
 								continue;
 							}
@@ -319,10 +345,12 @@ public class App3group {
 									log.info(this.callId + " send payload to " + handler.callId);
 									// handler.bos.write(payLoad);
 									// handler.bos.flush();
-									handler.sumWithCurrentData(payLoad);
+									handler.putData(payLoad, payLoad.length);
+									// handler.sumWithCurrentData(payLoad);
 								}
 							}
 						}
+
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -338,45 +366,6 @@ public class App3group {
 
 			System.out.println("END");
 			socketTable.clear();
-		}
-
-		private void sumWithCurrentData(byte[] payLoad) {
-			for (int i = 0; i < Math.max(payLoad.length, sumBufferLenght); i += 2) {
-				float sample1 = 0f, sample2 = 0f;
-				
-				if ((payLoad.length > i)) {
-					byte[] sample1Byte = new byte[2];
-					System.arraycopy(payLoad, i, sample1Byte, 0, sample1Byte.length);
-					sample1 = ByteBuffer.wrap(sample1Byte).getFloat();
-				}
-				
-				if ((sumBufferLenght > i)) {
-					byte[] sample2Byte = new byte[2];
-					System.arraycopy(sumBuffer, i, sample2Byte, 0, sample2Byte.length);
-					sample2 = ByteBuffer.wrap(sample2Byte).getFloat();
-				}
-
-				float samplef1 = sample1 / 32768.0f;
-				float samplef2 = sample2 / 32768.0f;
-				float mixed = samplef1 + samplef2;
-				// reduce the volume a bit:
-				mixed *= 0.8;
-				// hard clipping
-				if (mixed > 1.0f)
-					mixed = 1.0f;
-				if (mixed < -1.0f)
-					mixed = -1.0f;
-				
-				short outputSample = (short) (mixed * 32768.0f);
-				
-				byte[] output= ByteBuffer.allocate(2).putInt(outputSample).array();
-				System.arraycopy(output, 0, sumBuffer, i, 2);
-			}
-		}
-
-		private void send(BufferedOutputStream os, String message, int n) throws IOException {
-			os.write(message.getBytes(), 0, n);
-			os.flush();
 		}
 
 		private void send(BufferedOutputStream os, String message) throws IOException {
@@ -413,7 +402,67 @@ public class App3group {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
 
+		short[] buffer = new short[100 * 1024];
+		int bufferSize = 0;
+		Object sync = new Object();
+
+		public void putData(byte[] data, int length) {
+			log.info("Put data to" + this.callId + ":" + length);
+
+			short[] dataShort = new short[length / 2];
+
+			length = dataShort.length;
+
+			for (int i = 0; i < length; i++) {
+				byte[] tmp = new byte[2];
+				System.arraycopy(data, i * 2, tmp, 0, 2);
+				dataShort[i] = ByteBuffer.wrap(tmp).getShort();
+			}
+
+			synchronized (buffer) {
+				for (int i = 0; i < Math.max(bufferSize, length); i++) {
+					short sample1 = 0;
+					short sample2 = 0;
+
+					if (i < bufferSize) {
+						sample1 = buffer[i];
+					}
+
+					if (i < length) {
+						sample2 = dataShort[i];
+					}
+
+					// System.out.println("BUF_SIZE = " + sample1 + ":" +
+					// sample2);
+
+					float samplef1 = sample1 / 32768.0f;
+					float samplef2 = sample2 / 32768.0f;
+					float mixed = samplef1 + samplef2;
+
+					// hard clipping
+					if (mixed > 1.0f) {
+						// mixed = 1.0f;
+					}
+					if (mixed < -1.0f) {
+						// mixed = -1.0f;
+					}
+
+					short outputSample = (short) (mixed * 32768.0f);
+					// System.out.println("OUT_SAMPLE = " + sample1 + " + "
+					// +sample2 + " = " + outputSample);
+
+					buffer[i] = outputSample;
+				}
+
+				// buffer = dataShort;
+				bufferSize = Math.max(bufferSize, length);
+			}
+
+			synchronized (sync) {
+				sync.notify();
+			}
 		}
 
 	}

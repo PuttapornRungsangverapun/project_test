@@ -30,7 +30,7 @@ public class App3group2 {
 
 		this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/chat", "root", "092259816");
 
-		ServerSocket server = new ServerSocket(1234);
+		ServerSocket server = new ServerSocket(4000);
 		log.info("waiting...");
 
 		try {
@@ -103,12 +103,18 @@ public class App3group2 {
 						while (true) {
 							while (bufferSize == 0) {
 								try {
-									synchronized (sync) {
-										sync.wait();
-									}
+									Thread.sleep(100); 
 								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
+//								try {
+//									synchronized (sync) {
+//										sync.wait();
+//									}
+//								} catch (InterruptedException e) {
+//									e.printStackTrace();
+//								}
 							}
 							
 							short[] dump = null;

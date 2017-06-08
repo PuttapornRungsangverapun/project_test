@@ -32,8 +32,8 @@ public class App3group3 {
 	private static final Log log = LogFactory.getLog(App3group3.class);
 
 	public App3group3() throws Exception {
-		AudioFormat af = new AudioFormat(5000, 16, 1, true, false);
-		DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
+//		AudioFormat af = new AudioFormat(5000, 16, 1, true, false);
+//		DataLine.Info info = new DataLine.Info(SourceDataLine.class, af);
 
 		// try {
 		// line = (SourceDataLine) AudioSystem.getLine(info);
@@ -45,7 +45,7 @@ public class App3group3 {
 
 		socketTable = new Hashtable<>();
 
-		this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/chat", "root", "092259816");
+		this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/chat", "root", "root");
 
 		ServerSocket server = new ServerSocket(4000);
 		log.error("waiting...");
@@ -131,15 +131,15 @@ public class App3group3 {
 									}
 								} while (true);
 
-								long duration = System.currentTimeMillis();
+//								long duration = System.currentTimeMillis();
 								// line.write(data, 0, data.length);
 								bos.write(data, 0, data.length);
-								duration = System.currentTimeMillis() - duration;
+//								duration = System.currentTimeMillis() - duration;
 
-								System.out.println("[Play] " + callId + ": " + data.length + ": " + duration);
+								System.out.println("[Play] " + callId + ": " + data.length );
 
 								try {
-									Thread.sleep(2 - duration, 500000);
+									Thread.sleep(2 , 500000);
 								} catch (Exception e) {
 								}
 							}
@@ -522,9 +522,10 @@ public class App3group3 {
 
 						sample1 = output[i];
 
-						float samplef1 = sample1 / 256.0f;
-						float samplef2 = sample2 / 256.0f;
+						float samplef1 = sample1 ;
+						float samplef2 = sample2 ;
 						samplef2 /= audioData.size();
+				
 						float mixed = samplef1 + samplef2;
 
 						// hard clipping
@@ -537,7 +538,7 @@ public class App3group3 {
 
 						// mixed = (float) (mixed * 0.8);
 
-						byte outputSample = (byte) (mixed * 256.0f);
+						byte outputSample = (byte) mixed;
 						output[i] = outputSample;
 					}
 

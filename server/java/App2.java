@@ -119,7 +119,7 @@ public class App2 {
 				byte[] data = new byte[100 * 1024];
 				int n, buffersize = 0;
 				while ((n = bis.read(data)) != -1) {
-
+					log.info("n :" + n);
 					if (!alive) {
 						log.info("break");
 						break;
@@ -168,23 +168,16 @@ public class App2 {
 								}
 								// send(bos, "test:" +
 								// System.currentTimeMillis());// send
-								
-								
-								
-								
-								PreparedStatement	preparedStatement = connection.prepareStatement("SELECT user_username FROM users WHERE user_id=?");
-								preparedStatement.setString(1, senderId+"");
+
+								PreparedStatement preparedStatement = connection
+										.prepareStatement("SELECT user_username FROM users WHERE user_id=?");
+								preparedStatement.setString(1, senderId + "");
 								ResultSet result = preparedStatement.executeQuery();
 								result.next();
 								String username_friend = result.getString(1);
-								
-								
-								
-								
-								
-								
+
 								// noti
-								sendNoti(senderId + "", recieverId[0] + "", "Incoming Call:"+username_friend,
+								sendNoti(senderId + "", recieverId[0] + "", "Incoming Call:" + username_friend,
 										"call_from" + senderId + ":" + this.callId);
 								send(bos, "waiting:" + recieverId[0] + ":" + this.callId);
 								while (!ready) {
@@ -297,14 +290,12 @@ public class App2 {
 							// System.out.println(callId + ":" + type + ":" +
 							// timeStamp + ":" + length + ":" + (n - count)
 							// + ":" + buffersize);
-							
-							
-								log.info("call_id : " + callId + " type : " + type + " timestamp : " + timeStamp
-										+ " length : " + length);
-							
-							
+
+							log.info("call_id : " + callId + " type : " + type + " timestamp : " + timeStamp
+									+ " length : " + length);
+
 							if (callId < 0 || callId > 100000 || type < 0 || type > 128 || length < 0
-									|| length > 100000) {
+									|| length > 200000) {
 								// System.out.println("broken pakage");
 								log.info("Broken pakage");
 								continue;
@@ -316,12 +307,13 @@ public class App2 {
 							byte[] payLoad = new byte[length];
 							System.arraycopy(buffer, count, payLoad, 0, length);
 
-							int packageSize = count + length;
-
-							temp = new byte[buffer.length];
-							System.arraycopy(buffer, packageSize, temp, 0, buffersize - packageSize);
-							buffersize -= packageSize;
-							buffer = temp;
+							// int packageSize = count + length;
+							//
+							// temp = new byte[buffer.length];
+							// System.arraycopy(buffer, packageSize, temp, 0,
+							// buffersize - packageSize);
+							// buffersize -= packageSize;
+							// buffer = temp;
 
 							fbos.write(payLoad);
 							fbos.flush();
@@ -330,7 +322,7 @@ public class App2 {
 						e.printStackTrace();
 					}
 					// System.out.println(this.callId + ":" + n);
-//					log.info("call_id : " + this.callId + " length : " + n);
+					// log.info("call_id : " + this.callId + " length : " + n);
 				}
 
 				bis.close();
@@ -342,13 +334,13 @@ public class App2 {
 
 			// System.out.println("END");
 			log.info("END");
-			socketTable.clear();
+			// socketTable.clear();
 		}
 
-		private void send(BufferedOutputStream os, String message, int n) throws IOException {
-			os.write(message.getBytes(), 0, n);
-			os.flush();
-		}
+//		private void send(BufferedOutputStream os, String message, int n) throws IOException {
+//			os.write(message.getBytes(), 0, n);
+//			os.flush();
+//		}
 
 		private void send(BufferedOutputStream os, String message) throws IOException {
 			os.write(message.getBytes());
