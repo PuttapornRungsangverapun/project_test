@@ -221,6 +221,18 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                 httpRequest(url_server + "logout.php", param);
                 break;
             }
+            case "changpassword": {
+                HashMap<String, String> param = new HashMap<>();
+                param.put("userid", params[1]);
+                param.put("token", params[2]);
+                param.put("password", params[3]);
+                if (params.length >= 5) {
+                    param.put("newpassword", params[4]);
+                    param.put("privatekey", params[5]);
+                }
+                httpRequest(url_server + "chang_password.php", param);
+                break;
+            }
         }
 
         return status;
@@ -533,6 +545,18 @@ public class BackgoundWorker extends AsyncTask<String, String, String> {
                         temp.add(requestFriendInfo);
                     }
                     callback.onResult(null, temp);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "changpassword":
+
+                try {
+                    if (resource.getString("status").equals("success")) {
+                        callback.onResult(new String[]{TRUE}, null);
+                    } else {
+                        callback.onResult(new String[]{FALSE}, null);
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

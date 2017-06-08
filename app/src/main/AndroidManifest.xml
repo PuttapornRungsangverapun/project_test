@@ -146,6 +146,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             tools:targetApi="jelly_bean" />
+        <activity
+            android:name=".ChangPasswordActivity"
+            android:parentActivityName=".ContactActivity"
+            android:theme="@style/AppTheme"
+            tools:targetApi="jelly_bean" />
     </application>
 
 </manifest>

@@ -218,6 +218,10 @@ public class ContactActivity extends AppCompatActivity implements HttpRequestCal
                 Intent i = new Intent(ContactActivity.this, MainActivity.class);
                 startActivity(i);
                 return true;
+            case R.id.changpassword:
+                Intent i2 = new Intent(ContactActivity.this, ChangPasswordActivity.class);
+                startActivityForResult(i2, 1);
+                return true;
 //            case R.id.create_group:
 //                Intent i2 = new Intent(ContactActivity.this, CreateGroupActivity.class);
 //                startActivityForResult(i2, 1);
